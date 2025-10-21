@@ -23,7 +23,7 @@ Early-stage methodology exploration and evaluation.
 - Comparative evaluation of pure vs post-filter LLM approaches
 - Pseudo-labeled dataset generation
 
-**GitHub**: `IntelliSA-Experiments`
+**GitHub**: [IntelliSA-Experiments](https://github.com/ndryzsfdkx-source/anon-experiments)
 
 ### 2. IntelliSA-Models
 
@@ -32,7 +32,7 @@ Systematic training pipeline for encoder models.
 - Broad candidate selection and Focused hyperparameter tuning
 - Final optimization and Multi-seed stability testing
 
-**GitHub**: `IntelliSA-Models`
+**GitHub**: [IntelliSA-Models](https://github.com/ndryzsfdkx-source/anon-models)
 
 ### 3. IntelliSA-CLI
 
@@ -43,7 +43,7 @@ Production-ready CLI tool implementing the IntelliSA method.
 - Outputs SARIF, JSONL, CSV formats
 - Ready for CI/CD integration
 
-**GitHub**: `intellisa-cli`
+**GitHub**: [intellisa-cli](https://github.com/ndryzsfdkx-source/anon-cli)
 
 ## Paper Materials
 
@@ -55,13 +55,6 @@ Production-ready CLI tool implementing the IntelliSA method.
 ## Artifact Reproducibility
 
 See `artifact/release-manifest.yaml` for pinned commit SHAs, model versions, dataset versions, and tool dependencies used to generate paper results.
-
-Reproduction scripts:
-
-```bash
-./artifact/checkout-pinned.sh
-./artifact/reproduce-paper-results.sh
-```
 
 ## Documentation
 

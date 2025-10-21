@@ -6,29 +6,29 @@ Quick navigation to specific resources across all IntelliSA repositories.
 
 ### IntelliSA-Experiments (Methodology Exploration)
 
-- **Main**: `../01.IntelliSA-Experiments`
+- **Main**: `../IntelliSA-Experiments`
 - **GitHub**: https://github.com/ndryzsfdkx-source/anon-experiments
 
 ### IntelliSA-Models (Training Pipeline)
 
-- **Main**: `../02.IntelliSA-Models`
+- **Main**: `../IntelliSA-Models`
 - **GitHub**: https://github.com/ndryzsfdkx-source/anon-models
 
 ### IntelliSA-CLI (CLI Toolkit)
 
-- **Main**: `../03.intellisa`
+- **Main**: `../IntelliSA-CLI`
 - **GitHub**: https://github.com/ndryzsfdkx-source/anon-cli
 
 ## External Resources
 
 ### Models
 
-- **Hugging Face Models**: [anonuser/anon-model-220m](https://huggingface.co/anonuser/anon-model-220m)
+- **Hugging Face Models**: anonuser/anon-model-220m
 
 ### Datasets
 
-- **Oracle Datasets**: `../01.IntelliSA-Experiments/data/oracle-dataset-*/`
-- **Training Datasets**: `../01.IntelliSA-Experiments/data/iac_filter_training/datasets/`
+- **Oracle Datasets**: `../IntelliSA-Experiments/data/oracle-dataset-*/`
+- **Training Datasets**: `../IntelliSA-Experiments/data/iac_filter_training/datasets/`
 
 ## Contact & Support
 
