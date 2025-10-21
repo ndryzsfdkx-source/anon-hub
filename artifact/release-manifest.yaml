@@ -1,0 +1,33 @@
+# IntelliSA Paper Artifact - Version Record
+# Records exact versions used to generate paper results
+
+paper_title: "IntelliSA: An Intelligent Analyzer for IaC Security Smell Detection via Rule and Neural Inference"
+paper_tag: v1.0-paper
+generated_date: 2025-10-21
+
+# Repository versions (recorded from GitHub remotes)
+repositories:
+  experiments:
+    github: https://github.com/ndryzsfdkx-source/anon-experiments
+    commit: 751c05901e37b04900319ad4af901b547bcf3f10
+
+  models:
+    github: https://github.com/ndryzsfdkx-source/anon-models
+    commit: bf1838e8167ab22db450ae54d46dac67c0f6de91
+
+  cli:
+    github: https://github.com/ndryzsfdkx-source/anon-cli
+    commit: 1848d1f800bc3786275fc078f159a35266686065
+
+# Model used
+model:
+  name: codet5p-220m
+  threshold: 0.61
+  huggingface: https://huggingface.co/anonuser/anon-model-220m
+
+# Dataset sizes
+datasets:
+  train: 1840
+  validation: 230
+  test: 230
+  technologies: [ansible, chef, puppet]
