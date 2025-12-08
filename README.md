@@ -1,5 +1,7 @@
 # IntelliSA
 
+![IntelliSA logo](logo/intellisa_icon.png)
+
 > An Intelligent Analyzer for IaC Security Smell Detection via Rule and Neural Inference
 
 This is the research hub for **IntelliSA**, a system that combines static analysis with Large Language Models to reduce false positives in Infrastructure-as-Code (IaC) security scanning.
