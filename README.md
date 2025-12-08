@@ -1,6 +1,8 @@
 # IntelliSA
 
-![IntelliSA logo](logo/intellisa_icon.png)
+<p align="center">
+  <img src="logo/intellisa_icon.png" alt="IntelliSA logo" width="200">
+</p>
 
 > An Intelligent Analyzer for IaC Security Smell Detection via Rule and Neural Inference
 
