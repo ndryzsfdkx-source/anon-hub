@@ -1,0 +1,201 @@
+# CONSTRUCTED PROMPT
+# File: networking-ovn-migration-tripleo_environment-playbooks-ovn-migration.yml
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.594937
+# Length: 6579 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: networking-ovn-migration-tripleo_environment-playbooks-ovn-migration.yml (Ansible/YAML)**
+
+
+Line 1: # This is the playbook used by ovn-migration.sh.
+Line 2: 
+Line 3: #
+Line 4: # Pre migration and validation tasks will make sure that the initial cloud
+Line 5: # is functional, and will create resources which will be checked after
+Line 6: # migration.
+Line 7: #
+Line 8: 
+Line 9: - name: Pre migration and validation tasks
+Line 10:   hosts: localhost
+Line 11:   roles:
+Line 12:     - pre-migration
+Line 13:   tags:
+Line 14:     - pre-migration
+Line 15: 
+Line 16: #
+Line 17: # This step is executed before migration, and will backup some config
+Line 18: # files related to containers before those get lost.
+Line 19: #
+Line 20: 
+Line 21: - name: Backup tripleo container config files on the nodes
+Line 22:   hosts: ovn-controllers
+Line 23:   roles:
+Line 24:     - backup
+Line 25:   tags:
+Line 26:     - setup
+Line 27: 
+Line 28: #
+Line 29: # TripleO / Director is executed to deploy ovn using "br-migration" for the
+Line 30: # dataplane, while br-int is left intact to avoid dataplane disruption.
+Line 31: #
+Line 32: 
+Line 33: - name: Set up OVN and configure it using tripleo
+Line 34:   hosts: localhost
+Line 35:   roles:
+Line 36:     - tripleo-update
+Line 37:   vars:
+Line 38:       ovn_bridge: br-migration
+Line 39:   tags:
+Line 40:     - setup
+Line 41:   become: false
+Line 42: 
+Line 43: #
+Line 44: # Once everything is migrated prepare everything by syncing the neutron DB
+Line 45: # into the OVN NB database, and then switching the dataplane to br-int
+Line 46: # letting ovn-controller take control, afterwards any remaining neutron
+Line 47: # resources, namespaces or processes which are not needed anymore are
+Line 48: # cleaned up.
+Line 49: #
+Line 50: 
+Line 51: - name: Do the DB sync and dataplane switch
+Line 52:   hosts: ovn-controllers, ovn-dbs
+Line 53:   roles:
+Line 54:     - migration
+Line 55:   vars:
+Line 56:       ovn_bridge: br-int
+Line 57:   tags:
+Line 58:     - migration
+Line 59: 
+Line 60: #
+Line 61: # Verify that the initial resources are still reachable, remove them,
+Line 62: # and afterwards create new resources and repeat the connectivity tests.
+Line 63: #
+Line 64: 
+Line 65: - name: Post migration
+Line 66:   hosts: localhost
+Line 67:   roles:
+Line 68:     - delete-neutron-resources
+Line 69:     - post-migration
+Line 70:   tags:
+Line 71:     - post-migration
+Line 72: 
+Line 73: #
+Line 74: # Final step to make sure tripleo knows about OVNIntegrationBridge == br-int.
+Line 75: #
+Line 76: 
+Line 77: - name: Rerun the stack update to reset the OVNIntegrationBridge to br-int
+Line 78:   hosts: localhost
+Line 79:   roles:
+Line 80:     - tripleo-update
+Line 81:   vars:
+Line 82:       ovn_bridge: br-int
+Line 83:   tags:
+Line 84:     - setup
+Line 85:   become: false
+Line 86: 
+Line 87: #
+Line 88: # Announce that it's done and ready.
+Line 89: #
+Line 90: 
+Line 91: - hosts: localhost
+Line 92:   tasks:
+Line 93:   - name: Migration successful.
+Line 94:     debug:
+Line 95:       msg: Migration from ML2OVS to OVN is now complete.
+Line 96: 
+Line 97: 
+Line 98: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

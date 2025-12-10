@@ -1,0 +1,10 @@
+Method,Occurrences,TP,FP,FN,Precision,Recall,F1,Overlap,FileAcc
+GLITCH,126,76,50,28,0.603,0.731,0.661,0.494,0.946
+SLAC/SLIC,109,40,69,64,0.367,0.385,0.376,0.231,0.838
+claude-sonnet-4.0-static-analysis-rules,138,63,75,41,0.457,0.606,0.521,0.352,0.973
+claude-sonnet-4.0-definition-based,104,51,53,53,0.490,0.490,0.490,0.325,0.973
+grok-4-fast-static-analysis-rules,99,66,33,38,0.667,0.635,0.650,0.482,0.892
+grok-4-fast-definition-based,96,60,36,44,0.625,0.577,0.600,0.429,0.865
+gpt-5-static-analysis-rules,112,62,50,42,0.554,0.596,0.574,0.403,0.811
+gpt-5-2025-08-07-definition-based,55,36,19,68,0.655,0.346,0.453,0.293,0.649
+IntelliSA,81,71,10,33,0.877,0.683,0.768,0.623,0.865

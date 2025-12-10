@@ -1,0 +1,202 @@
+# CONSTRUCTED PROMPT
+# File: openstack@puppet-neutron-manifests-server-placement.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.639718
+# Length: 7682 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack@puppet-neutron-manifests-server-placement.pp (Puppet)**
+
+
+Line 1: # Licensed under the Apache License, Version 2.0 (the "License"); you may
+Line 2: # not use this file except in compliance with the License. You may obtain
+Line 3: # a copy of the License at
+Line 4: #
+Line 5: #      http://www.apache.org/licenses/LICENSE-2.0
+Line 6: #
+Line 7: # Unless required by applicable law or agreed to in writing, software
+Line 8: # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+Line 9: # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+Line 10: # License for the specific language governing permissions and limitations
+Line 11: # under the License.
+Line 12: #
+Line 13: # == Class: neutron::server::placement
+Line 14: #
+Line 15: # Configure Placement API Options
+Line 16: #
+Line 17: # === Parameters
+Line 18: #
+Line 19: # [*password*]
+Line 20: #   (required) Password for connection to nova in admin context.
+Line 21: #
+Line 22: # [*auth_type*]
+Line 23: #   (optional) An authentication type to use with an OpenStack Identity server.
+Line 24: #   The value should contain auth plugin name
+Line 25: #   Defaults to 'password'
+Line 26: #
+Line 27: # [*username*]
+Line 28: #   (optional) Username for connection to nova in admin context
+Line 29: #   Defaults to 'nova'
+Line 30: #
+Line 31: # [*project_domain_id*]
+Line 32: #   (optional) Nova project's domain ID
+Line 33: #   Defaults to 'default'
+Line 34: #
+Line 35: # [*project_domain_name*]
+Line 36: #   (Optional) Name of domain for $project_name
+Line 37: #   Defaults to 'Default'
+Line 38: #
+Line 39: # [*project_name*]
+Line 40: #   (optional) Nova project's name
+Line 41: #   Defaults to 'services'
+Line 42: #
+Line 43: # [*user_domain_id*]
+Line 44: #   (optional) User's domain ID for connection to nova in admin context
+Line 45: #   Defaults to 'default'
+Line 46: #
+Line 47: # [*user_domain_name*]
+Line 48: #   (Optional) Name of domain for $username
+Line 49: #   Defaults to 'Default'
+Line 50: #
+Line 51: # [*auth_url*]
+Line 52: #   (optional) Authorization URL for connection to nova in admin context.
+Line 53: #   If version independent identity plugin is used available versions will be
+Line 54: #   determined using auth_url
+Line 55: #   Defaults to 'http://127.0.0.1:5000'
+Line 56: #
+Line 57: # [*region_name*]
+Line 58: #   (optional) Name of nova region to use. Useful if keystone manages more than
+Line 59: #   one region.
+Line 60: #   Defaults to $::os_service_default
+Line 61: #
+Line 62: # [*endpoint_type*]
+Line 63: #   (optional) The type of nova endpoint to use when looking up in
+Line 64: #   the keystone catalog.
+Line 65: #   Defaults to $::os_service_default
+Line 66: #
+Line 67: 
+Line 68: class neutron::server::placement (
+Line 69:   $password,
+Line 70:   $auth_type           = 'password',
+Line 71:   $username            = 'nova',
+Line 72:   $project_domain_id   = 'default',
+Line 73:   $project_domain_name = 'Default',
+Line 74:   $project_name        = 'services',
+Line 75:   $user_domain_id      = 'default',
+Line 76:   $user_domain_name    = 'Default',
+Line 77:   $auth_url            = 'http://127.0.0.1:5000',
+Line 78:   $region_name         = $::os_service_default,
+Line 79:   $endpoint_type       = $::os_service_default,
+Line 80: ) {
+Line 81: 
+Line 82:   include ::neutron::deps
+Line 83: 
+Line 84:   neutron_config {
+Line 85:     'placement/auth_url':            value => $auth_url;
+Line 86:     'placement/username':            value => $username;
+Line 87:     'placement/password':            value => $password, secret => true;
+Line 88:     'placement/project_domain_id':   value => $project_domain_id;
+Line 89:     'placement/project_domain_name': value => $project_domain_name;
+Line 90:     'placement/project_name':        value => $project_name;
+Line 91:     'placement/user_domain_id':      value => $user_domain_id;
+Line 92:     'placement/user_domain_name':    value => $user_domain_name;
+Line 93:     'placement/region_name':         value => $region_name;
+Line 94:     'placement/endpoint_type':       value => $endpoint_type;
+Line 95:     'placement/auth_type':           value => $auth_type;
+Line 96:   }
+Line 97: 
+Line 98: }
+Line 99: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

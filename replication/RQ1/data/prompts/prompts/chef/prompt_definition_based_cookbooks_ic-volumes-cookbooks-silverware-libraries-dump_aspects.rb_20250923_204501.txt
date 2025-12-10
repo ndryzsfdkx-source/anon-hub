@@ -1,0 +1,162 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-volumes-cookbooks-silverware-libraries-dump_aspects.rb
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.362556
+# Length: 7536 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-volumes-cookbooks-silverware-libraries-dump_aspects.rb (Unknown)**
+
+
+Line 1: module Ironfan
+Line 2:   module Discovery
+Line 3:     module_function
+Line 4: 
+Line 5:     def dump_aspects(run_context)
+Line 6:       [
+Line 7:         [:apache,         :server],
+Line 8:         [:cassandra,      :server],
+Line 9:         [:chef,           :client],
+Line 10:         [:chef,           :server],
+Line 11:         [:cron,           :daemon],
+Line 12:         [:elasticsearch,  :server],
+Line 13:         [:flume,          :agent],
+Line 14:         [:flume,          :master],
+Line 15:         [:ganglia,        :master],
+Line 16:         [:ganglia,        :monitor],
+Line 17:         [:graphite,       :carbon],
+Line 18:         [:graphite,       :dashboard],
+Line 19:         [:graphite,       :whisper],
+Line 20:         #
+Line 21:         [:hadoop,         :datanode],
+Line 22:         [:hadoop,         :hdfs_fuse],
+Line 23:         [:hadoop,         :jobtracker],
+Line 24:         [:hadoop,         :namenode],
+Line 25:         [:hadoop,         :secondarynn],
+Line 26:         [:hadoop,         :tasktracker],
+Line 27:         #
+Line 28:         [:hbase,          :master],
+Line 29:         [:hbase,          :regionserver],
+Line 30:         [:hbase,          :thrift],
+Line 31:         [:hbase,          :stargate],
+Line 32:         #
+Line 33:         [:jenkins,        :server],
+Line 34:         [:jenkins,        :worker],
+Line 35:         [:minidash,       :dashboard],
+Line 36:         [:mongodb,        :server],
+Line 37:         [:mysql,          :server],
+Line 38:         [:nfs,            :server],
+Line 39:         [:nginx,          :server],
+Line 40:         [:ntp,            :server],
+Line 41:         [:redis,          :server],
+Line 42:         [:resque,         :redis],
+Line 43:         [:resque,         :dashboard],
+Line 44:         [:ssh,            :daemon],
+Line 45:         [:statsd,         :server],
+Line 46:         [:zabbix,         :agent],
+Line 47:         [:zabbix,         :master],
+Line 48:         [:zookeeper,      :server],
+Line 49: 
+Line 50:         # [:goliath,        :app],
+Line 51:         # [:unicorn,        :app],
+Line 52:         # [:apt,            :cacher],
+Line 53:         # [:bluepill,       :monitor],
+Line 54:         # [:resque,         :worker],
+Line 55: 
+Line 56:       ].each do |sys, subsys|
+Line 57:         components = discover_all(sys, subsys)
+Line 58:         pad = ([""]*20)
+Line 59:         components.each do |component|
+Line 60:           dump_line = dump(component) || []
+Line 61:           puts( "%-15s\t%-15s\t%-23s\t| %-51s\t| %-12s\t#{"%-7s\t"*12}" % [sys, subsys, dump_line, pad].flatten )
+Line 62:         end
+Line 63:       end
+Line 64: 
+Line 65:       run_context.resource_collection.select{|r| r.resource_name.to_s == 'service' }.each{|r| p [r.name, r.action] }
+Line 66:     end
+Line 67: 
+Line 68: 
+Line 69:     def dump(component)
+Line 70:       return if component.empty?
+Line 71:       vals = [
+Line 72:         component.daemon    .map{|asp|  asp.name                }.join(",")[0..20],
+Line 73:         component.port      .map{|asp| "#{asp.flavor}=#{asp.port_num}" }.join(","),
+Line 74:         component.dashboard .map{|asp|  asp.name                }.join(","),
+Line 75:         component.log       .map{|asp|  asp.name                }.join(","),
+Line 76:         DirectoryAspect::ALLOWED_FLAVORS.map do |flavor|
+Line 77:           asp = component[:directory ].detect{|asp| asp[:flavor] == flavor }
+Line 78:           # asp ? "#{asp.flavor}=#{asp.path}" : ""
+Line 79:           asp ? asp.name : ""
+Line 80:         end,
+Line 81:         ExportedAspect::ALLOWED_FLAVORS.map do |flavor|
+Line 82:           asp = component[:exported ].detect{|asp| asp[:flavor] == flavor }
+Line 83:           # asp ? "#{asp.flavor}=#{asp.files.join(",")}" : ""
+Line 84:           asp ? asp.name : ""
+Line 85:         end,
+Line 86:       ]
+Line 87:       vals
+Line 88:     end
+Line 89: 
+Line 90:   end
+Line 91: end
+Line 92: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

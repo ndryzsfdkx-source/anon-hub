@@ -1,46 +1,58 @@
 #!/usr/bin/env bash
-# Records git versions from GitHub (remote), not local uncommitted work
+# Records git versions for the IntelliSA artifact.
+# Prefers GitHub remotes when available; falls back to local HEAD when offline.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 MANIFEST="$SCRIPT_DIR/release-manifest.yaml"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-echo "Recording git versions from GitHub remotes..."
+PRIMARY_REPOS=("anon-hub" "anon-cli")
+OPTIONAL_REPOS=("anon-experiments" "anon-models")
+
+echo "Recording git versions (artifact focus: hub + cli; experiments/models optional)..."
 echo ""
 
-# Fetch latest from remotes (doesn't change local files)
-echo "Fetching latest from GitHub..."
-git -C "$ROOT/anon-experiments" fetch origin main 2>/dev/null
-git -C "$ROOT/anon-models" fetch origin main 2>/dev/null
-git -C "$ROOT/anon-cli" fetch origin main 2>/dev/null
+# Best-effort fetch from remotes (safe when offline)
+echo "Fetching latest from GitHub (best-effort)..."
+for repo in "${PRIMARY_REPOS[@]}" "${OPTIONAL_REPOS[@]}"; do
+  if git -C "$ROOT/$repo" fetch origin main >/dev/null 2>&1; then
+    echo "  $repo: fetch ok"
+  else
+    echo "  $repo: fetch skipped (offline or no remote)"
+  fi
+done
 echo ""
 
-# Get commit SHAs from remote branches (what's on GitHub)
-EXPERIMENTS_SHA=$(git -C "$ROOT/anon-experiments" rev-parse origin/main 2>/dev/null || echo "not-found")
-MODELS_SHA=$(git -C "$ROOT/anon-models" rev-parse origin/main 2>/dev/null || echo "not-found")
-CLI_SHA=$(git -C "$ROOT/anon-cli" rev-parse origin/main 2>/dev/null || echo "not-found")
+remote_or_local() {
+  local path="$1"
+  git -C "$path" rev-parse origin/main 2>/dev/null || git -C "$path" rev-parse HEAD 2>/dev/null || echo "not-found"
+}
+
+HUB_SHA=$(remote_or_local "$ROOT/anon-hub")
+CLI_SHA=$(remote_or_local "$ROOT/anon-cli")
+EXPERIMENTS_SHA=$(remote_or_local "$ROOT/anon-experiments")
+MODELS_SHA=$(remote_or_local "$ROOT/anon-models")
 TIMESTAMP=$(date -u +"%Y-%m-%d")
 
-echo "Remote (GitHub) versions:"
-echo "  Experiments: $EXPERIMENTS_SHA"
-echo "  Models:      $MODELS_SHA"
-echo "  CLI:         $CLI_SHA"
-echo "  Date:        $TIMESTAMP"
+echo "Recorded versions:"
+echo "  hub:          $HUB_SHA"
+echo "  cli:          $CLI_SHA"
+echo "  experiments:  $EXPERIMENTS_SHA (optional)"
+echo "  models:       $MODELS_SHA (optional)"
+echo "  date:         $TIMESTAMP"
 echo ""
 
-# Check if local has unpushed commits
 echo "Checking for unpushed local changes..."
-for repo in "anon-experiments" "anon-models" "anon-cli"; do
+for repo in "${PRIMARY_REPOS[@]}" "${OPTIONAL_REPOS[@]}"; do
   cd "$ROOT/$repo"
   LOCAL=$(git rev-parse HEAD 2>/dev/null)
-  REMOTE=$(git rev-parse origin/main 2>/dev/null)
+  REMOTE=$(git rev-parse origin/main 2>/dev/null || echo "$LOCAL")
   if [ "$LOCAL" != "$REMOTE" ]; then
     echo "  ⚠️  $repo: Local differs from GitHub (unpushed commits?)"
   fi
 done
 echo ""
 
-# Write new manifest with filled values
 cat > "$MANIFEST" << EOF
 # IntelliSA Paper Artifact - Version Record
 # Records exact versions used to generate paper results
@@ -49,19 +61,25 @@ paper_title: "IntelliSA: An Intelligent Analyzer for IaC Security Smell Detectio
 paper_tag: v1.0-paper
 generated_date: $TIMESTAMP
 
-# Repository versions (recorded from GitHub remotes)
+# Repository versions (recorded from GitHub remotes when available; otherwise local HEAD)
 repositories:
-  experiments:
-    github: https://github.com/ndryzsfdkx-source/anon-experiments
-    commit: $EXPERIMENTS_SHA
-
-  models:
-    github: https://github.com/ndryzsfdkx-source/anon-models
-    commit: $MODELS_SHA
+  hub:
+    github: https://github.com/ndryzsfdkx-source/anon-hub
+    commit: $HUB_SHA
 
   cli:
     github: https://github.com/ndryzsfdkx-source/anon-cli
     commit: $CLI_SHA
+
+  experiments:
+    github: https://github.com/ndryzsfdkx-source/anon-experiments
+    commit: $EXPERIMENTS_SHA
+    optional: true
+
+  models:
+    github: https://github.com/ndryzsfdkx-source/anon-models
+    commit: $MODELS_SHA
+    optional: true
 
 # Model used
 model:
@@ -78,4 +96,4 @@ datasets:
 EOF
 
 echo "Updated: $MANIFEST"
-echo "These are the versions currently on GitHub."
+echo "These are the versions currently recorded."

@@ -1,0 +1,203 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-package_set-cookbooks-rvm-providers-global_gem.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.615843
+# Length: 7328 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-package_set-cookbooks-rvm-providers-global_gem.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Cookbook Name:: rvm
+Line 3: # Provider:: global_gem
+Line 4: #
+Line 5: # Author:: Fletcher Nichol <fnichol@nichol.ca>
+Line 6: #
+Line 7: # Copyright 2011, Fletcher Nichol
+Line 8: #
+Line 9: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 10: # you may not use this file except in compliance with the License.
+Line 11: # You may obtain a copy of the License at
+Line 12: #
+Line 13: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 14: #
+Line 15: # Unless required by applicable law or agreed to in writing, software
+Line 16: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 17: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 18: # See the License for the specific language governing permissions and
+Line 19: # limitations under the License.
+Line 20: #
+Line 21: 
+Line 22: action :install do
+Line 23:   # add gem entry into global.gems
+Line 24:   update_global_gems_file :create
+Line 25: 
+Line 26:   # install gem in all rubies in global gemsets
+Line 27:   installed_rubies.each do |rubie|
+Line 28:     gem_package_wrapper :install, "#{rubie}@global"
+Line 29:   end
+Line 30: end
+Line 31: 
+Line 32: action :upgrade do
+Line 33:   # add gem entry into global.gems
+Line 34:   update_global_gems_file :create
+Line 35: 
+Line 36:   # upgrade gem in all rubies in global gemsets
+Line 37:   installed_rubies.each do |rubie|
+Line 38:     gem_package_wrapper :upgrade, "#{rubie}@global"
+Line 39:   end
+Line 40: end
+Line 41: 
+Line 42: action :remove do
+Line 43:   # remove gem entry from global.gems
+Line 44:   update_global_gems_file :remove
+Line 45: 
+Line 46:   # remove gem in all rubies in global gemsets
+Line 47:   installed_rubies.each do |rubie|
+Line 48:     gem_package_wrapper :remove, "#{rubie}@global"
+Line 49:   end
+Line 50: end
+Line 51: 
+Line 52: action :purge do
+Line 53:   # remove gem entry from global.gems
+Line 54:   update_global_gems_file :remove
+Line 55: 
+Line 56:   # remove gem in all rubies in global gemsets
+Line 57:   installed_rubies.each do |rubie|
+Line 58:     gem_package_wrapper :purge, "#{rubie}@global"
+Line 59:   end
+Line 60: end
+Line 61: 
+Line 62: ##
+Line 63: # Wraps the rvm_gem resource
+Line 64: #
+Line 65: # @param [Symbol] action to be performed with gem_package provider
+Line 66: # @param [optional, String, #to_s] the fully qualifed rvm string
+Line 67: def gem_package_wrapper(exec_action, ruby_global_gemset)
+Line 68:   profile = find_profile_to_source
+Line 69: 
+Line 70:   g = rvm_gem new_resource.package_name do
+Line 71:     ruby_string ruby_global_gemset
+Line 72:     source      new_resource.source if new_resource.source
+Line 73:     options     new_resource.options if new_resource.options
+Line 74:     version     new_resource.version if new_resource.version
+Line 75:     gem_binary  new_resource.gem_binary if new_resource.gem_binary
+Line 76:     action      :nothing
+Line 77:   end
+Line 78:   g.run_action(exec_action)
+Line 79: end
+Line 80: 
+Line 81: ##
+Line 82: # Updates global.gems file to create or remove a gem entry
+Line 83: #
+Line 84: # @oaram [Symbol] action to :create or :remove the gem from the file
+Line 85: def update_global_gems_file(exec_action)
+Line 86:   global_gems_file = "#{node['rvm']['root_path']}/gemsets/global.gems"
+Line 87:   gem = new_resource.package_name
+Line 88: 
+Line 89:   if exec_action == :create
+Line 90:     e = execute "Add #{gem} to #{global_gems_file}" do
+Line 91:       user      "root"
+Line 92:       group     "rvm"
+Line 93:       command   %{echo "#{gem}" >> "#{global_gems_file}"}
+Line 94:       not_if    %{grep -q "^#{gem}" "#{global_gems_file}"}
+Line 95:       action    :nothing
+Line 96:     end
+Line 97:     e.run_action(:run)
+Line 98:   end
+Line 99: end
+Line 100: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

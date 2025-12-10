@@ -1,0 +1,177 @@
+# CONSTRUCTED PROMPT
+# File: openstack-ansible-ops-pxelinux-provisioning-playbooks-deploy-dhcp.yml
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.600975
+# Length: 6688 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack-ansible-ops-pxelinux-provisioning-playbooks-deploy-dhcp.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 3: # you may not use this file except in compliance with the License.
+Line 4: # You may obtain a copy of the License at
+Line 5: #
+Line 6: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 7: #
+Line 8: # Unless required by applicable law or agreed to in writing, software
+Line 9: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 10: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 11: # See the License for the specific language governing permissions and
+Line 12: # limitations under the License.
+Line 13: 
+Line 14: - name: Deploy DHCP
+Line 15:   hosts: dhcp_hosts
+Line 16:   gather_facts: "{{ gather_facts | default(true) }}"
+Line 17:   pre_tasks:
+Line 18:     - name: Gather variables for each operating system
+Line 19:       include_vars: "{{ item }}"
+Line 20:       with_first_found:
+Line 21:         - "{{ playbook_dir }}/vars/{{ ansible_distribution | lower }}-{{ ansible_distribution_version | lower }}.yml"
+Line 22:         - "{{ playbook_dir }}/vars/{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
+Line 23:         - "{{ playbook_dir }}/vars/{{ ansible_os_family | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
+Line 24:         - "{{ playbook_dir }}/vars/{{ ansible_distribution | lower }}.yml"
+Line 25:         - "{{ playbook_dir }}/vars/{{ ansible_os_family | lower }}.yml"
+Line 26:       tags:
+Line 27:         - always
+Line 28: 
+Line 29:     - name: Install all required packages for dhcpd_install
+Line 30:       package:
+Line 31:         pkg: "{{ item }}"
+Line 32:         state: "latest"
+Line 33:         update_cache: yes
+Line 34:         cache_valid_time: 600
+Line 35:       with_items: "{{ default_dhcp_distro_packages }}"
+Line 36: 
+Line 37:     - name: Enable services
+Line 38:       systemd:
+Line 39:         name: "{{ item }}"
+Line 40:         enabled: yes
+Line 41:       with_items: "{{ default_dhcp_distro_packages }}"
+Line 42: 
+Line 43:   tasks:
+Line 44:     - name: Create a template in /etc/dhcp/dhcpd.conf
+Line 45:       template:
+Line 46:         src: templates/dhcp/dhcpd.conf.j2
+Line 47:         dest: /etc/dhcp/dhcpd.conf
+Line 48:         mode: 0644
+Line 49:         owner: root
+Line 50:         group: root
+Line 51:       notify: restart dhcpd
+Line 52: 
+Line 53:     - name: Create a template in /etc/dhcp/dhcpd.conf
+Line 54:       template:
+Line 55:         src: templates/dhcp/isc-dhcp-server.j2
+Line 56:         dest: /etc/default/isc-dhcp-server
+Line 57:         mode: 0644
+Line 58:         owner: root
+Line 59:         group: root
+Line 60:       notify: restart dhcpd
+Line 61: 
+Line 62:   environment: "{{ deployment_environment_variables | default({}) }}"
+Line 63: 
+Line 64:   handlers:
+Line 65:     - name: restart dhcpd
+Line 66:       systemd:
+Line 67:         name: "{{ item }}"
+Line 68:         state: restarted
+Line 69:       with_items: "{{ default_dhcp_distro_packages }}"
+Line 70: 
+Line 71:   tags:
+Line 72:     - deploy-dhcpd
+Line 73: 
+Line 74: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

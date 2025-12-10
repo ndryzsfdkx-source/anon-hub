@@ -1,0 +1,156 @@
+# CONSTRUCTED PROMPT
+# File: alphagov@govuk-puppet-modules-govuk-manifests-node-s_calculators_frontend.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.630539
+# Length: 5898 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: alphagov@govuk-puppet-modules-govuk-manifests-node-s_calculators_frontend.pp (Puppet)**
+
+
+Line 1: # FIXME: This class needs better documentation as per https://docs.puppetlabs.com/guides/style_guide.html#puppet-doc
+Line 2: class govuk::node::s_calculators_frontend inherits govuk::node::s_base {
+Line 3:   include govuk::node::s_app_server
+Line 4: 
+Line 5:   include govuk_aws_xray_daemon
+Line 6: 
+Line 7:   include nginx
+Line 8: 
+Line 9:   # Local proxy for licence-finder to access ES cluster.
+Line 10:   if (! $::aws_migration) or ($::aws_environment == 'staging') or ($::aws_environment == 'production') {
+Line 11:     include govuk_elasticsearch::local_proxy
+Line 12:   }
+Line 13: 
+Line 14:   # If we miss all the apps, throw a 500 to be caught by the cache nginx
+Line 15:   nginx::config::vhost::default { 'default': }
+Line 16: 
+Line 17:   @@icinga::check::graphite { "check_nginx_connections_writing_${::hostname}":
+Line 18:     target    => "${::fqdn_metrics}.nginx.nginx_connections-writing",
+Line 19:     warning   => 150,
+Line 20:     critical  => 250,
+Line 21:     desc      => 'nginx high conn writing - upstream indicator',
+Line 22:     host_name => $::fqdn,
+Line 23:     notes_url => monitoring_docs_url(nginx-high-conn-writing-upstream-indicator-check),
+Line 24:   }
+Line 25: 
+Line 26:   include ::collectd::plugin::memcached
+Line 27:   class { 'memcached':
+Line 28:     max_memory => '12%',
+Line 29:     listen_ip  => '0.0.0.0',
+Line 30:   }
+Line 31: 
+Line 32:   govuk_envvar {
+Line 33:     'UNICORN_TIMEOUT': value => 15;
+Line 34:   }
+Line 35: 
+Line 36:   # Only for testing
+Line 37:   if $::aws_environment == 'staging' {
+Line 38:     include govuk_splunk
+Line 39:   }
+Line 40: 
+Line 41:   if ($::aws_environment == 'staging') or ($::aws_environment == 'production') {
+Line 42:     $app_domain = hiera('app_domain')
+Line 43: 
+Line 44:     govuk_envvar {
+Line 45:       'PLEK_SERVICE_SEARCH_URI': value    => "https://search.${app_domain}";
+Line 46:       'PLEK_SERVICE_RUMMAGER_URI': value  => "https://rummager.${app_domain}";
+Line 47:       'PLEK_SERVICE_EMAIL_ALERT_API_URI': value  => "https://email-alert-api.${app_domain}";
+Line 48:       'PLEK_SERVICE_PUBLISHING_API_URI': value  => "https://publishing-api.${app_domain}";
+Line 49:       'PLEK_SERVICE_WHITEHALL_ADMIN_URI': value  => "https://whitehall-admin.${app_domain}";
+Line 50:     }
+Line 51:   }
+Line 52: }
+Line 53: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

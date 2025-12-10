@@ -1,0 +1,146 @@
+# CONSTRUCTED PROMPT
+# File: binary-com_chef-third-party-cookbooks-poise-files-halite_gem-poise-subcontext-resource_collection.rb
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.357435
+# Length: 6483 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: binary-com_chef-third-party-cookbooks-poise-files-halite_gem-poise-subcontext-resource_collection.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Copyright 2013-2015, Noah Kantrowitz
+Line 3: #
+Line 4: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 5: # you may not use this file except in compliance with the License.
+Line 6: # You may obtain a copy of the License at
+Line 7: #
+Line 8: # http://www.apache.org/licenses/LICENSE-2.0
+Line 9: #
+Line 10: # Unless required by applicable law or agreed to in writing, software
+Line 11: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 12: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 13: # See the License for the specific language governing permissions and
+Line 14: # limitations under the License.
+Line 15: #
+Line 16: 
+Line 17: require 'chef/resource_collection'
+Line 18: 
+Line 19: 
+Line 20: module Poise
+Line 21:   module Subcontext
+Line 22:     # A subclass of the normal Chef ResourceCollection that creates a partially
+Line 23:     # isolated set of resources. Notifications and other resources lookups can
+Line 24:     # propagate out to parent contexts but not back in. This is used to allow
+Line 25:     # black-box resources that are still aware of things in upper contexts.
+Line 26:     #
+Line 27:     # @api private
+Line 28:     # @since 1.0.0
+Line 29:     class ResourceCollection < Chef::ResourceCollection
+Line 30:       attr_accessor :parent
+Line 31: 
+Line 32:       def initialize(parent)
+Line 33:         @parent = parent
+Line 34:         super()
+Line 35:       end
+Line 36: 
+Line 37:       def lookup(resource)
+Line 38:         super
+Line 39:       rescue Chef::Exceptions::ResourceNotFound
+Line 40:         @parent.lookup(resource)
+Line 41:       end
+Line 42: 
+Line 43:       # Iterate over all resources, expanding parent context in order.
+Line 44:       #
+Line 45:       # @param block [Proc] Iteration block
+Line 46:       # @return [void]
+Line 47:       def recursive_each(&block)
+Line 48:         if @parent
+Line 49:           if @parent.respond_to?(:recursive_each)
+Line 50:             @parent.recursive_each(&block)
+Line 51:           else
+Line 52:             @parent.each(&block)
+Line 53:           end
+Line 54:         end
+Line 55:         each(&block)
+Line 56:       end
+Line 57: 
+Line 58:       # Iterate over all resources in reverse order.
+Line 59:       #
+Line 60:       # @since 2.3.0
+Line 61:       # @param block [Proc] Iteration block
+Line 62:       # @return [void]
+Line 63:       def reverse_recursive_each(&block)
+Line 64:         reverse_each(&block)
+Line 65:         if @parent
+Line 66:           if @parent.respond_to?(:recursive_each)
+Line 67:             @parent.reverse_recursive_each(&block)
+Line 68:           else
+Line 69:             @parent.reverse_each(&block)
+Line 70:           end
+Line 71:         end
+Line 72:       end
+Line 73:     end
+Line 74:   end
+Line 75: end
+Line 76: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

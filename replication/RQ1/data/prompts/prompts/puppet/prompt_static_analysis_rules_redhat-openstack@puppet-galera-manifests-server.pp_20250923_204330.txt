@@ -1,0 +1,259 @@
+# CONSTRUCTED PROMPT
+# File: redhat-openstack@puppet-galera-manifests-server.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.643948
+# Length: 9250 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: redhat-openstack@puppet-galera-manifests-server.pp (Puppet)**
+
+
+Line 1: # == Class: galera::server
+Line 2: #
+Line 3: # manages the installation of the galera server.
+Line 4: # manages the package, service, galera.cnf
+Line 5: #
+Line 6: # === Parameters:
+Line 7: #
+Line 8: #  [*bootstrap*]
+Line 9: #   Defaults to false, boolean to set cluster boostrap.
+Line 10: #
+Line 11: #  [*package_name*]
+Line 12: #   The name of the galera package.
+Line 13: #
+Line 14: #  [*package_ensure*]
+Line 15: #   Ensure state for package. Can be specified as version.
+Line 16: #
+Line 17: #  [*wsrep_node_address*]
+Line 18: #   Address of local galera node.
+Line 19: #
+Line 20: #  [*wsrep_provider*]
+Line 21: #   Full path to wsrep provider library or 'none'.
+Line 22: #
+Line 23: #  [*wsrep_cluster_name*]
+Line 24: #   Logical cluster name.  be the same for all nodes.
+Line 25: #
+Line 26: #  [*wsrep_cluster_members*]
+Line 27: #   List of cluster members, IP addresses or hostnames.
+Line 28: #
+Line 29: #  [*wsrep_sst_method*]
+Line 30: #   State snapshot transfer method.
+Line 31: #
+Line 32: #  [*wsrep_sst_username*]
+Line 33: #   Username used by the wsrep_sst_auth authentication string.
+Line 34: #
+Line 35: #  [*wsrep_sst_password*]
+Line 36: #   Password used by the wsrep_sst_auth authentication string.
+Line 37: #
+Line 38: #  [*wsrep_ssl*]
+Line 39: #   Boolean to disable SSL even if certificate and key are configured.
+Line 40: #
+Line 41: #  [*wsrep_ssl_key*]
+Line 42: #   Private key for the certificate above, unencrypted, in PEM format.
+Line 43: #
+Line 44: #  [*wsrep_ssl_cert*]
+Line 45: #   Certificate file in PEM format.
+Line 46: #
+Line 47: #  [*debug*]
+Line 48: #
+Line 49: #  [*wsrep_bind_address*]
+Line 50: #   Address to bind galera service.
+Line 51: #   Deprecated, please use ::mysql::server class.
+Line 52: #
+Line 53: #  [*mysql_server_hash*]
+Line 54: #   Hash of mysql server parameters.
+Line 55: #   Deprecated, please use ::mysql::server class.
+Line 56: #
+Line 57: #
+Line 58: #  [*manage_service*]
+Line 59: #   State of the service.
+Line 60: #   Deprecated, please use ::mysql::server class.
+Line 61: #
+Line 62: #  [*service_name*]
+Line 63: #   The name of the galera service.
+Line 64: #   Deprecated, please use ::mysql::server class.
+Line 65: #
+Line 66: #  [*service_enable*]
+Line 67: #   Defaults to true, boolean to set service enable.
+Line 68: #   Deprecated, please use ::mysql::server class.
+Line 69: #
+Line 70: #  [*service_ensure*]
+Line 71: #   Defaults to running, needed to set root password.
+Line 72: #   Deprecated, please use ::mysql::server class.
+Line 73: #
+Line 74: #  [*service_provider*]
+Line 75: #   What service provider to use.
+Line 76: #   Deprecated, please use ::mysql::server class.
+Line 77: #
+Line 78: # === Actions:
+Line 79: #
+Line 80: # === Requires:
+Line 81: #
+Line 82: # === Sample Usage:
+Line 83: # class { 'galera::server':
+Line 84: #   wsrep_cluster_name => 'galera_cluster',
+Line 85: #   wsrep_sst_method   => 'rsync'
+Line 86: #   wsrep_sst_username => 'ChangeMe',
+Line 87: #   wsrep_sst_password => 'ChangeMe',
+Line 88: # }
+Line 89: #
+Line 90: class galera::server (
+Line 91:   $bootstrap             = false,
+Line 92:   $debug                 = false,
+Line 93:   $wsrep_node_address    = undef,
+Line 94:   $wsrep_provider        = '/usr/lib64/galera/libgalera_smm.so',
+Line 95:   $wsrep_cluster_name    = 'galera_cluster',
+Line 96:   $wsrep_cluster_members = [ $::ipaddress ],
+Line 97:   $wsrep_sst_method      = 'rsync',
+Line 98:   $wsrep_sst_username    = 'root',
+Line 99:   $wsrep_sst_password    = undef,
+Line 100:   $wsrep_ssl             = false,
+Line 101:   $wsrep_ssl_key         = undef,
+Line 102:   $wsrep_ssl_cert        = undef,
+Line 103:   $create_mysql_resource = true,
+Line 104:   # DEPRECATED OPTIONS
+Line 105:   $mysql_server_hash     = {},
+Line 106:   $wsrep_bind_address    = '0.0.0.0',
+Line 107:   $manage_service        = false,
+Line 108:   $service_name          = 'mariadb',
+Line 109:   $service_enable        = true,
+Line 110:   $service_ensure        = 'running',
+Line 111: )  {
+Line 112:   if $create_mysql_resource {
+Line 113:   warning("DEPRECATED: ::mysql::server should be called manually, please set create_mysql_resource to false and call class ::mysql::server with your config")
+Line 114: 
+Line 115:     $mysql_server_class = { 'mysql::server' => $mysql_server_hash }
+Line 116: 
+Line 117:     create_resources( 'class', $mysql_server_class )
+Line 118:   }
+Line 119: 
+Line 120:   if $wsrep_bind_address {
+Line 121:     warning("DEPRECATED: wsrep_bind_address is deprecated, you should use bind_address of mysql module")
+Line 122:   }
+Line 123: 
+Line 124:   if $wsrep_ssl {
+Line 125:     $wsrep_provider_options = wsrep_options({
+Line 126:       'socket.ssl'      => $wsrep_ssl,
+Line 127:       'socket.ssl_key'  => $wsrep_ssl_key,
+Line 128:       'socket.ssl_cert' => $wsrep_ssl_cert,
+Line 129:     })
+Line 130:   } else {
+Line 131:     $wsrep_provider_options = wsrep_options({
+Line 132:       'socket.ssl'      => $wsrep_ssl,
+Line 133:     })
+Line 134:   }
+Line 135: 
+Line 136:   $wsrep_debug = bool2num($debug)
+Line 137: 
+Line 138:   file { '/etc/my.cnf.d/galera.cnf':
+Line 139:     ensure  => present,
+Line 140:     mode    => '0644',
+Line 141:     owner   => 'root',
+Line 142:     group   => 'root',
+Line 143:     content => template('galera/wsrep.cnf.erb'),
+Line 144:     notify  => Service['mysqld'],
+Line 145:   }
+Line 146: 
+Line 147:   if $manage_service {
+Line 148:     warning("DEPRECATED: service setup is deprecated, you should use mysql module for this.")
+Line 149:     service { 'galera':
+Line 150:       ensure => $service_ensure,
+Line 151:       name   => $service_name,
+Line 152:       enable => $service_enable,
+Line 153:     }
+Line 154:   }
+Line 155: }
+Line 156: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

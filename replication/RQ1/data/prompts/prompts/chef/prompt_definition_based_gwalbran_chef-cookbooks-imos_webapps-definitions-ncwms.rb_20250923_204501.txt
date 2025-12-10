@@ -1,0 +1,151 @@
+# CONSTRUCTED PROMPT
+# File: gwalbran_chef-cookbooks-imos_webapps-definitions-ncwms.rb
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.366377
+# Length: 6973 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: gwalbran_chef-cookbooks-imos_webapps-definitions-ncwms.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Cookbook Name:: imos_webapps
+Line 3: # Definition:: ncwms
+Line 4: #
+Line 5: # Copyright 2012, IMOS
+Line 6: #
+Line 7: # All rights reserved - Do Not Redistribute
+Line 8: #
+Line 9: 
+Line 10: define :ncwms do
+Line 11: 
+Line 12:   app_parameters          = params[:app_parameters]
+Line 13:   instance_parameters     = params[:instance_parameters]
+Line 14:   instance_service_name   = params[:instance_service_name]
+Line 15:   instance_base_directory = params[:instance_base_directory]
+Line 16: 
+Line 17:   app_name                = app_parameters['name']
+Line 18: 
+Line 19:   # Overriding the WMS-servlet.xml file extracted by the WAR
+Line 20:   wms_servlet_xml = "#{instance_base_directory}/webapps/#{app_name}/WEB-INF/WMS-servlet.xml"
+Line 21: 
+Line 22:   template wms_servlet_xml do
+Line 23:     source   "#{app_name}/WMS-servlet.xml.erb"
+Line 24:     owner    node['tomcat']['user']
+Line 25:     group    node['tomcat']['group']
+Line 26:     mode     0644
+Line 27:     backup   3
+Line 28:     notifies :restart, "service[#{instance_service_name}]", :delayed
+Line 29: 
+Line 30:     variables({
+Line 31:       :cache_dir => app_parameters['cache_dir']
+Line 32:     })
+Line 33:   end
+Line 34: 
+Line 35:   # On dev machines, we'll create the ncwms cache dir, so it doesn't fail
+Line 36:   # On real production machines we'd like it to fail if the directory is not in
+Line 37:   # place
+Line 38:   if Chef::Config[:dev]
+Line 39:     directory app_parameters['cache_dir'] do
+Line 40:       owner     node['tomcat']['user']
+Line 41:       group     node['tomcat']['group']
+Line 42:       mode      0755
+Line 43:       recursive true
+Line 44:     end
+Line 45:   end
+Line 46: 
+Line 47:   password = Chef::EncryptedDataBagItem.load('passwords', 'ncwms')['password']
+Line 48: 
+Line 49:   # NcWMS is making funny things with config, such as updating the config file
+Line 50:   # while running. We want to be able to manage the config from chef so the way
+Line 51:   # we do it is that if the chef config have changed - we'll trigger a restart.
+Line 52:   # However if the chef config is different from what's on the node and the chef
+Line 53:   # config was unchanged - we'll avoid restarting NcWMS.
+Line 54:   ncwms_config_real = ::File.join(app_parameters['cache_dir'], "config.xml")
+Line 55:   ncwms_config_from_chef = ::File.join(app_parameters['cache_dir'], "config_base.xml")
+Line 56: 
+Line 57:   template ncwms_config_from_chef do
+Line 58:     cookbook "external_templates"
+Line 59:     source   "#{app_name}/config.xml.erb"
+Line 60:     owner    node['tomcat']['user']
+Line 61:     group    node['tomcat']['group']
+Line 62:     mode     00644
+Line 63:     notifies :create, "ruby_block[refresh_ncwms_config_#{instance_service_name}]", :immediately
+Line 64:     variables ({
+Line 65:       :root     => app_parameters['root'],
+Line 66:       :password => password
+Line 67:     })
+Line 68:   end
+Line 69: 
+Line 70:   ruby_block "refresh_ncwms_config_#{instance_service_name}" do
+Line 71:     block do
+Line 72:       FileUtils.cp ncwms_config_from_chef, ncwms_config_real
+Line 73:       FileUtils.chown node['tomcat']['user'], node['tomcat']['group'], ncwms_config_real
+Line 74:     end
+Line 75:     action   :nothing
+Line 76:     notifies :restart, "service[#{instance_service_name}]", :delayed
+Line 77:   end
+Line 78: 
+Line 79: end
+Line 80: 
+Line 81: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

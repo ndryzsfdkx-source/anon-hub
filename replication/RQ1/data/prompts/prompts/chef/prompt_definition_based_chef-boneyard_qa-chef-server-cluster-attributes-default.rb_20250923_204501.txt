@@ -1,0 +1,122 @@
+# CONSTRUCTED PROMPT
+# File: chef-boneyard_qa-chef-server-cluster-attributes-default.rb
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.357681
+# Length: 8384 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: chef-boneyard_qa-chef-server-cluster-attributes-default.rb (Unknown)**
+
+
+Line 1: # unsecured default keys
+Line 2: # provisioner-setup recipe will clear the private and public attributes so they are not added to any nodes
+Line 3: node.default['qa-chef-server-cluster']['private-key'] = "-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA2lzwvnpTObhbhrzgiOaaoj04hsGi2PIvWqQeF6dk9wP9rpPQ\nmEqCpEwVNzoOAT4hgB5VvlGBvchOkdV/4TiJGIKP6mGlHglKCEAnOir/FCP1+jb7\nIvSW6t752+tYffCA9ywRSu1OIub+fO6dQ+3nZvYT0vYttBUjHOG24F7XHvE6G6G9\nI5RF1MtCR7JWP/WOenHKtdXAPXC9eKtK6HKqh4OZVGWZOUvcOPNRyA2SfZ7XS2rl\nfgYZj0/Lxsirc6frR9jSFrHksBSUWuWQv7LhzzIi1YimR7jf//WR9CjcCm06o/Qp\nJVefpIfYFiqzFIRzpPsVcRChX4BkwBy/23B6iwIDAQABAoIBAQDQqD7jxMACR8gt\n2A42wyTAIwAAxMd3xvS5CFo5ABvablXanCSXYZu0o38iZrc7OMOKSXJlij0PvHhX\nokuwSvW2FgyvSt8c9INpnuPdEXjtJe/GSQNxQ4dyp97Z5umIbmjNx64+isQ/VbuY\nZeqhHpQgLsSCsfq6OfhzgLvfasDlLpkOwKTQPYIj2PC1CHXCUMti9GQKYKO96Xgt\nXjIjrQ/J/DsmgmISLBGTLUBdClyJpt+Pqk/vBVsFZ+hZECFtwUEuotLDxkT2F/oK\nzczrdqAtg272SWupINE2g4LRWVn31utGWA2uijHQgUgvAtF03FiTR9j4HnLGUmtk\nt3g224EBAoGBAPAmbh4JFpvpj6zF4AQDINuZDO8IK0k+aNePICQ2p5VZ5TIr0/+f\nFbvbbEdoCT+OGgUJKfVSrAwr7sKZRrodaYmPHpUqEeureAbiI2PMmfuJFpHyyu4f\ny6+GwYvEmC/G/SGt2QZH9QryHHB7/DTnfi9VIKGE+kIUxb6YPHbhHEQnAoGBAOjG\nZYMKZDYDdALPKN/+iY5vEJYXV91MJ/zXh+ICo39vPMu993fEzGoli2iEmbzxVhVn\nfq7r0hjbD3vD+QEsgOd6UEYvXiNqhucRH3qMhpqEOpU6aqU+PpPtJi9v8MYYEeZZ\nHhAhs9BefZ4Vn6TMsKkaveK4c5jUdBGWyxsiieD9AoGAEUQyFqbAoWUhl2KCwMcY\nzbErZORJeHKsRxNbVD85vVtBR2IvU+m0PlWAa4HnaFJnPIV0JtdS120xNXyfwTHs\nLJ/FqyPjNfaWIqiPstU7HQK2RLgYLxbKJkyiDdKMvqKoAIvnVrRFwgu2T8AaWhNq\n1yxftD1DYQztSs7XShTVW3ECgYAWerpo6kL9OF4mu0zOPO2Z1L38UKrKk0U1VLcp\nq2mQr/RmFKVmapn3EkMhR9T0+zV+Aa2pRNrYTad0I1vTsjGMqTJBZOepcesvO2cX\n1aRWHbjummKcLKOsc3WBlUTiTIbGAQs3MZoE4GsvLhVpu96/pfZ6g6eeNb4zyKU6\nrJ42HQKBgF5g0H0HvSlKRhVsISdINHKXcB++d+mYz3f7i8o88bxsB9IU7xOKiNPY\n3pjf2xfYScjHZOg+T93YfOtP7NY9bc5yuTYvXC7/5bMK/5zvxwhFYGkNuD53113m\n5KwYhHhWLiizsCC6ghbgDHbf1heu+Wn7IOwRG7wh3QaDm0JDpJ9l\n-----END RSA PRIVATE KEY-----"
+Line 4: node.default['qa-chef-server-cluster']['public-key'] = 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDaXPC+elM5uFuGvOCI5pqiPTiGwaLY8i9apB4Xp2T3A/2uk9CYSoKkTBU3Og4BPiGAHlW+UYG9yE6R1X/hOIkYgo/qYaUeCUoIQCc6Kv8UI/X6Nvsi9Jbq3vnb61h98ID3LBFK7U4i5v587p1D7edm9hPS9i20FSMc4bbgXtce8Tobob0jlEXUy0JHslY/9Y56ccq11cA9cL14q0rocqqHg5lUZZk5S9w481HIDZJ9ntdLauV+BhmPT8vGyKtzp+tH2NIWseSwFJRa5ZC/suHPMiLViKZHuN//9ZH0KNwKbTqj9CklV5+kh9gWKrMUhHOk+xVxEKFfgGTAHL/bcHqL ociv'
+Line 5: 
+Line 6: node.default['qa-chef-server-cluster']['aws'].tap do |aws|
+Line 7:   aws['region'] = 'us-west-2'
+Line 8:   aws['availability_zone'] = 'b'
+Line 9: end
+Line 10: 
+Line 11: node.default['qa-chef-server-cluster']['aws']['machine_options'].tap do |machine_options|
+Line 12:   machine_options['aws_tags'] = { 'X-Project' => 'qa-chef-server-cluster' }
+Line 13:   machine_options['transport_address_location'] = :private_ip
+Line 14:   machine_options['ssh_username'] = 'ubuntu'
+Line 15:   machine_options['bootstrap_options'].tap do |bootstrap_options|
+Line 16:     bootstrap_options['key_name'] = 'qa-chef-server-cluster-default'
+Line 17:     bootstrap_options['subnet_id'] = 'subnet-d3d9b8b4' # chef-cd -- acceptance-us-west-2a-private
+Line 18:     bootstrap_options['security_group_ids'] = ['sg-b3ed07c8'] # acceptance-default
+Line 19:     bootstrap_options['image_id'] = 'ami-4218403a' # Ubuntu 14.04
+Line 20:     bootstrap_options['instance_type'] = 't2.large'
+Line 21:   end
+Line 22: end
+Line 23: 
+Line 24: node.default['qa-chef-server-cluster']['provisioning-id'] = 'default'
+Line 25: node.default['qa-chef-server-cluster']['topology'] = nil
+Line 26: 
+Line 27: node.default['qa-chef-server-cluster']['chef-server'].tap do |chef_server|
+Line 28:   chef_server['version'] = 'latest'
+Line 29:   chef_server['channel'] = 'stable'
+Line 30:   chef_server['flavor'] = 'chef_server'
+Line 31:   chef_server['api_fqdn'] = 'api.chef.sh'
+Line 32:   chef_server['url'] = nil # setting this will override version and channel settings
+Line 33: end
+Line 34: 
+Line 35: node.default['qa-chef-server-cluster']['opscode-manage'].tap do |opscode_manage|
+Line 36:   opscode_manage['version'] = nil
+Line 37:   opscode_manage['channel'] = 'stable'
+Line 38:   opscode_manage['url'] = nil # setting this will override version and channel settings
+Line 39: end
+Line 40: 
+Line 41: node.default['qa-chef-server-cluster']['chef-ha'].tap do |chef_ha|
+Line 42:   chef_ha['version'] =  '1.0.0'
+Line 43:   chef_ha['channel'] = 'stable'
+Line 44:   chef_ha['url'] = nil # setting this will override version and channel settings
+Line 45: end
+Line 46: 
+Line 47: node.default['qa-chef-server-cluster']['chef-server-ctl-test-options'] = ''
+Line 48: 
+Line 49: node.default['qa-chef-server-cluster']['download-logs'] = false
+Line 50: 
+Line 51: node.default['qa-chef-server-cluster']['data-generator']['branch'] = 'ssd/pool-607'
+Line 52: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

@@ -1,0 +1,28 @@
+PATH,LINE,CATEGORY
+ansible-role-tripleo-modify-image-tasks-modify_image.yml,35,Suspicious comment
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,15,Admin by default
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,15,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,16,Empty password
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,16,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,47,Admin by default
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,47,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,48,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,55,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,56,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,61,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,62,Hard-coded secret
+browbeat-ansible-browbeat-roles-keystone-token-tasks-main.yml,32,Missing Default in Case Statement
+openstack-ansible-inventory-group_vars-ceilometer_all.yml,20,Use of HTTP without SSL/TLS
+openstack-ansible-ops-elk_metrics_6x-roles-elastic_filebeat-tasks-main.yml,46,No integrity check
+openstack-ansible-ops-leap-upgrades-upgrade-utilities-mitaka-playbooks-deploy-config-changes-mitaka.yml,20,Admin by default
+openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml,98,Suspicious comment
+openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml,121,Suspicious comment
+openstack-ansible-playbooks-healthcheck-hosts.yml,20,Suspicious comment
+openstack-ansible-playbooks-healthcheck-hosts.yml,23,Suspicious comment
+openstack-ansible-playbooks-healthcheck-hosts.yml,53,No integrity check
+openstack-ansible-playbooks-lxc-containers-destroy.yml,33,Admin by default
+openstack-ansible-playbooks-os-designate-install.yml,22,Admin by default
+openstack-ansible-playbooks-os-tempest-install.yml,19,Admin by default
+puppet-openstack-integration-playbooks-run-syntax-tests.yaml,8,No integrity check
+puppet-openstack-integration-playbooks-run-syntax-tests.yaml,9,No integrity check
+tripleo-quickstart-roles-libvirt-setup-overcloud-tasks-vars-libvirt_nodepool_vars.yml,23,Use of weak cryptography algorithms

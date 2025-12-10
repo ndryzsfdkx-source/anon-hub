@@ -1,0 +1,10 @@
+Method,Ansible,Chef,Puppet,Macro-F1
+GLITCH,0.843,0.661,0.578,0.694
+SLAC/SLIC,0.505,0.376,0.357,0.413
+claude-sonnet-4.0-static-analysis-rules,0.606,0.521,0.552,0.559
+claude-sonnet-4.0-definition-based,0.699,0.490,0.676,0.622
+grok-4-fast-static-analysis-rules,0.870,0.650,0.750,0.757
+grok-4-fast-definition-based,0.759,0.600,0.701,0.687
+gpt-5-static-analysis-rules,0.777,0.574,0.608,0.653
+gpt-5-2025-08-07-definition-based,0.563,0.453,0.565,0.527
+IntelliSA,0.878,0.768,0.846,0.831

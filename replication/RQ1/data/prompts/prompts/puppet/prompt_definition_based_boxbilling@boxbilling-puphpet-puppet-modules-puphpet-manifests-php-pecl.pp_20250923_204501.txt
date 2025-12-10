@@ -1,0 +1,195 @@
+# CONSTRUCTED PROMPT
+# File: boxbilling@boxbilling-puphpet-puppet-modules-puphpet-manifests-php-pecl.pp
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.381110
+# Length: 7995 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: boxbilling@boxbilling-puphpet-puppet-modules-puphpet-manifests-php-pecl.pp (Puppet)**
+
+
+Line 1: /*
+Line 2:  * This "translates" PECL package names into system-specific names.
+Line 3:  * For example, APCu does not install correctly on CentOS via PECL,
+Line 4:  * but there is a system package for it that works well. Use that
+Line 5:  * instead of the PECL package.
+Line 6:  */
+Line 7: 
+Line 8: define puphpet::php::pecl (
+Line 9:   $service_autorestart
+Line 10: ){
+Line 11: 
+Line 12:   $ignore = {
+Line 13:     'date_time' => true,
+Line 14:     'mysql'     => true,
+Line 15:   }
+Line 16: 
+Line 17:   $pecl = $::osfamily ? {
+Line 18:     'Debian' => {
+Line 19:       'mongo' => $::lsbdistcodename ? {
+Line 20:         'precise' => 'mongo',
+Line 21:         default   => false,
+Line 22:       },
+Line 23:     },
+Line 24:     'Redhat' => {
+Line 25:       #
+Line 26:     }
+Line 27:   }
+Line 28: 
+Line 29:   $pecl_beta = $::osfamily ? {
+Line 30:     'Debian' => {
+Line 31:       'augeas'      => 'augeas',
+Line 32:       'zendopcache' => $::operatingsystem ? {
+Line 33:         'debian' => false,
+Line 34:         'ubuntu' => 'ZendOpcache',
+Line 35:       },
+Line 36:     },
+Line 37:     'Redhat' => {
+Line 38:       #
+Line 39:     }
+Line 40:   }
+Line 41: 
+Line 42:   $package = $::osfamily ? {
+Line 43:     'Debian' => {
+Line 44:       'apc'         => $::operatingsystem ? {
+Line 45:         'debian' => 'php5-apc',
+Line 46:         'ubuntu' => 'php5-apcu',
+Line 47:       },
+Line 48:       'apcu'        => 'php5-apcu',
+Line 49:       'imagick'     => 'php5-imagick',
+Line 50:       'memcache'    => 'php5-memcache',
+Line 51:       'memcached'   => 'php5-memcached',
+Line 52:       'mongo'       => $::lsbdistcodename ? {
+Line 53:         'precise' => false,
+Line 54:         default   => 'php5-mongo',
+Line 55:       },
+Line 56:       'redis'       => 'php5-redis',
+Line 57:       'sqlite'      => 'php5-sqlite',
+Line 58:       'zendopcache' => 'php5-zendopcache',
+Line 59:     },
+Line 60:     'Redhat' => {
+Line 61:       'apc'         => 'php-pecl-apcu',
+Line 62:       'apcu'        => 'php-pecl-apcu',
+Line 63:       'imagick'     => 'php-pecl-imagick',
+Line 64:       'memcache'    => 'php-pecl-memcache',
+Line 65:       'memcached'   => 'php-pecl-memcached',
+Line 66:       'mongo'       => 'php-pecl-mongo',
+Line 67:       'redis'       => 'php-pecl-redis',
+Line 68:       'sqlite'      => 'php-pecl-sqlite',
+Line 69:       'zendopcache' => 'php-pecl-zendopcache',
+Line 70:     }
+Line 71:   }
+Line 72: 
+Line 73:   $auto_answer_hash = {
+Line 74:     'mongo' => 'no\n'
+Line 75:   }
+Line 76: 
+Line 77:   $downcase_name = downcase($name)
+Line 78: 
+Line 79:   if has_key($auto_answer_hash, $downcase_name) {
+Line 80:     $auto_answer = $auto_answer_hash[$downcase_name]
+Line 81:   } else {
+Line 82:     $auto_answer = '\\n'
+Line 83:   }
+Line 84: 
+Line 85:   if has_key($ignore, $downcase_name) and $ignore[$downcase_name] {
+Line 86:     $pecl_name       = $pecl[$downcase_name]
+Line 87:     $package_name    = false
+Line 88:     $preferred_state = 'stable'
+Line 89:   }
+Line 90:   elsif has_key($pecl, $downcase_name) and $pecl[$downcase_name] {
+Line 91:     $pecl_name       = $pecl[$downcase_name]
+Line 92:     $package_name    = false
+Line 93:     $preferred_state = 'stable'
+Line 94:   }
+Line 95:   elsif has_key($pecl_beta, $downcase_name) and $pecl_beta[$downcase_name] {
+Line 96:     $pecl_name       = $pecl_beta[$downcase_name]
+Line 97:     $package_name    = false
+Line 98:     $preferred_state = 'beta'
+Line 99:   }
+Line 100:   elsif has_key($package, $downcase_name) and $package[$downcase_name] {
+Line 101:     $pecl_name    = false
+Line 102:     $package_name = $package[$downcase_name]
+Line 103:   }
+Line 104:   else {
+Line 105:     $pecl_name    = $name
+Line 106:     $package_name = false
+Line 107:   }
+Line 108: 
+Line 109:   if $pecl_name and ! defined(::Php::Pecl::Module[$pecl_name]) {
+Line 110:     ::php::pecl::module { $pecl_name:
+Line 111:       use_package         => false,
+Line 112:       preferred_state     => $preferred_state,
+Line 113:       auto_answer         => $auto_answer,
+Line 114:       service_autorestart => $service_autorestart,
+Line 115:     }
+Line 116:   }
+Line 117:   elsif $package_name and ! defined(Package[$package_name]) {
+Line 118:     package { $package_name:
+Line 119:       ensure  => present,
+Line 120:       require => Class['Php::Devel'],
+Line 121:     }
+Line 122:   }
+Line 123: 
+Line 124: }
+Line 125: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

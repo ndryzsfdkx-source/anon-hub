@@ -1,0 +1,180 @@
+# CONSTRUCTED PROMPT
+# File: browbeat-ansible-gather-roles-undercloud-tasks-main.yml
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.592802
+# Length: 6726 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: browbeat-ansible-gather-roles-undercloud-tasks-main.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: #
+Line 3: # Tasks to set undercloud facts
+Line 4: #
+Line 5: 
+Line 6: 
+Line 7:   - name: Check that the undercloud.conf exists
+Line 8:     become: true
+Line 9:     stat: path=/home/stack/undercloud.conf
+Line 10:     register: undercloud_conf
+Line 11: 
+Line 12:   - name: Undercloud.conf
+Line 13:     become: true
+Line 14:     command: python /tmp/openstack-config-parser.py undercloud /tmp/out.yml
+Line 15:     when: undercloud_conf.stat.exists
+Line 16: 
+Line 17:   - name: Fetch output
+Line 18:     fetch: src=/tmp/out.yml dest=/tmp/out-{{ inventory_hostname }}.yml flat=yes
+Line 19:     when: undercloud_conf.stat.exists
+Line 20: 
+Line 21:   - name: Load configuration variables
+Line 22:     include_vars: /tmp/out-{{ inventory_hostname }}.yml
+Line 23:     when: undercloud_conf.stat.exists
+Line 24: 
+Line 25:   - name: Get max_connections on the database
+Line 26:     shell: mysql -e "show variables like 'max_connections';" | grep max_connections | awk '{print $2}'
+Line 27:     register: max_conn
+Line 28:     ignore_errors: true
+Line 29:     when: undercloud_conf.stat.exists
+Line 30: 
+Line 31:   - name: Set max database connections
+Line 32:     set_fact:
+Line 33:       openstack_mysql_max_connections: "{{ max_conn.stdout }}"
+Line 34:     when: undercloud_conf.stat.exists
+Line 35: 
+Line 36:   - name : Get file descriptors for the mysql process
+Line 37:     shell: cat /proc/$(pgrep mysqld_safe)/limits | grep "open files" | awk '{print $4}'
+Line 38:     register: mysql_desc
+Line 39:     when: undercloud_conf.stat.exists
+Line 40: 
+Line 41:   - name: Set file descriptors fact for mysql
+Line 42:     set_fact:
+Line 43:       openstack_mysql_file_descriptors: "{{ mysql_desc.stdout }}"
+Line 44:     when: undercloud_conf.stat.exists
+Line 45: 
+Line 46:   - name : Get rabbitmq file descriptors
+Line 47:     shell: rabbitmqctl status | grep total_limit |  awk -F',' '{print $2}' | sed 's/.$//'
+Line 48:     register: rabbitmq_desc
+Line 49:     ignore_errors: true
+Line 50:     when: undercloud_conf.stat.exists
+Line 51: 
+Line 52:   - name: Set rabbitmq file descriptors
+Line 53:     set_fact:
+Line 54:       openstack_rabbitmq_file_descriptors: "{{ rabbitmq_desc.stdout  }}"
+Line 55:     when: undercloud_conf.stat.exists
+Line 56: 
+Line 57:   - name: Get Controller Nodes number
+Line 58:     shell: source {{ ansible_env.HOME }}/stackrc; nova list | grep controller | grep ACTIVE | wc -l
+Line 59:     register: controller_count
+Line 60:     when: undercloud_conf.stat.exists
+Line 61: 
+Line 62:   - name : Set Controler number fact
+Line 63:     set_fact:
+Line 64:       osp_controllers_number: "{{ controller_count.stdout }}"
+Line 65:     when: undercloud_conf.stat.exists
+Line 66: 
+Line 67:   - name: Get Compute Nodes number
+Line 68:     shell: source {{ ansible_env.HOME }}/stackrc; nova list | grep compute | grep ACTIVE | wc -l
+Line 69:     register: compute_count
+Line 70:     when: undercloud_conf.stat.exists
+Line 71: 
+Line 72:   - name : Set Commpute number fact
+Line 73:     set_fact:
+Line 74:       osp_computes_number: "{{ compute_count.stdout }}"
+Line 75:     when: undercloud_conf.stat.exists
+Line 76: 
+Line 77: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

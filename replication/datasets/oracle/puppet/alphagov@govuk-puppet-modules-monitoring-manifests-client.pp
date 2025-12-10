@@ -1,0 +1,29 @@
+# FIXME: This class needs better documentation as per https://docs.puppetlabs.com/guides/style_guide.html#puppet-doc
+class monitoring::client (
+  $graphite_hostname = 'graphite.cluster',
+  $alert_hostname = 'alert.cluster',
+) {
+
+  include monitoring::client::apt
+  include icinga::client
+  include nsca
+  include auditd
+  include collectd
+  include collectd::plugin::tcp
+
+  exec { 'gds-nagios-plugins':
+    path    => ['/usr/local/bin', '/usr/bin', '/bin'],
+    command => 'pip install setuptools-pep8 gds-nagios-plugins==1.5.0 --index-url https://pypi.python.org/pypi',
+    require => Package['update-notifier-common'],
+  }
+
+  class { 'statsd':
+    graphite_hostname => $graphite_hostname,
+  }
+
+  file { '/usr/local/bin/notify_passive_check':
+    ensure  => present,
+    mode    => '0755',
+    content => template('govuk/notify_passive_check.erb'),
+  }
+}

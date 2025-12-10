@@ -1,0 +1,81 @@
+PATH,LINE,CATEGORY
+Automattic@vip-quickstart-puppet-manifests-sections-mail.pp,7,Hard-coded secret
+Juniper@contrail-puppet-contrail-environment-modules-contrail-manifests-collector-config.pp,74,Unrestricted IP Address
+Mirantis@solar-resources-cinder_puppet-actions-run.pp,60,Suspicious comment
+SecGen@SecGen-modules-services-unix-database-mysql-manifests-backup-xtrabackup.pp,3,Empty password
+SecGen@SecGen-modules-services-unix-database-mysql-manifests-backup-xtrabackup.pp,4,Empty password
+SecGen@SecGen-modules-services-unix-http-tomcat-manifests-instance-dependencies.pp,6,Use of weak cryptography algorithms
+SecGen@SecGen-modules-services-unix-http-tomcat-manifests-instance-dependencies.pp,7,Use of weak cryptography algorithms
+SecGen@SecGen-modules-services-unix-smb-samba-manifests-params.pp,44,Admin by default
+SecGen@SecGen-modules-services-unix-smb-samba-manifests-params.pp,60,Admin by default
+SecGen@SecGen-modules-services-unix-smb-samba-manifests-params.pp,64,Admin by default
+SecGen@SecGen-modules-services-unix-smb-samba-manifests-params.pp,111,Unrestricted IP Address
+SecGen@SecGen-modules-services-unix-smb-samba-manifests-params.pp,115,Suspicious comment
+SecGen@SecGen-modules-vulnerabilities-unix-access_control_misconfigurations-uid_less_root-uid_less_root.pp,2,Hard-coded secret
+Yelp@puppet-uchiwa-manifests-repo-yum.pp,24,No integrity check
+alphagov@govuk-puppet-modules-govuk-manifests-node-s_calculators_frontend.pp,1,Suspicious comment
+alphagov@govuk-puppet-modules-govuk-manifests-node-s_calculators_frontend.pp,29,Unrestricted IP Address
+alphagov@govuk-puppet-modules-govuk_beat-manifests-repo.pp,16,Use of HTTP without SSL/TLS
+alphagov@govuk-puppet-modules-govuk_elasticsearch-manifests-dump.pp,1,Suspicious comment
+alphagov@govuk-puppet-modules-govuk_elasticsearch-manifests-dump.pp,30,Use of HTTP without SSL/TLS
+alphagov@govuk-puppet-modules-govuk_mysql-manifests-server.pp,84,Unrestricted IP Address
+alphagov@govuk-puppet-modules-govuk_postgresql-manifests-env_sync_user.pp,14,Admin by default
+alphagov@govuk-puppet-modules-govuk_postgresql-manifests-env_sync_user.pp,23,Use of weak cryptography algorithms
+alphagov@govuk-puppet-modules-govuk_rabbitmq-manifests-monitoring.pp,1,Suspicious comment
+alphagov@govuk-puppet-modules-govuk_rbenv-manifests-all.pp,18,Use of HTTP without SSL/TLS
+alphagov@govuk-puppet-modules-icinga-manifests-init.pp,1,Suspicious comment
+alphagov@govuk-puppet-modules-users-manifests-felisialoukou.pp,5,Hard-coded secret
+boxbilling@boxbilling-puphpet-puppet-modules-apache-manifests-mod-pagespeed.pp,40,Missing Default in Case Statement
+boxbilling@boxbilling-puphpet-puppet-modules-yum-manifests-repo-jpackage6.pp,9,Use of HTTP without SSL/TLS
+boxbilling@boxbilling-puphpet-puppet-modules-yum-manifests-repo-jpackage6.pp,12,Use of HTTP without SSL/TLS
+camptocamp@puppet-python-manifests-pip-couchdb.pp,20,Suspicious comment
+cargomedia@puppet-packages-modules-backup-manifests-agent.pp,8,Use of HTTP without SSL/TLS
+cargomedia@puppet-packages-modules-backup-manifests-agent.pp,21,Hard-coded secret
+cargomedia@puppet-packages-modules-backup-manifests-agent.pp,26,Hard-coded secret
+cargomedia@puppet-packages-modules-mysql-manifests-server-instance.pp,1,Empty password
+ceph@puppet-ceph-manifests-mds.pp,7,Use of HTTP without SSL/TLS
+danofthewired@puppet-bitbucket-examples-bitbucket_mysql_java_install.pp,9,Hard-coded secret
+danofthewired@puppet-bitbucket-examples-bitbucket_mysql_java_install.pp,14,Hard-coded secret
+duritong@puppet-shorewall-manifests-dnat_rule.pp,4,Use of HTTP without SSL/TLS
+fuel-infra@puppet-manifests-modules-obs_server-manifests-folders.pp,10,Admin by default
+fuel-infra@puppet-manifests-modules-obs_server-manifests-folders.pp,11,Admin by default
+hubspotdevops@puppet-nexus-manifests-params.pp,28,Use of HTTP without SSL/TLS
+hubspotdevops@puppet-nexus-manifests-params.pp,36,Unrestricted IP Address
+hubspotdevops@puppet-nexus-manifests-params.pp,40,Use of HTTP without SSL/TLS
+openstack@fuel-library-deployment-puppet-openstack_tasks-manifests-ironic-db.pp,9,Admin by default
+openstack@fuel-library-deployment-puppet-openstack_tasks-manifests-ironic-db.pp,19,Admin by default
+openstack@fuel-library-deployment-puppet-osnailyfacter-manifests-ssh.pp,34,Use of weak cryptography algorithms
+openstack@fuel-library-deployment-puppet-tweaks-manifests-ubuntu_service_override.pp,55,Admin by default
+openstack@puppet-neutron-manifests-server-placement.pp,77,Use of HTTP without SSL/TLS
+openstack@puppet-openstack-integration-manifests-designate.pp,11,Hard-coded secret
+openstack@puppet-openstack-integration-manifests-designate.pp,16,Hard-coded secret
+openstack@puppet-openstack-integration-manifests-designate.pp,27,Hard-coded secret
+openstack@puppet-openstack-integration-manifests-designate.pp,32,Hard-coded secret
+openstack@puppet-openstack-integration-manifests-designate.pp,37,Suspicious comment
+openstack@puppet-openstack-integration-manifests-designate.pp,39,Hard-coded secret
+openstack@puppet-openstack-integration-manifests-designate.pp,40,Use of HTTP without SSL/TLS
+openstack@puppet-openstack-integration-manifests-designate.pp,41,Use of HTTP without SSL/TLS
+openstack@puppet-openstack-integration-manifests-designate.pp,42,Use of HTTP without SSL/TLS
+openstack@puppet-openstack-integration-manifests-designate.pp,45,Hard-coded secret
+openstack@puppet-openstack-integration-manifests-designate.pp,55,Use of HTTP without SSL/TLS
+openstack@puppet-openstack-integration-manifests-designate.pp,91,Hard-coded secret
+openstack@puppet-openstack-integration-manifests-designate.pp,100,Suspicious comment
+openstack@puppet-tripleo-manifests-profile-base-aide-installdb.pp,36,Admin by default
+openstack@puppet-tripleo-manifests-profile-base-aide-installdb.pp,44,Admin by default
+openstack@puppet-tripleo-manifests-profile-base-neutron-wrappers-dibbler_client.pp,30,Suspicious comment
+puphpet@puppet-puphpet-manifests-nginx-params.pp,5,Hard-coded secret
+puphpet@puppet-puphpet-manifests-nginx-params.pp,17,Use of HTTP without SSL/TLS
+puppet-tripleo-manifests-stunnel-service_proxy.pp,8,Use of HTTP without SSL/TLS
+puppetlabs@puppetlabs-mysql-manifests-server-config.pp,12,Admin by default
+purpleidea@puppet-gluster-manifests-simple.pp,16,Use of HTTP without SSL/TLS
+purpleidea@puppet-gluster-manifests-simple.pp,22,Suspicious comment
+purpleidea@puppet-gluster-manifests-simple.pp,26,Empty password
+quintel@boxen-modules-osx-manifests-recovery_message.pp,22,Admin by default
+quintel@boxen-modules-osx-manifests-recovery_message.pp,29,Admin by default
+quintel@boxen-modules-osx-manifests-recovery_message.pp,48,Admin by default
+quintel@boxen-modules-osx-manifests-recovery_message.pp,67,Admin by default
+redhat-openstack@puppet-galera-manifests-server.pp,98,Admin by default
+redhat-openstack@puppet-galera-manifests-server.pp,106,Unrestricted IP Address
+voxpupuli@puppet-rabbitmq-examples-permissions-add.pp,2,Hard-coded secret
+voxpupuli@puppet-rundeck-manifests-config-global-framework.pp,28,Use of HTTP without SSL/TLS
+wikimedia@mediawiki-vagrant-puppet-modules-xhprofgui-manifests-init.pp,17,Use of HTTP without SSL/TLS

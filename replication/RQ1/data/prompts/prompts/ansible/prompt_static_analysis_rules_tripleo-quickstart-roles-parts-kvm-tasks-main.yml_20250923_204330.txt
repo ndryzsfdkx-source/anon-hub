@@ -1,0 +1,187 @@
+# CONSTRUCTED PROMPT
+# File: tripleo-quickstart-roles-parts-kvm-tasks-main.yml
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.605828
+# Length: 7026 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: tripleo-quickstart-roles-parts-kvm-tasks-main.yml (Ansible/YAML)**
+
+
+Line 1: - name: Set CPU vendor
+Line 2:   set_fact:
+Line 3:     cpu_vendor: "{{ 'intel' if 'Intel' in ansible_processor|join('') else
+Line 4:                     'amd' if 'AMD' in ansible_processor|join('') else 'unknown' }}"
+Line 5:     cacheable: true
+Line 6: 
+Line 7: - name: Get CPU flags
+Line 8:   command: "awk -F: '/^flags/ {print $2; exit}' /proc/cpuinfo"
+Line 9:   register: cpu_flags_cmd
+Line 10:   changed_when: false
+Line 11: 
+Line 12: - name: Check for nested support
+Line 13:   set_fact:
+Line 14:     cpu_nested_support: "{{ true if cpu_vendor == 'intel' and 'vmx' in cpu_flags_cmd.stdout.split() else
+Line 15:                             true if cpu_vendor == 'amd' and 'svm' in cpu_flags_cmd.stdout.split() else false }}"
+Line 16:     cacheable: true
+Line 17: 
+Line 18: - name: Disable nested if not supported
+Line 19:   set_fact:
+Line 20:     nested: "{{ false if not cpu_nested_support|bool else nested }}"
+Line 21:     cacheable: true
+Line 22: 
+Line 23: - name: Remove previous KVM modprobe configs
+Line 24:   shell: find /etc/modprobe.d/ -type f -print0| xargs -r -0 sed -i '/^options kvm_intel/d;/^options kvm_amd/d'
+Line 25:   become: true
+Line 26:   changed_when: true
+Line 27: 
+Line 28: - name: Configure KVM module
+Line 29:   copy:
+Line 30:     dest: "/etc/modprobe.d/kvm.conf"
+Line 31:     content: |
+Line 32:       options kvm_{{ cpu_vendor }} nested={{ nested|bool|ternary('1', '0') }}
+Line 33:   become: true
+Line 34: 
+Line 35: - name: Fetch current runtime nested setting
+Line 36:   command: cat /sys/module/kvm_{{ cpu_vendor }}/parameters/nested
+Line 37:   register: kvm_nested_info
+Line 38:   changed_when: false
+Line 39:   when: nested|bool
+Line 40: 
+Line 41: - name: Set fact for nested to false if virtualization is not enabled
+Line 42:   set_fact:
+Line 43:     cpu_nested_enabled: false
+Line 44:     cacheable: true
+Line 45:   when: not nested|bool
+Line 46: 
+Line 47: - name: Check if nested is enabled currently
+Line 48:   set_fact:
+Line 49:     cpu_nested_enabled: "{{ true if 'Y' in kvm_nested_info.stdout else
+Line 50:                             true if '1' in kvm_nested_info.stdout else false }}"
+Line 51:     cacheable: true
+Line 52:   when: nested|bool
+Line 53: 
+Line 54: - when: nested|bool != cpu_nested_enabled|bool
+Line 55:   block:
+Line 56:     - name: Unload KVM module
+Line 57:       modprobe:
+Line 58:         name: "kvm_{{ cpu_vendor }}"
+Line 59:         state: "absent"
+Line 60:       become: true
+Line 61: 
+Line 62:     - name: Reload KVM module
+Line 63:       modprobe:
+Line 64:         name: "kvm_{{ cpu_vendor }}"
+Line 65:         state: "present"
+Line 66:       become: true
+Line 67: 
+Line 68:     - name: Fetch current runtime nested setting
+Line 69:       command: cat /sys/module/kvm_{{ cpu_vendor }}/parameters/nested
+Line 70:       register: kvm_nested_info
+Line 71:       changed_when: false
+Line 72: 
+Line 73:     - name: Check again if nested is enabled currently
+Line 74:       set_fact:
+Line 75:         cpu_nested_enabled: "{{ true if 'Y' in kvm_nested_info.stdout else
+Line 76:                                 true if '1' in kvm_nested_info.stdout else false }}"
+Line 77:         cacheable: true
+Line 78:     - name: Fail when the desired and actual state do not match
+Line 79:       fail:
+Line 80:         msg: "Cannot change the state of nested virtualization. Please shut down any running VMs."
+Line 81:       when: nested|bool != cpu_nested_enabled|bool
+Line 82: 
+Line 83: 
+Line 84: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

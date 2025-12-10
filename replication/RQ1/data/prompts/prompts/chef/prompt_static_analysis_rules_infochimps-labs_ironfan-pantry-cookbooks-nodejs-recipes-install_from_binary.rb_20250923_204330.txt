@@ -1,0 +1,184 @@
+# CONSTRUCTED PROMPT
+# File: infochimps-labs_ironfan-pantry-cookbooks-nodejs-recipes-install_from_binary.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.621937
+# Length: 7161 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: infochimps-labs_ironfan-pantry-cookbooks-nodejs-recipes-install_from_binary.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Author:: Julian Wilde (jules@jules.com.au)
+Line 3: # Cookbook Name:: nodejs
+Line 4: # Recipe:: install_from_binary
+Line 5: #
+Line 6: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 7: # you may not use this file except in compliance with the License.
+Line 8: # You may obtain a copy of the License at
+Line 9: #
+Line 10: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 11: #
+Line 12: # Unless required by applicable law or agreed to in writing, software
+Line 13: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 14: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 15: # See the License for the specific language governing permissions and
+Line 16: # limitations under the License.
+Line 17: #
+Line 18: 
+Line 19: 
+Line 20: # Shamelessly borrowed from http://docs.opscode.com/dsl_recipe_method_platform.html
+Line 21: # Surely there's a more canonical way to get arch?
+Line 22: if node['kernel']['machine'] =~ /armv6l/
+Line 23:   arch = "arm-pi" # assume a raspberry pi
+Line 24: else
+Line 25:   arch = node['kernel']['machine'] =~ /x86_64/ ? "x64" : "x86"
+Line 26: end
+Line 27: 
+Line 28: distro_suffix = "-linux-#{arch}"
+Line 29: 
+Line 30: # package_stub is for example: "node-v0.8.20-linux-x64"
+Line 31: package_stub = "node-v#{node['nodejs']['version']}#{distro_suffix}"
+Line 32: nodejs_tar = "#{package_stub}.tar.gz"
+Line 33: expected_checksum = node['nodejs']["checksum_linux_#{arch}"]
+Line 34: 
+Line 35: nodejs_tar_path = nodejs_tar
+Line 36: if node['nodejs']['version'].split('.')[1].to_i >= 5
+Line 37:   nodejs_tar_path = "v#{node['nodejs']['version']}/#{nodejs_tar_path}"
+Line 38: end
+Line 39: 
+Line 40: # Let the user override the source url in the attributes
+Line 41: nodejs_bin_url = "#{node['nodejs']['src_url']}/#{nodejs_tar_path}"
+Line 42: 
+Line 43: # Download it:
+Line 44: remote_file "/usr/local/src/#{nodejs_tar}" do
+Line 45:   source nodejs_bin_url
+Line 46:   checksum expected_checksum
+Line 47:   mode 0644
+Line 48:   action :create_if_missing
+Line 49: end
+Line 50: 
+Line 51: # Where we will install the binaries and libs to (normally /usr/local):
+Line 52: destination_dir = node['nodejs']['dir']
+Line 53: 
+Line 54: install_not_needed = File.exists?("#{node['nodejs']['dir']}/bin/node") && `#{node['nodejs']['dir']}/bin/node --version`.chomp == "v#{node['nodejs']['version']}" 
+Line 55: 
+Line 56: # Verify the SHA sum of the downloaded file:
+Line 57: ruby_block "verify_sha_sum" do
+Line 58:     block do
+Line 59:         require 'digest/sha1'
+Line 60:         calculated_sha256_hash = Digest::SHA256.file("/usr/local/src/#{nodejs_tar}")
+Line 61:         if calculated_sha256_hash != expected_checksum
+Line 62:             raise "SHA256 Hash of #{nodejs_tar} did not match!  Expected #{expected_checksum} found #{calculated_sha256_hash}"
+Line 63:         end
+Line 64:     end
+Line 65:     not_if { !node['nodejs']['check_sha'] or install_not_needed }
+Line 66: end
+Line 67: 
+Line 68: # One hopes that we can trust the contents of the node tarball not to overwrite anything it shouldn't!
+Line 69: execute "install package to system" do
+Line 70:     command <<-EOF
+Line 71:             tar xf /usr/local/src/#{nodejs_tar} \
+Line 72:             --strip-components=1  --no-same-owner \
+Line 73:             -C #{destination_dir} \
+Line 74:             #{package_stub}/bin \
+Line 75:             #{package_stub}/lib \
+Line 76:             #{package_stub}/share
+Line 77:         EOF
+Line 78: 
+Line 79:     not_if { install_not_needed }
+Line 80: end
+Line 81: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

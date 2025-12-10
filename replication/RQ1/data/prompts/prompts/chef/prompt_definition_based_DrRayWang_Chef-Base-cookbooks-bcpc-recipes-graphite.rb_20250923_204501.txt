@@ -1,0 +1,257 @@
+# CONSTRUCTED PROMPT
+# File: DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.354012
+# Length: 11712 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Cookbook Name:: bcpc
+Line 3: # Recipe:: graphite
+Line 4: #
+Line 5: # Copyright 2013, Bloomberg Finance L.P.
+Line 6: #
+Line 7: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 8: # you may not use this file except in compliance with the License.
+Line 9: # You may obtain a copy of the License at
+Line 10: #
+Line 11: # http://www.apache.org/licenses/LICENSE-2.0
+Line 12: #
+Line 13: # Unless required by applicable law or agreed to in writing, software
+Line 14: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 15: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 16: # See the License for the specific language governing permissions and
+Line 17: # limitations under the License.
+Line 18: #
+Line 19: 
+Line 20: include_recipe "bcpc::default"
+Line 21: include_recipe "bcpc::apache2"
+Line 22: 
+Line 23: make_config('mysql-graphite-user', "graphite")
+Line 24: make_config('mysql-graphite-password', secure_password)
+Line 25: 
+Line 26: %w{python-whisper_0.9.10_all.deb python-carbon_0.9.10_all.deb python-graphite-web_0.9.10_all.deb}.each do |pkg|
+Line 27:     # split package name on the first underscore to get the package name for dpkg to look-up
+Line 28:     package "#{pkg.split('_',2)[0]}" do
+Line 29:         action :install
+Line 30:         version "0.9.10"
+Line 31:     end
+Line 32: end
+Line 33: 
+Line 34: %w{python-mysqldb python-pip python-cairo python-django python-django-tagging python-ldap python-twisted python-memcache}.each do |pkg|
+Line 35:     package pkg do
+Line 36:         action :upgrade
+Line 37:     end
+Line 38: end
+Line 39: 
+Line 40: %w{cache relay}.each do |pkg|
+Line 41:     template "/etc/init.d/carbon-#{pkg}" do
+Line 42:         source "init.d-carbon.erb"
+Line 43:         owner "root"
+Line 44:         group "root"
+Line 45:         mode 00755
+Line 46:         notifies :restart, "service[carbon-#{pkg}]", :delayed
+Line 47:         variables( :daemon => "#{pkg}" )
+Line 48:     end
+Line 49:     service "carbon-#{pkg}" do
+Line 50:         action [ :enable, :start ]
+Line 51:     end
+Line 52: end
+Line 53: 
+Line 54: # #### #
+Line 55: # Adding this to set the graphite ip
+Line 56: # #### #
+Line 57: ruby_block "graphite_ip" do
+Line 58:   block do
+Line 59:     if (node[:bcpc].attribute?(:graphite) \
+Line 60:         and node[:bcpc][:graphite].attribute?(:ip) \
+Line 61:         and node[:bcpc][:graphite][:ip]) \
+Line 62:     then
+Line 63:       Chef::Log.info("graphite ip = '#{node[:bcpc][:graphite][:ip]}'")
+Line 64:     else
+Line 65:       Chef::Log.info("node[:bcpc][:graphite][:ip] is not set")
+Line 66:       if not node[:bcpc][:management][:vip] then
+Line 67:         Chef::Application.fatal!("No graphite ip or management vip!", 1)
+Line 68:       else
+Line 69:         node.override[:bcpc][:graphite][:ip] = node[:bcpc][:management][:vip]
+Line 70:       end
+Line 71:     end
+Line 72:   end
+Line 73: end
+Line 74: 
+Line 75: mysql_servers = get_node_attributes(MGMT_IP_GRAPHITE_WEBPORT_ATTR_SRCH_KEYS,"mysql","bcpc")
+Line 76: 
+Line 77: # Directory resource sets owner and group only to the leaf directory.
+Line 78: # All other directories will be owned by root
+Line 79: directory "#{node['bcpc']['graphite']['local_data_dir']}" do
+Line 80:     owner "www-data"
+Line 81:     group "www-data"
+Line 82:     recursive true
+Line 83: end
+Line 84: 
+Line 85: template "/opt/graphite/conf/carbon.conf" do
+Line 86:     source "carbon.conf.erb"
+Line 87:     owner "root"
+Line 88:     group "root"
+Line 89:     mode 00644
+Line 90:     variables( :servers => mysql_servers,
+Line 91:                :min_quorum => mysql_servers.length/2 + 1 )
+Line 92:     notifies :restart, "service[carbon-cache]", :delayed
+Line 93:     notifies :restart, "service[carbon-relay]", :delayed
+Line 94: end
+Line 95: 
+Line 96: template "/opt/graphite/conf/storage-schemas.conf" do
+Line 97:     source "carbon-storage-schemas.conf.erb"
+Line 98:     owner "root"
+Line 99:     group "root"
+Line 100:     mode 00644
+Line 101:     notifies :restart, "service[carbon-cache]", :delayed
+Line 102: end
+Line 103: 
+Line 104: template "/opt/graphite/conf/storage-aggregation.conf" do
+Line 105:     source "carbon-storage-aggregation.conf.erb"
+Line 106:     owner "root"
+Line 107:     group "root"
+Line 108:     mode 00644
+Line 109:     notifies :restart, "service[carbon-cache]", :delayed
+Line 110: end
+Line 111: 
+Line 112: template "/opt/graphite/conf/relay-rules.conf" do
+Line 113:     source "carbon-relay-rules.conf.erb"
+Line 114:     owner "root"
+Line 115:     group "root"
+Line 116:     mode 00644
+Line 117:     variables( :servers => mysql_servers )
+Line 118:     notifies :restart, "service[carbon-relay]", :delayed
+Line 119: end
+Line 120: 
+Line 121: template "/etc/apache2/sites-available/graphite-web" do
+Line 122:     source "apache-graphite-web.conf.erb"
+Line 123:     owner "root"
+Line 124:     group "root"
+Line 125:     mode 00644
+Line 126:     notifies :restart, "service[apache2]", :delayed
+Line 127: end
+Line 128: 
+Line 129: bash "apache-enable-graphite-web" do
+Line 130:     user "root"
+Line 131:     code "a2ensite graphite-web"
+Line 132:     not_if "test -r /etc/apache2/sites-enabled/graphite-web"
+Line 133:     notifies :restart, "service[apache2]", :delayed
+Line 134: end
+Line 135: 
+Line 136: template "/opt/graphite/conf/graphite.wsgi" do
+Line 137:     source "graphite.wsgi.erb"
+Line 138:     owner "root"
+Line 139:     group "root"
+Line 140:     mode 00755
+Line 141: end
+Line 142: 
+Line 143: template "/opt/graphite/webapp/graphite/local_settings.py" do
+Line 144:     source "graphite.local_settings.py.erb"
+Line 145:     owner "root"
+Line 146:     group "root"
+Line 147:     mode 00644
+Line 148:     variables( :servers => mysql_servers )
+Line 149:     notifies :restart, "service[apache2]", :delayed
+Line 150: end
+Line 151: 
+Line 152: execute "graphite-storage-ownership" do
+Line 153:     user "root"
+Line 154:     command "chown -R www-data:www-data /opt/graphite/storage"
+Line 155:     not_if "ls -ald /opt/graphite/storage | awk '{print $3}' | grep www-data"
+Line 156: end
+Line 157: 
+Line 158: ruby_block "graphite-database-creation" do
+Line 159:     block do
+Line 160:         if not system "mysql -uroot -p#{get_config('mysql-root-password')} -e 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"#{node['bcpc']['graphite_dbname']}\"'|grep \"#{node['bcpc']['graphite_dbname']}\"" then
+Line 161:             %x[ mysql -uroot -p#{get_config('mysql-root-password')} -e "CREATE DATABASE #{node['bcpc']['graphite_dbname']};"
+Line 162:                 mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['graphite_dbname']}.* TO '#{get_config('mysql-graphite-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-graphite-password')}';"
+Line 163:                 mysql -uroot -p#{get_config('mysql-root-password')} -e "GRANT ALL ON #{node['bcpc']['graphite_dbname']}.* TO '#{get_config('mysql-graphite-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-graphite-password')}';"
+Line 164:                 mysql -uroot -p#{get_config('mysql-root-password')} -e "FLUSH PRIVILEGES;"
+Line 165:             ]
+Line 166:             self.notifies :run, "bash[graphite-database-sync]", :immediately
+Line 167:             self.resolve_notification_references
+Line 168:         end
+Line 169:     end
+Line 170: end
+Line 171: 
+Line 172: bash "graphite-database-sync" do
+Line 173:     action :nothing
+Line 174:     user "root"
+Line 175:     code <<-EOH
+Line 176:         python /opt/graphite/webapp/graphite/manage.py syncdb --noinput
+Line 177:         python /opt/graphite/webapp/graphite/manage.py createsuperuser --username=admin --email=#{node[:bcpc][:admin_email]} --noinput
+Line 178:     EOH
+Line 179:     notifies :restart, "service[apache2]", :immediately
+Line 180: end
+Line 181: 
+Line 182: bash "cleanup-old-logs" do
+Line 183:   action :run
+Line 184:   user "root"
+Line 185:   code "find #{node['bcpc']['graphite']['local_data_dir']} -name *.wsp -mtime +#{node['bcpc']['graphite']['log']['retention']} -type f -exec rm {} \\;"
+Line 186: end
+Line 187: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

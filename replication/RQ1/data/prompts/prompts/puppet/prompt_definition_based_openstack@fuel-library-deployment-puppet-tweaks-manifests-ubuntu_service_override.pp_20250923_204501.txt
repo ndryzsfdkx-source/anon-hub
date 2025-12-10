@@ -1,0 +1,148 @@
+# CONSTRUCTED PROMPT
+# File: openstack@fuel-library-deployment-puppet-tweaks-manifests-ubuntu_service_override.pp
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.392142
+# Length: 6957 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack@fuel-library-deployment-puppet-tweaks-manifests-ubuntu_service_override.pp (Puppet)**
+
+
+Line 1: # == Type: tweaks::ubuntu_service_override
+Line 2: #
+Line 3: #  Disable services from starting when the package is installed on Ubuntu OS
+Line 4: #
+Line 5: # == Parameters
+Line 6: #
+Line 7: # [*service_name*]
+Line 8: #  The name of the service that is associated with the package being installed.
+Line 9: #  Defaults to $name
+Line 10: #
+Line 11: # [*package_name*]
+Line 12: #  The name of the package that is being installed that has a service to be
+Line 13: #  prevented from being started as part of the installation process.
+Line 14: #  Defaults to $name
+Line 15: #
+Line 16: # [*mask_service*]
+Line 17: #  Boolean variable to mask service.
+Line 18: #  Defaults to false
+Line 19: #
+Line 20: define tweaks::ubuntu_service_override (
+Line 21:   $service_name = $name,
+Line 22:   $package_name = $name,
+Line 23:   $mask_service = false,
+Line 24: ) {
+Line 25:   if $::operatingsystem == 'Ubuntu' {
+Line 26:     if ! is_pkg_installed($package_name) {
+Line 27:       # https://people.debian.org/~hmh/invokerc.d-policyrc.d-specification.txt
+Line 28:       # use policy-rc.d to really ensure services don't get started on
+Line 29:       # installation as service override files are only used if a job
+Line 30:       # configuration file exists (see man 5 init)
+Line 31:       $systemd_unit = "/etc/systemd/system/${service_name}.service"
+Line 32: 
+Line 33:       if $::service_provider != 'systemd' {
+Line 34:         ensure_resource('file', $systemd_unit, {
+Line 35:           ensure  => 'absent',
+Line 36:         })
+Line 37:       } elsif $mask_service {
+Line 38:         ensure_resource('file', $systemd_unit, {
+Line 39:           ensure => 'symlink',
+Line 40:           target => '/dev/null'
+Line 41:         })
+Line 42:       }
+Line 43: 
+Line 44:       Service <| title == $service_name |> ->
+Line 45:       File <| title == $systemd_unit |>
+Line 46: 
+Line 47:       $policyrc_file = '/usr/sbin/policy-rc.d'
+Line 48:       # use ensure resource as we only want a single instance of the
+Line 49:       # policy-rc.d file in the catalog
+Line 50:       ensure_resource('file', 'create-policy-rc.d', {
+Line 51:         ensure  => present,
+Line 52:         path    => $policyrc_file,
+Line 53:         content => "#!/bin/bash\nexit 101",
+Line 54:         mode    => '0755',
+Line 55:         owner   => 'root',
+Line 56:         group   => 'root'
+Line 57:       })
+Line 58:       # use ensure resource as we only want a single remove exec in the catalog
+Line 59:       ensure_resource('exec', 'remove-policy-rc.d', {
+Line 60:         path    => [ '/sbin', '/bin', '/usr/bin', '/usr/sbin' ],
+Line 61:         command => "rm -f ${policyrc_file}",
+Line 62:         onlyif  => "test -f ${policyrc_file}",
+Line 63:       })
+Line 64: 
+Line 65:       File['create-policy-rc.d'] ->
+Line 66:         Package <| name == $package_name |> { provider =>  'apt_fuel' } ->
+Line 67:           Exec['remove-policy-rc.d']
+Line 68:       File['create-policy-rc.d'] ->
+Line 69:         Package <| title == $package_name |> { provider => 'apt_fuel' } ->
+Line 70:           Exec['remove-policy-rc.d']
+Line 71:       Exec['remove-policy-rc.d'] ->
+Line 72:         Service <| name == $service_name |>
+Line 73:       Exec['remove-policy-rc.d'] ->
+Line 74:         Service <| title == $service_name |>
+Line 75:     }
+Line 76:   }
+Line 77: }
+Line 78: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

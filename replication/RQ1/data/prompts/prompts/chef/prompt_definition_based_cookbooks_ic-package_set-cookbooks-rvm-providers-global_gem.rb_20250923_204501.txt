@@ -1,0 +1,170 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-package_set-cookbooks-rvm-providers-global_gem.rb
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.361356
+# Length: 7364 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-package_set-cookbooks-rvm-providers-global_gem.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Cookbook Name:: rvm
+Line 3: # Provider:: global_gem
+Line 4: #
+Line 5: # Author:: Fletcher Nichol <fnichol@nichol.ca>
+Line 6: #
+Line 7: # Copyright 2011, Fletcher Nichol
+Line 8: #
+Line 9: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 10: # you may not use this file except in compliance with the License.
+Line 11: # You may obtain a copy of the License at
+Line 12: #
+Line 13: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 14: #
+Line 15: # Unless required by applicable law or agreed to in writing, software
+Line 16: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 17: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 18: # See the License for the specific language governing permissions and
+Line 19: # limitations under the License.
+Line 20: #
+Line 21: 
+Line 22: action :install do
+Line 23:   # add gem entry into global.gems
+Line 24:   update_global_gems_file :create
+Line 25: 
+Line 26:   # install gem in all rubies in global gemsets
+Line 27:   installed_rubies.each do |rubie|
+Line 28:     gem_package_wrapper :install, "#{rubie}@global"
+Line 29:   end
+Line 30: end
+Line 31: 
+Line 32: action :upgrade do
+Line 33:   # add gem entry into global.gems
+Line 34:   update_global_gems_file :create
+Line 35: 
+Line 36:   # upgrade gem in all rubies in global gemsets
+Line 37:   installed_rubies.each do |rubie|
+Line 38:     gem_package_wrapper :upgrade, "#{rubie}@global"
+Line 39:   end
+Line 40: end
+Line 41: 
+Line 42: action :remove do
+Line 43:   # remove gem entry from global.gems
+Line 44:   update_global_gems_file :remove
+Line 45: 
+Line 46:   # remove gem in all rubies in global gemsets
+Line 47:   installed_rubies.each do |rubie|
+Line 48:     gem_package_wrapper :remove, "#{rubie}@global"
+Line 49:   end
+Line 50: end
+Line 51: 
+Line 52: action :purge do
+Line 53:   # remove gem entry from global.gems
+Line 54:   update_global_gems_file :remove
+Line 55: 
+Line 56:   # remove gem in all rubies in global gemsets
+Line 57:   installed_rubies.each do |rubie|
+Line 58:     gem_package_wrapper :purge, "#{rubie}@global"
+Line 59:   end
+Line 60: end
+Line 61: 
+Line 62: ##
+Line 63: # Wraps the rvm_gem resource
+Line 64: #
+Line 65: # @param [Symbol] action to be performed with gem_package provider
+Line 66: # @param [optional, String, #to_s] the fully qualifed rvm string
+Line 67: def gem_package_wrapper(exec_action, ruby_global_gemset)
+Line 68:   profile = find_profile_to_source
+Line 69: 
+Line 70:   g = rvm_gem new_resource.package_name do
+Line 71:     ruby_string ruby_global_gemset
+Line 72:     source      new_resource.source if new_resource.source
+Line 73:     options     new_resource.options if new_resource.options
+Line 74:     version     new_resource.version if new_resource.version
+Line 75:     gem_binary  new_resource.gem_binary if new_resource.gem_binary
+Line 76:     action      :nothing
+Line 77:   end
+Line 78:   g.run_action(exec_action)
+Line 79: end
+Line 80: 
+Line 81: ##
+Line 82: # Updates global.gems file to create or remove a gem entry
+Line 83: #
+Line 84: # @oaram [Symbol] action to :create or :remove the gem from the file
+Line 85: def update_global_gems_file(exec_action)
+Line 86:   global_gems_file = "#{node['rvm']['root_path']}/gemsets/global.gems"
+Line 87:   gem = new_resource.package_name
+Line 88: 
+Line 89:   if exec_action == :create
+Line 90:     e = execute "Add #{gem} to #{global_gems_file}" do
+Line 91:       user      "root"
+Line 92:       group     "rvm"
+Line 93:       command   %{echo "#{gem}" >> "#{global_gems_file}"}
+Line 94:       not_if    %{grep -q "^#{gem}" "#{global_gems_file}"}
+Line 95:       action    :nothing
+Line 96:     end
+Line 97:     e.run_action(:run)
+Line 98:   end
+Line 99: end
+Line 100: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

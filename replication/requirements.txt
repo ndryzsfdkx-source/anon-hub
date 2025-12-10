@@ -1,0 +1,15 @@
+# Shared requirements for all RQ replication packages
+# Install with: uv pip install -r requirements.txt
+
+# RQ1: No external dependencies (uses standard library only)
+
+# RQ2: Cost-effectiveness metrics
+pandas>=2.0.0
+pyarrow>=12.0.0
+pyyaml>=6.0
+
+# RQ3: Design choices ablation (add RQ3 requirements here)
+
+# Optional: For visualization (if needed)
+# matplotlib>=3.5.0
+

@@ -1,0 +1,238 @@
+# CONSTRUCTED PROMPT
+# File: openstack-ansible-tests-roles-bootstrap-host-tasks-check-requirements.yml
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.603088
+# Length: 9600 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack-ansible-tests-roles-bootstrap-host-tasks-check-requirements.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: # Copyright 2015, Rackspace US, Inc.
+Line 3: #
+Line 4: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 5: # you may not use this file except in compliance with the License.
+Line 6: # You may obtain a copy of the License at
+Line 7: #
+Line 8: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 9: #
+Line 10: # Unless required by applicable law or agreed to in writing, software
+Line 11: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 12: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 13: # See the License for the specific language governing permissions and
+Line 14: # limitations under the License.
+Line 15: 
+Line 16: - name: Check for a supported Operating System
+Line 17:   assert:
+Line 18:     that:
+Line 19:       - (ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'xenial') or
+Line 20:         (ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'bionic') or
+Line 21:         (ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7') or
+Line 22:         (ansible_os_family == 'Suse' and ansible_distribution_major_version in ['42', '15'])
+Line 23:     msg: "The only supported platforms for this release are Ubuntu 16.04 LTS (Xenial), Ubuntu 18.04 LTS (Bionic), CentOS 7 (WIP), openSUSE Leap 42.X and openSUSE Leap 15.X"
+Line 24:   when: (check_operating_system | default(True))| bool
+Line 25:   tags:
+Line 26:     - check-operating-system
+Line 27: 
+Line 28: - name: Identify the space available in /
+Line 29:   # NOTE(hwoarang): df does not work reliably on btrfs filesystems
+Line 30:   # https://btrfs.wiki.kernel.org/index.php/FAQ#How_much_free_space_do_I_have.3F
+Line 31:   # As such, use the btrfs tools to determine the real available size on the
+Line 32:   # disk
+Line 33:   shell: |
+Line 34:     if [[ $(df -T / | tail -n 1 | awk '{print $2}') == "btrfs" ]]; then
+Line 35:         btrfs fi usage --kbytes / | awk '/^.*Free / {print $3}'| sed 's/\..*//'
+Line 36:     else
+Line 37:         df -BK / | awk '!/^Filesystem/ {print $4}' | sed 's/K//'
+Line 38:     fi
+Line 39:   when:
+Line 40:     - bootstrap_host_data_disk_device == None
+Line 41:   changed_when: false
+Line 42:   register: root_space_available
+Line 43:   tags:
+Line 44:     - check-disk-size
+Line 45: 
+Line 46: # Convert root_space_available to bytes.
+Line 47: - name: Set root disk facts
+Line 48:   set_fact:
+Line 49:     host_root_space_available_bytes: "{{ ( root_space_available.stdout | int) * 1024 | int }}"
+Line 50:   when:
+Line 51:     - bootstrap_host_data_disk_device == None
+Line 52:   tags:
+Line 53:     - check-disk-size
+Line 54: 
+Line 55: - name: Fail when disk can not be found
+Line 56:   fail:
+Line 57:     msg: |
+Line 58:       Can not find disk {{ bootstrap_host_data_disk_device }}
+Line 59:   when:
+Line 60:     - bootstrap_host_data_disk_device != None
+Line 61:     - ansible_devices.get(bootstrap_host_data_disk_device) == None
+Line 62:   tags:
+Line 63:     - check-disk-size
+Line 64: 
+Line 65: - name: Set data disk facts
+Line 66:   set_fact:
+Line 67:     host_data_disk_sectors: "{{ (ansible_devices[bootstrap_host_data_disk_device]['sectors'] | int) }}"
+Line 68:     host_data_disk_sectorsize: "{{ (ansible_devices[bootstrap_host_data_disk_device]['sectorsize'] | int) }}"
+Line 69:   when:
+Line 70:     - bootstrap_host_data_disk_device != None
+Line 71:   tags:
+Line 72:     - check-disk-size
+Line 73: 
+Line 74: # Calculate the size of the bootstrap_host_data_disk_device by muliplying sectors with sectorsize.
+Line 75: - name: Calculate data disk size
+Line 76:   set_fact:
+Line 77:     host_data_disk_size_bytes: "{{ ((host_data_disk_sectors | int) * (host_data_disk_sectorsize | int)) | int }}"
+Line 78:   when:
+Line 79:     - bootstrap_host_data_disk_device != None
+Line 80:   tags:
+Line 81:     - check-disk-size
+Line 82: 
+Line 83: # Convert bootstrap_host_data_disk_min_size to bytes.
+Line 84: - name: Set min size fact
+Line 85:   set_fact:
+Line 86:     host_data_disk_min_size_bytes: "{{ ((bootstrap_host_data_disk_min_size | int) * 1024**3) | int }}"
+Line 87:   tags:
+Line 88:     - check-disk-size
+Line 89: 
+Line 90: - name: Set size facts
+Line 91:   set_fact:
+Line 92:     root_gb_available: "{{ ((host_root_space_available_bytes | int ) / 1024**3) | round(2, 'floor') }}"
+Line 93:   when: bootstrap_host_data_disk_device == None
+Line 94:   tags:
+Line 95:     - check-disk-size
+Line 96: 
+Line 97: - name: Set disk size facts
+Line 98:   set_fact:
+Line 99:     disk_gb_available: "{{ ((host_data_disk_size_bytes | int ) / 1024**3) | round(2, 'floor') }}"
+Line 100:   when: bootstrap_host_data_disk_device != None
+Line 101:   tags:
+Line 102:     - check-disk-size
+Line 103: 
+Line 104: - name: Fail if there is not enough space available in /
+Line 105:   fail:
+Line 106:     msg: |
+Line 107:       Not enough space available in /.
+Line 108:       Found {{ root_gb_available }} GB, required {{ bootstrap_host_data_disk_min_size }} GB)
+Line 109:   when:
+Line 110:     - bootstrap_host_data_disk_device == None
+Line 111:     - (host_root_space_available_bytes | int) < (host_data_disk_min_size_bytes | int)
+Line 112:   tags:
+Line 113:     - check-disk-size
+Line 114: 
+Line 115: - name: Fail if there is not enough disk space available (disk specified)
+Line 116:   fail:
+Line 117:     msg: |
+Line 118:       Not enough disk space available.
+Line 119:       Found {{ disk_gb_available }} GB, required {{ bootstrap_host_data_disk_min_size }} GB)
+Line 120:   when:
+Line 121:     - bootstrap_host_data_disk_device != None
+Line 122:     - (host_data_disk_size_bytes | int) < (host_data_disk_min_size_bytes | int)
+Line 123:   tags:
+Line 124:     - check-disk-size
+Line 125: 
+Line 126: - name: Ensure that the kernel has VXLAN, VLAN, and bonding support
+Line 127:   modprobe:
+Line 128:     name: "{{ item }}"
+Line 129:     state: present
+Line 130:   with_items:
+Line 131:     - vxlan
+Line 132:     - bonding
+Line 133:     - 8021q
+Line 134: 
+Line 135: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

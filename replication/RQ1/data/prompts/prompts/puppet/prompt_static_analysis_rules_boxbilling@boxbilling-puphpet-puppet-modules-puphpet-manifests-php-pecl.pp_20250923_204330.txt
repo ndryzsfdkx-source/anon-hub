@@ -1,0 +1,228 @@
+# CONSTRUCTED PROMPT
+# File: boxbilling@boxbilling-puphpet-puppet-modules-puphpet-manifests-php-pecl.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.633521
+# Length: 7959 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: boxbilling@boxbilling-puphpet-puppet-modules-puphpet-manifests-php-pecl.pp (Puppet)**
+
+
+Line 1: /*
+Line 2:  * This "translates" PECL package names into system-specific names.
+Line 3:  * For example, APCu does not install correctly on CentOS via PECL,
+Line 4:  * but there is a system package for it that works well. Use that
+Line 5:  * instead of the PECL package.
+Line 6:  */
+Line 7: 
+Line 8: define puphpet::php::pecl (
+Line 9:   $service_autorestart
+Line 10: ){
+Line 11: 
+Line 12:   $ignore = {
+Line 13:     'date_time' => true,
+Line 14:     'mysql'     => true,
+Line 15:   }
+Line 16: 
+Line 17:   $pecl = $::osfamily ? {
+Line 18:     'Debian' => {
+Line 19:       'mongo' => $::lsbdistcodename ? {
+Line 20:         'precise' => 'mongo',
+Line 21:         default   => false,
+Line 22:       },
+Line 23:     },
+Line 24:     'Redhat' => {
+Line 25:       #
+Line 26:     }
+Line 27:   }
+Line 28: 
+Line 29:   $pecl_beta = $::osfamily ? {
+Line 30:     'Debian' => {
+Line 31:       'augeas'      => 'augeas',
+Line 32:       'zendopcache' => $::operatingsystem ? {
+Line 33:         'debian' => false,
+Line 34:         'ubuntu' => 'ZendOpcache',
+Line 35:       },
+Line 36:     },
+Line 37:     'Redhat' => {
+Line 38:       #
+Line 39:     }
+Line 40:   }
+Line 41: 
+Line 42:   $package = $::osfamily ? {
+Line 43:     'Debian' => {
+Line 44:       'apc'         => $::operatingsystem ? {
+Line 45:         'debian' => 'php5-apc',
+Line 46:         'ubuntu' => 'php5-apcu',
+Line 47:       },
+Line 48:       'apcu'        => 'php5-apcu',
+Line 49:       'imagick'     => 'php5-imagick',
+Line 50:       'memcache'    => 'php5-memcache',
+Line 51:       'memcached'   => 'php5-memcached',
+Line 52:       'mongo'       => $::lsbdistcodename ? {
+Line 53:         'precise' => false,
+Line 54:         default   => 'php5-mongo',
+Line 55:       },
+Line 56:       'redis'       => 'php5-redis',
+Line 57:       'sqlite'      => 'php5-sqlite',
+Line 58:       'zendopcache' => 'php5-zendopcache',
+Line 59:     },
+Line 60:     'Redhat' => {
+Line 61:       'apc'         => 'php-pecl-apcu',
+Line 62:       'apcu'        => 'php-pecl-apcu',
+Line 63:       'imagick'     => 'php-pecl-imagick',
+Line 64:       'memcache'    => 'php-pecl-memcache',
+Line 65:       'memcached'   => 'php-pecl-memcached',
+Line 66:       'mongo'       => 'php-pecl-mongo',
+Line 67:       'redis'       => 'php-pecl-redis',
+Line 68:       'sqlite'      => 'php-pecl-sqlite',
+Line 69:       'zendopcache' => 'php-pecl-zendopcache',
+Line 70:     }
+Line 71:   }
+Line 72: 
+Line 73:   $auto_answer_hash = {
+Line 74:     'mongo' => 'no\n'
+Line 75:   }
+Line 76: 
+Line 77:   $downcase_name = downcase($name)
+Line 78: 
+Line 79:   if has_key($auto_answer_hash, $downcase_name) {
+Line 80:     $auto_answer = $auto_answer_hash[$downcase_name]
+Line 81:   } else {
+Line 82:     $auto_answer = '\\n'
+Line 83:   }
+Line 84: 
+Line 85:   if has_key($ignore, $downcase_name) and $ignore[$downcase_name] {
+Line 86:     $pecl_name       = $pecl[$downcase_name]
+Line 87:     $package_name    = false
+Line 88:     $preferred_state = 'stable'
+Line 89:   }
+Line 90:   elsif has_key($pecl, $downcase_name) and $pecl[$downcase_name] {
+Line 91:     $pecl_name       = $pecl[$downcase_name]
+Line 92:     $package_name    = false
+Line 93:     $preferred_state = 'stable'
+Line 94:   }
+Line 95:   elsif has_key($pecl_beta, $downcase_name) and $pecl_beta[$downcase_name] {
+Line 96:     $pecl_name       = $pecl_beta[$downcase_name]
+Line 97:     $package_name    = false
+Line 98:     $preferred_state = 'beta'
+Line 99:   }
+Line 100:   elsif has_key($package, $downcase_name) and $package[$downcase_name] {
+Line 101:     $pecl_name    = false
+Line 102:     $package_name = $package[$downcase_name]
+Line 103:   }
+Line 104:   else {
+Line 105:     $pecl_name    = $name
+Line 106:     $package_name = false
+Line 107:   }
+Line 108: 
+Line 109:   if $pecl_name and ! defined(::Php::Pecl::Module[$pecl_name]) {
+Line 110:     ::php::pecl::module { $pecl_name:
+Line 111:       use_package         => false,
+Line 112:       preferred_state     => $preferred_state,
+Line 113:       auto_answer         => $auto_answer,
+Line 114:       service_autorestart => $service_autorestart,
+Line 115:     }
+Line 116:   }
+Line 117:   elsif $package_name and ! defined(Package[$package_name]) {
+Line 118:     package { $package_name:
+Line 119:       ensure  => present,
+Line 120:       require => Class['Php::Devel'],
+Line 121:     }
+Line 122:   }
+Line 123: 
+Line 124: }
+Line 125: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

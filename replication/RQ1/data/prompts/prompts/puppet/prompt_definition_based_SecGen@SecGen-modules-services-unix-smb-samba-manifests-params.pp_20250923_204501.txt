@@ -1,0 +1,189 @@
+# CONSTRUCTED PROMPT
+# File: SecGen@SecGen-modules-services-unix-smb-samba-manifests-params.pp
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.375634
+# Length: 7402 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: SecGen@SecGen-modules-services-unix-smb-samba-manifests-params.pp (Puppet)**
+
+
+Line 1: # Class: samba::params
+Line 2: #
+Line 3: # This class defines default parameters used by the main module class samba
+Line 4: # Operating Systems differences in names and paths are addressed here
+Line 5: #
+Line 6: # == Variables
+Line 7: #
+Line 8: # Refer to samba class for the variables defined here.
+Line 9: #
+Line 10: # == Usage
+Line 11: #
+Line 12: # This class is not intended to be used directly.
+Line 13: # It may be imported or inherited by other classes
+Line 14: #
+Line 15: class samba::params {
+Line 16: 
+Line 17:   ### Application related parameters
+Line 18: 
+Line 19:   $package = $::operatingsystem ? {
+Line 20:     default => 'samba',
+Line 21:   }
+Line 22: 
+Line 23:   $service = $::operatingsystem ? {
+Line 24:     /(?i:Centos|RedHat|Scientific|Fedora|Amazon|Linux)/ => 'smb',
+Line 25:     /(?i:SLES|OpenSuSE)/                                => 'smb',
+Line 26:     /(?i:Ubuntu|Mint)/                                  => 'smbd',
+Line 27:     /(?i:Debian)/                                       => 'samba',
+Line 28:     default                                             => 'smb',
+Line 29:   }
+Line 30: 
+Line 31:   $service_status = $::operatingsystem ? {
+Line 32:     default => true,
+Line 33:   }
+Line 34: 
+Line 35:   $process = $::operatingsystem ? {
+Line 36:     default => 'smbd',
+Line 37:   }
+Line 38: 
+Line 39:   $process_args = $::operatingsystem ? {
+Line 40:     default => '',
+Line 41:   }
+Line 42: 
+Line 43:   $process_user = $::operatingsystem ? {
+Line 44:     default => 'root',
+Line 45:   }
+Line 46: 
+Line 47:   $config_dir = $::operatingsystem ? {
+Line 48:     default => '/etc/samba',
+Line 49:   }
+Line 50: 
+Line 51:   $config_file = $::operatingsystem ? {
+Line 52:     default => '/etc/samba/smb.conf',
+Line 53:   }
+Line 54: 
+Line 55:   $config_file_mode = $::operatingsystem ? {
+Line 56:     default => '0644',
+Line 57:   }
+Line 58: 
+Line 59:   $config_file_owner = $::operatingsystem ? {
+Line 60:     default => 'root',
+Line 61:   }
+Line 62: 
+Line 63:   $config_file_group = $::operatingsystem ? {
+Line 64:     default => 'root',
+Line 65:   }
+Line 66: 
+Line 67:   $config_file_init = $::operatingsystem ? {
+Line 68:     /(?i:Debian|Ubuntu|Mint)/ => '/etc/default/samba',
+Line 69:     default                   => '/etc/sysconfig/samba',
+Line 70:   }
+Line 71: 
+Line 72:   $pid_file = $::operatingsystem ? {
+Line 73:     /(?i:Debian|Ubuntu|Mint)/ => '/var/run/samba/smbd.pid',
+Line 74:     default                   => '/var/run/smbd.pid',
+Line 75:   }
+Line 76: 
+Line 77:   $data_dir = $::operatingsystem ? {
+Line 78:     default => '/etc/samba',
+Line 79:   }
+Line 80: 
+Line 81:   $log_dir = $::operatingsystem ? {
+Line 82:     default => '/var/log/samba',
+Line 83:   }
+Line 84: 
+Line 85:   $log_file = $::operatingsystem ? {
+Line 86:     default => [ '/var/log/samba/log.smbd','/var/log/samba/log.nmbd' ],
+Line 87:   }
+Line 88: 
+Line 89:   $port = '445'
+Line 90:   $protocol = 'tcp'
+Line 91: 
+Line 92:   # General Settings
+Line 93:   $my_class = ''
+Line 94:   $source = ''
+Line 95:   $source_dir = ''
+Line 96:   $source_dir_purge = false
+Line 97:   $template = ''
+Line 98:   $options = ''
+Line 99:   $service_autorestart = true
+Line 100:   $version = 'present'
+Line 101:   $absent = false
+Line 102:   $disable = false
+Line 103:   $disableboot = false
+Line 104: 
+Line 105:   ### General module variables that can have a site or per module default
+Line 106:   $monitor = false
+Line 107:   $monitor_tool = ''
+Line 108:   $monitor_target = $::ipaddress
+Line 109:   $firewall = false
+Line 110:   $firewall_tool = ''
+Line 111:   $firewall_src = '0.0.0.0/0'
+Line 112:   $firewall_dst = $::ipaddress
+Line 113:   $puppi = false
+Line 114:   $puppi_helper = 'standard'
+Line 115:   $debug = false
+Line 116:   $audit_only = false
+Line 117: 
+Line 118: }
+Line 119: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

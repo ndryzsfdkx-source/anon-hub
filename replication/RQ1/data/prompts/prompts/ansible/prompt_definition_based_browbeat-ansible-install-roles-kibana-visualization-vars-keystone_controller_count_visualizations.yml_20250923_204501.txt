@@ -1,0 +1,367 @@
+# CONSTRUCTED PROMPT
+# File: browbeat-ansible-install-roles-kibana-visualization-vars-keystone_controller_count_visualizations.yml
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.339146
+# Length: 26328 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: browbeat-ansible-install-roles-kibana-visualization-vars-keystone_controller_count_visualizations.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: #
+Line 3: # Keystone Controller Count Comparsion - Visualizations Variables
+Line 4: #
+Line 5: 
+Line 6: keystone_controller_count_visualizations:
+Line 7:   - title: "BrowbeatAuthenticateKeystoneConcurrencyControllerCountCompare-md"
+Line 8:     template: "markdown.json.j2"
+Line 9:     markdown: "# Controller Count Comparsion\\\\n[Browbeat](https://github.com/openstack/browbeat)\\\\n\\\\n[Rally Authenticate.keystone](https://github.com/openstack/rally/blob/master/rally/plugins/openstack/scenarios/authenticate/authenticate.py#L29)"
+Line 10:   # Authenticate.keystone Controller Count Comparsion Visualizations: [Min, 50th, 95th, 99th, Max]
+Line 11:   - title: "BrowbeatAuthenticateKeystoneConcurrencyControllerCountCompareResultCount-bg"
+Line 12:     template: "min_max_count-concurency-bg.json.j2"
+Line 13:     metric_type: "count"
+Line 14:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 15:     query: "_type: result AND rally_setup.name: Authenticate.keystone "
+Line 16:   - title: "BrowbeatAuthenticateKeystoneConcurrencyControllerCountCompareErrorCount-bg"
+Line 17:     template: "min_max_count-concurency-bg.json.j2"
+Line 18:     metric_type: "count"
+Line 19:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 20:     query: "_type: error AND rally_setup.name: Authenticate.keystone "
+Line 21: 
+Line 22:   - title: "BrowbeatAuthenticateKeystoneConcurrencyControllerCountCompareMin-bg"
+Line 23:     template: "min_max_count-concurency-bg.json.j2"
+Line 24:     metric_type: "min"
+Line 25:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 26:     query: "_type: result AND rally_setup.name: Authenticate.keystone "
+Line 27:   - title: "BrowbeatAuthenticateKeystoneConcurrencyControllerCountCompare50th-bg"
+Line 28:     template: "percentiles-concurrency-bg.json.j2"
+Line 29:     percents: "[50]"
+Line 30:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 31:     query: "_type: result AND rally_setup.name: Authenticate.keystone "
+Line 32:   - title: "BrowbeatAuthenticateKeystoneConcurrencyControllerCountCompare95th-bg"
+Line 33:     template: "percentiles-concurrency-bg.json.j2"
+Line 34:     percents: "[95]"
+Line 35:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 36: 
+Line 37:     query: "_type: result AND rally_setup.name: Authenticate.keystone "
+Line 38:   - title: "BrowbeatAuthenticateKeystoneConcurrencyControllerCountCompare99th-bg"
+Line 39:     template: "percentiles-concurrency-bg.json.j2"
+Line 40:     percents: "[99]"
+Line 41:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 42:     query: "_type: result AND rally_setup.name: Authenticate.keystone "
+Line 43:   - title: "BrowbeatAuthenticateKeystoneConcurrencyControllerCountCompareMax-bg"
+Line 44:     template: "min_max_count-concurency-bg.json.j2"
+Line 45:     metric_type: "max"
+Line 46:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 47:     query: "_type: result AND rally_setup.name: Authenticate.keystone "
+Line 48: 
+Line 49:   - title: "BrowbeatAuthenticateValidateCinderConcurrencyControllerCountCompare-md"
+Line 50:     template: "markdown.json.j2"
+Line 51:     markdown: "# Controller Count Comparsion\\\\n[Browbeat](https://github.com/openstack/browbeat)\\\\n\\\\n[Rally Authenticate.validate_cinder](https://github.com/openstack/rally/blob/master/rally/plugins/openstack/scenarios/authenticate/authenticate.py#L104)"
+Line 52:   # Authenticate.validate_cinder Controller Count Comparsion Visualizations: [Min, 50th, 95th, 99th, Max]
+Line 53:   - title: "BrowbeatAuthenticateValidateCinderConcurrencyControllerCountCompareResultCount-bg"
+Line 54:     template: "min_max_count-concurency-bg.json.j2"
+Line 55:     metric_type: "count"
+Line 56:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 57:     query: "_type: result AND rally_setup.name: Authenticate.validate_cinder "
+Line 58:   - title: "BrowbeatAuthenticateValidateCinderConcurrencyControllerCountCompareErrorCount-bg"
+Line 59:     template: "min_max_count-concurency-bg.json.j2"
+Line 60:     metric_type: "count"
+Line 61:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 62:     query: "_type: error AND rally_setup.name: Authenticate.validate_cinder "
+Line 63: 
+Line 64:   - title: "BrowbeatAuthenticateValidateCinderConcurrencyControllerCountCompareMin-bg"
+Line 65:     template: "min_max_count-concurency-bg.json.j2"
+Line 66:     metric_type: "min"
+Line 67:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 68:     query: "_type: result AND rally_setup.name: Authenticate.validate_cinder "
+Line 69:   - title: "BrowbeatAuthenticateValidateCinderConcurrencyControllerCountCompare50th-bg"
+Line 70:     template: "percentiles-concurrency-bg.json.j2"
+Line 71:     percents: "[50]"
+Line 72:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 73:     query: "_type: result AND rally_setup.name: Authenticate.validate_cinder "
+Line 74:   - title: "BrowbeatAuthenticateValidateCinderConcurrencyControllerCountCompare95th-bg"
+Line 75:     template: "percentiles-concurrency-bg.json.j2"
+Line 76:     percents: "[95]"
+Line 77:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 78:     query: "_type: result AND rally_setup.name: Authenticate.validate_cinder "
+Line 79:   - title: "BrowbeatAuthenticateValidateCinderConcurrencyControllerCountCompare99th-bg"
+Line 80:     template: "percentiles-concurrency-bg.json.j2"
+Line 81:     percents: "[99]"
+Line 82:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 83:     query: "_type: result AND rally_setup.name: Authenticate.validate_cinder "
+Line 84:   - title: "BrowbeatAuthenticateValidateCinderConcurrencyControllerCountCompareMax-bg"
+Line 85:     template: "min_max_count-concurency-bg.json.j2"
+Line 86:     metric_type: "max"
+Line 87:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 88:     query: "_type: result AND rally_setup.name: Authenticate.validate_cinder "
+Line 89: 
+Line 90: 
+Line 91:   - title: "BrowbeatAuthenticateValidateGlanceConcurrencyControllerCountCompare-md"
+Line 92:     template: "markdown.json.j2"
+Line 93:     markdown: "# Controller Count Comparsion\\\\n[Browbeat](https://github.com/openstack/browbeat)\\\\n\\\\n[Rally Authenticate.validate_glance](https://github.com/openstack/rally/blob/master/rally/plugins/openstack/scenarios/authenticate/authenticate.py#L39)"
+Line 94:   # Authenticate.validate_glance Controller Count Comparsion Visualizations: [Min, 50th, 95th, 99th, Max]
+Line 95:   - title: "BrowbeatAuthenticateValidateGlanceConcurrencyControllerCountCompareResultCount-bg"
+Line 96:     template: "min_max_count-concurency-bg.json.j2"
+Line 97:     metric_type: "count"
+Line 98:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 99:     query: "_type: result AND rally_setup.name: Authenticate.validate_glance "
+Line 100:   - title: "BrowbeatAuthenticateValidateGlanceConcurrencyControllerCountCompareErrorCount-bg"
+Line 101:     template: "min_max_count-concurency-bg.json.j2"
+Line 102:     metric_type: "count"
+Line 103:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 104:     query: "_type: error AND rally_setup.name: Authenticate.validate_glance "
+Line 105: 
+Line 106:   - title: "BrowbeatAuthenticateValidateGlanceConcurrencyControllerCountCompareMin-bg"
+Line 107:     template: "min_max_count-concurency-bg.json.j2"
+Line 108:     metric_type: "min"
+Line 109:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 110:     query: "_type: result AND rally_setup.name: Authenticate.validate_glance "
+Line 111:   - title: "BrowbeatAuthenticateValidateGlanceConcurrencyControllerCountCompare50th-bg"
+Line 112:     template: "percentiles-concurrency-bg.json.j2"
+Line 113:     percents: "[50]"
+Line 114:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 115:     query: "_type: result AND rally_setup.name: Authenticate.validate_glance "
+Line 116:   - title: "BrowbeatAuthenticateValidateGlanceConcurrencyControllerCountCompare95th-bg"
+Line 117:     template: "percentiles-concurrency-bg.json.j2"
+Line 118:     percents: "[95]"
+Line 119:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 120:     query: "_type: result AND rally_setup.name: Authenticate.validate_glance "
+Line 121:   - title: "BrowbeatAuthenticateValidateGlanceConcurrencyControllerCountCompare99th-bg"
+Line 122:     template: "percentiles-concurrency-bg.json.j2"
+Line 123:     percents: "[99]"
+Line 124:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 125: 
+Line 126:     query: "_type: result AND rally_setup.name: Authenticate.validate_glance "
+Line 127:   - title: "BrowbeatAuthenticateValidateGlanceConcurrencyControllerCountCompareMax-bg"
+Line 128:     template: "min_max_count-concurency-bg.json.j2"
+Line 129:     metric_type: "max"
+Line 130:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 131:     query: "_type: result AND rally_setup.name: Authenticate.validate_glance "
+Line 132: 
+Line 133:   - title: "BrowbeatAuthenticateValidateHeatConcurrencyControllerCountCompare-md"
+Line 134:     template: "markdown.json.j2"
+Line 135:     markdown: "# Controller Count Comparsion\\\\n[Browbeat](https://github.com/openstack/browbeat)\\\\n\\\\n[Rally Authenticate.validate_heat](https://github.com/openstack/rally/blob/master/rally/plugins/openstack/scenarios/authenticate/authenticate.py#L146)"
+Line 136:   # Authenticate.validate_heat Controller Count Comparsion Visualizations: [Min, 50th, 95th, 99th, Max]
+Line 137:   - title: "BrowbeatAuthenticateValidateHeatConcurrencyControllerCountCompareResultCount-bg"
+Line 138:     template: "min_max_count-concurency-bg.json.j2"
+Line 139:     metric_type: "count"
+Line 140:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 141:     query: "_type: result AND rally_setup.name: Authenticate.validate_heat "
+Line 142:   - title: "BrowbeatAuthenticateValidateHeatConcurrencyControllerCountCompareErrorCount-bg"
+Line 143:     template: "min_max_count-concurency-bg.json.j2"
+Line 144:     metric_type: "count"
+Line 145:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 146:     query: "_type: error AND rally_setup.name: Authenticate.validate_heat "
+Line 147: 
+Line 148:   - title: "BrowbeatAuthenticateValidateHeatConcurrencyControllerCountCompareMin-bg"
+Line 149:     template: "min_max_count-concurency-bg.json.j2"
+Line 150:     metric_type: "min"
+Line 151:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 152:     query: "_type: result AND rally_setup.name: Authenticate.validate_heat "
+Line 153:   - title: "BrowbeatAuthenticateValidateHeatConcurrencyControllerCountCompare50th-bg"
+Line 154:     template: "percentiles-concurrency-bg.json.j2"
+Line 155:     percents: "[50]"
+Line 156:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 157:     query: "_type: result AND rally_setup.name: Authenticate.validate_heat "
+Line 158:   - title: "BrowbeatAuthenticateValidateHeatConcurrencyControllerCountCompare95th-bg"
+Line 159:     template: "percentiles-concurrency-bg.json.j2"
+Line 160:     percents: "[95]"
+Line 161:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 162:     query: "_type: result AND rally_setup.name: Authenticate.validate_heat "
+Line 163:   - title: "BrowbeatAuthenticateValidateHeatConcurrencyControllerCountCompare99th-bg"
+Line 164:     template: "percentiles-concurrency-bg.json.j2"
+Line 165:     percents: "[99]"
+Line 166:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 167:     query: "_type: result AND rally_setup.name: Authenticate.validate_heat "
+Line 168:   - title: "BrowbeatAuthenticateValidateHeatConcurrencyControllerCountCompareMax-bg"
+Line 169:     template: "min_max_count-concurency-bg.json.j2"
+Line 170:     metric_type: "max"
+Line 171:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 172:     query: "_type: result AND rally_setup.name: Authenticate.validate_heat "
+Line 173: 
+Line 174:   - title: "BrowbeatAuthenticateValidateNeutronConcurrencyControllerCountCompare-md"
+Line 175:     template: "markdown.json.j2"
+Line 176:     markdown: "# Controller Count Comparsion\\\\n[Browbeat](https://github.com/openstack/browbeat)\\\\n\\\\n[Rally Authenticate.validate_neutron](https://github.com/openstack/rally/blob/master/rally/plugins/openstack/scenarios/authenticate/authenticate.py#L125)"
+Line 177:   # Authenticate.validate_neutron Controller Count Comparsion Visualizations: [Min, 50th, 95th, 99th, Max]
+Line 178:   - title: "BrowbeatAuthenticateValidateNeutronConcurrencyControllerCountCompareResultCount-bg"
+Line 179:     template: "min_max_count-concurency-bg.json.j2"
+Line 180:     metric_type: "count"
+Line 181:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 182:     query: "_type: result AND rally_setup.name: Authenticate.validate_neutron "
+Line 183:   - title: "BrowbeatAuthenticateValidateNeutronConcurrencyControllerCountCompareErrorCount-bg"
+Line 184:     template: "min_max_count-concurency-bg.json.j2"
+Line 185:     metric_type: "count"
+Line 186:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 187:     query: "_type: error AND rally_setup.name: Authenticate.validate_neutron "
+Line 188: 
+Line 189:   - title: "BrowbeatAuthenticateValidateNeutronConcurrencyControllerCountCompareMin-bg"
+Line 190:     template: "min_max_count-concurency-bg.json.j2"
+Line 191:     metric_type: "min"
+Line 192:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 193:     query: "_type: result AND rally_setup.name: Authenticate.validate_neutron "
+Line 194:   - title: "BrowbeatAuthenticateValidateNeutronConcurrencyControllerCountCompare50th-bg"
+Line 195:     template: "percentiles-concurrency-bg.json.j2"
+Line 196:     percents: "[50]"
+Line 197:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 198:     query: "_type: result AND rally_setup.name: Authenticate.validate_neutron "
+Line 199:   - title: "BrowbeatAuthenticateValidateNeutronConcurrencyControllerCountCompare95th-bg"
+Line 200:     template: "percentiles-concurrency-bg.json.j2"
+Line 201:     percents: "[95]"
+Line 202:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 203:     query: "_type: result AND rally_setup.name: Authenticate.validate_neutron "
+Line 204:   - title: "BrowbeatAuthenticateValidateNeutronConcurrencyControllerCountCompare99th-bg"
+Line 205:     template: "percentiles-concurrency-bg.json.j2"
+Line 206:     percents: "[99]"
+Line 207:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 208:     query: "_type: result AND rally_setup.name: Authenticate.validate_neutron "
+Line 209:   - title: "BrowbeatAuthenticateValidateNeutronConcurrencyControllerCountCompareMax-bg"
+Line 210:     template: "min_max_count-concurency-bg.json.j2"
+Line 211:     metric_type: "max"
+Line 212:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 213:     query: "_type: result AND rally_setup.name: Authenticate.validate_neutron "
+Line 214: 
+Line 215:   - title: "BrowbeatAuthenticateValidateNovaConcurrencyControllerCountCompare-md"
+Line 216:     template: "markdown.json.j2"
+Line 217:     markdown: "# Controller Count Comparsion\\\\n[Browbeat](https://github.com/openstack/browbeat)\\\\n\\\\n[Rally Authenticate.validate_nova](https://github.com/openstack/rally/blob/master/rally/plugins/openstack/scenarios/authenticate/authenticate.py#L62)"
+Line 218:   # Authenticate.validate_nova Controller Count Comparsion Visualizations: [Min, 50th, 95th, 99th, Max]
+Line 219:   - title: "BrowbeatAuthenticateValidateNovaConcurrencyControllerCountCompareResultCount-bg"
+Line 220:     template: "min_max_count-concurency-bg.json.j2"
+Line 221:     metric_type: "count"
+Line 222:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 223:     query: "_type: result AND rally_setup.name: Authenticate.validate_nova "
+Line 224:   - title: "BrowbeatAuthenticateValidateNovaConcurrencyControllerCountCompareErrorCount-bg"
+Line 225:     template: "min_max_count-concurency-bg.json.j2"
+Line 226:     metric_type: "count"
+Line 227:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 228:     query: "_type: error AND rally_setup.name: Authenticate.validate_nova "
+Line 229: 
+Line 230:   - title: "BrowbeatAuthenticateValidateNovaConcurrencyControllerCountCompareMin-bg"
+Line 231:     template: "min_max_count-concurency-bg.json.j2"
+Line 232:     metric_type: "min"
+Line 233:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 234:     query: "_type: result AND rally_setup.name: Authenticate.validate_nova "
+Line 235:   - title: "BrowbeatAuthenticateValidateNovaConcurrencyControllerCountCompare50th-bg"
+Line 236:     template: "percentiles-concurrency-bg.json.j2"
+Line 237:     percents: "[50]"
+Line 238:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 239:     query: "_type: result AND rally_setup.name: Authenticate.validate_nova "
+Line 240:   - title: "BrowbeatAuthenticateValidateNovaConcurrencyControllerCountCompare95th-bg"
+Line 241:     template: "percentiles-concurrency-bg.json.j2"
+Line 242:     percents: "[95]"
+Line 243:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 244:     query: "_type: result AND rally_setup.name: Authenticate.validate_nova "
+Line 245:   - title: "BrowbeatAuthenticateValidateNovaConcurrencyControllerCountCompare99th-bg"
+Line 246:     template: "percentiles-concurrency-bg.json.j2"
+Line 247:     percents: "[99]"
+Line 248:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 249:     query: "_type: result AND rally_setup.name: Authenticate.validate_nova "
+Line 250:   - title: "BrowbeatAuthenticateValidateNovaConcurrencyControllerCountCompareMax-bg"
+Line 251:     template: "min_max_count-concurency-bg.json.j2"
+Line 252:     metric_type: "max"
+Line 253:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 254:     query: "_type: result AND rally_setup.name: Authenticate.validate_nova "
+Line 255: 
+Line 256:   - title: "BrowbeatKeystoneBasicAuthenticateUserAndValidateTokenConcurrencyControllerCountCompare-md"
+Line 257:     template: "markdown.json.j2"
+Line 258:     markdown: "# Controller Count Comparsion\\\\n[Browbeat](https://github.com/openstack/browbeat)\\\\n\\\\n[Rally KeystoneBasic.authenticate_user_and_validate_token](https://github.com/openstack/rally/blob/master/rally/plugins/openstack/scenarios/keystone/basic.py#L102)"
+Line 259:   # KeystoneBasic.authenticate_user_and_validate_token Controller Count Comparsion Visualizations: [Min, 50th, 95th, 99th, Max]
+Line 260:   - title: "BrowbeatKeystoneBasicAuthenticateUserAndValidateTokenConcurrencyControllerCountCompareResultCount-bg"
+Line 261:     template: "min_max_count-concurency-bg.json.j2"
+Line 262:     metric_type: "count"
+Line 263:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 264:     query: "_type: result AND rally_setup.name: KeystoneBasic.authenticate_user_and_validate_token "
+Line 265:   - title: "BrowbeatKeystoneBasicAuthenticateUserAndValidateTokenConcurrencyControllerCountCompareErrorCount-bg"
+Line 266:     template: "min_max_count-concurency-bg.json.j2"
+Line 267:     metric_type: "count"
+Line 268:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 269:     query: "_type: error AND rally_setup.name: KeystoneBasic.authenticate_user_and_validate_token "
+Line 270: 
+Line 271:   - title: "BrowbeatKeystoneBasicAuthenticateUserAndValidateTokenConcurrencyControllerCountCompareMin-bg"
+Line 272:     template: "min_max_count-concurency-bg.json.j2"
+Line 273:     metric_type: "min"
+Line 274:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 275:     query: "_type: result AND rally_setup.name: KeystoneBasic.authenticate_user_and_validate_token "
+Line 276:   - title: "BrowbeatKeystoneBasicAuthenticateUserAndValidateTokenConcurrencyControllerCountCompare50th-bg"
+Line 277:     template: "percentiles-concurrency-bg.json.j2"
+Line 278:     percents: "[50]"
+Line 279:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 280:     query: "_type: result AND rally_setup.name: KeystoneBasic.authenticate_user_and_validate_token "
+Line 281:   - title: "BrowbeatKeystoneBasicAuthenticateUserAndValidateTokenConcurrencyControllerCountCompare95th-bg"
+Line 282:     template: "percentiles-concurrency-bg.json.j2"
+Line 283:     percents: "[95]"
+Line 284:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 285:     query: "_type: result AND rally_setup.name: KeystoneBasic.authenticate_user_and_validate_token "
+Line 286:   - title: "BrowbeatKeystoneBasicAuthenticateUserAndValidateTokenConcurrencyControllerCountCompare99th-bg"
+Line 287:     template: "percentiles-concurrency-bg.json.j2"
+Line 288:     percents: "[99]"
+Line 289:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 290:     query: "_type: result AND rally_setup.name: KeystoneBasic.authenticate_user_and_validate_token "
+Line 291:   - title: "BrowbeatKeystoneBasicAuthenticateUserAndValidateTokenConcurrencyControllerCountCompareMax-bg"
+Line 292:     template: "min_max_count-concurency-bg.json.j2"
+Line 293:     metric_type: "max"
+Line 294:     split_bars_field: "environment-metadata.environment_setup.osp_controllers_number"
+Line 295:     query: "_type: result AND rally_setup.name: KeystoneBasic.authenticate_user_and_validate_token "
+Line 296: 
+Line 297: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

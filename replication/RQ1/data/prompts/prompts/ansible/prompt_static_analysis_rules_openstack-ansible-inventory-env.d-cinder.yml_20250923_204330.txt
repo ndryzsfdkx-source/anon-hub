@@ -1,0 +1,171 @@
+# CONSTRUCTED PROMPT
+# File: openstack-ansible-inventory-env.d-cinder.yml
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.595363
+# Length: 5952 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack-ansible-inventory-env.d-cinder.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: # Copyright 2014, Rackspace US, Inc.
+Line 3: #
+Line 4: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 5: # you may not use this file except in compliance with the License.
+Line 6: # You may obtain a copy of the License at
+Line 7: #
+Line 8: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 9: #
+Line 10: # Unless required by applicable law or agreed to in writing, software
+Line 11: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 12: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 13: # See the License for the specific language governing permissions and
+Line 14: # limitations under the License.
+Line 15: 
+Line 16: component_skel:
+Line 17:   cinder_api:
+Line 18:     belongs_to:
+Line 19:       - cinder_all
+Line 20:   cinder_scheduler:
+Line 21:     belongs_to:
+Line 22:       - cinder_all
+Line 23:   cinder_volume:
+Line 24:     belongs_to:
+Line 25:       - cinder_all
+Line 26:   cinder_backup:
+Line 27:     belongs_to:
+Line 28:       - cinder_all
+Line 29: 
+Line 30: 
+Line 31: container_skel:
+Line 32:   cinder_api_container:
+Line 33:     belongs_to:
+Line 34:       - storage-infra_containers
+Line 35:     contains:
+Line 36:       - cinder_api
+Line 37:       - cinder_scheduler
+Line 38:   cinder_volumes_container:
+Line 39:     belongs_to:
+Line 40:       - storage_containers
+Line 41:     contains:
+Line 42:       - cinder_volume
+Line 43:       - cinder_backup
+Line 44:     properties:
+Line 45: # When using LVM or any iSCSI based (see LP#1226855) cinder backends, such as
+Line 46: # NetApp with iSCSI protocol, it is advised to run cinder-volumes on metal.
+Line 47: # If you are using a different backend you may want to remove "is_metal: true".
+Line 48: # Otherwise if cinder-volumes is already running in containers you may want to
+Line 49: # leave is_metal off, alternatively you will have to migrate your volumes once
+Line 50: # deployed on metal.
+Line 51:       is_metal: true
+Line 52: 
+Line 53: 
+Line 54: physical_skel:
+Line 55:   storage-infra_containers:
+Line 56:     belongs_to:
+Line 57:       - all_containers
+Line 58:   storage-infra_hosts:
+Line 59:     belongs_to:
+Line 60:       - hosts
+Line 61:   storage_containers:
+Line 62:     belongs_to:
+Line 63:       - all_containers
+Line 64:   storage_hosts:
+Line 65:     belongs_to:
+Line 66:       - hosts
+Line 67: 
+Line 68: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

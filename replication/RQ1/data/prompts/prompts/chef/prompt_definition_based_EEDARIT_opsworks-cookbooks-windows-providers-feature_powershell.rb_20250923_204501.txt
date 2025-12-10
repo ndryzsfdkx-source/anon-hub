@@ -1,0 +1,109 @@
+# CONSTRUCTED PROMPT
+# File: EEDARIT_opsworks-cookbooks-windows-providers-feature_powershell.rb
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.354850
+# Length: 4998 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: EEDARIT_opsworks-cookbooks-windows-providers-feature_powershell.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Author:: Greg Zapp (<greg.zapp@gmail.com>)
+Line 3: # Cookbook Name:: windows
+Line 4: # Provider:: feature_powershell
+Line 5: #
+Line 6: 
+Line 7: include Chef::Provider::WindowsFeature::Base
+Line 8: include Chef::Mixin::PowershellOut
+Line 9: include Windows::Helper
+Line 10: 
+Line 11: def install_feature(name)
+Line 12:   cmd = powershell_out("Install-WindowsFeature #{@new_resource.feature_name}")
+Line 13:   Chef::Log.info(cmd.stdout)
+Line 14: end
+Line 15: 
+Line 16: def remove_feature(name)
+Line 17:   cmd = powershell_out("Uninstall-WindowsFeature #{@new_resource.feature_name}")
+Line 18:   Chef::Log.info(cmd.stdout)
+Line 19: end
+Line 20: 
+Line 21: def delete_feature(name)
+Line 22:   cmd = powershell_out("Uninstall-WindowsFeature #{@new_resource.feature_name} -Remove")
+Line 23:   Chef::Log.info(cmd.stdout)
+Line 24: end
+Line 25: 
+Line 26: def installed?
+Line 27:   @installed ||= begin
+Line 28:     cmd = powershell_out("Get-WindowsFeature #{@new_resource.feature_name} | Select Installed | % { Write-Host $_.Installed }")
+Line 29:     cmd.stderr.empty? &&  cmd.stdout =~ /True/i
+Line 30:   end
+Line 31: end
+Line 32: 
+Line 33: def available?
+Line 34:   @available ||= begin
+Line 35:     cmd = powershell_out("Get-WindowsFeature #{@new_resource.feature_name}")
+Line 36:     cmd.stderr.empty? && cmd.stdout !~ /Removed/i
+Line 37:   end
+Line 38: end
+Line 39: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

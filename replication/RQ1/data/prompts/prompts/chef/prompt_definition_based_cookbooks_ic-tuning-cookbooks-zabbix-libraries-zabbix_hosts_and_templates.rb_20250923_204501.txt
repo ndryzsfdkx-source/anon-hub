@@ -1,0 +1,113 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-tuning-cookbooks-zabbix-libraries-zabbix_hosts_and_templates.rb
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.362268
+# Length: 5428 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-tuning-cookbooks-zabbix-libraries-zabbix_hosts_and_templates.rb (Unknown)**
+
+
+Line 1: class Chef
+Line 2: 
+Line 3:   class Recipe
+Line 4: 
+Line 5:     def node_zabbix_host_groups(the_node=nil)
+Line 6:       the_node ||= node
+Line 7:       Set.new.tap do |hgs|
+Line 8:         hgs << the_node[:cluster_name] if the_node[:cluster_name]
+Line 9:         hgs << "#{the_node[:cluster_name]}-#{the_node[:facet_name]}" if the_node[:cluster_name] && the_node[:facet_name]
+Line 10:         if the_node[:zabbix] && the_node[:zabbix][:host_groups]
+Line 11:           case
+Line 12:           when the_node[:zabbix][:host_groups].respond_to?(:each_pair)
+Line 13:             the_node[:zabbix][:host_groups].each_pair do |service, groups|
+Line 14:               groups.each { |g| hgs << g }
+Line 15:             end
+Line 16:           # Supports deprecated usage
+Line 17:           when the_node[:zabbix][:host_groups].respond_to?(:each)
+Line 18:             the_node[:zabbix][:host_groups].each { |g| hgs << g }
+Line 19:           end
+Line 20:         end
+Line 21:       end.to_a
+Line 22:     end
+Line 23: 
+Line 24:     def node_zabbix_templates(the_node=nil)
+Line 25:       the_node ||= node
+Line 26:       Set.new.tap do |ts|
+Line 27:         if the_node[:zabbix] && the_node[:zabbix][:templates]
+Line 28:           case
+Line 29:           when the_node[:zabbix][:templates].respond_to?(:each_pair)
+Line 30:             the_node[:zabbix][:templates].each_pair do |service, templates|
+Line 31:               (templates ||{}).each{ |t| ts << t }
+Line 32:             end
+Line 33:           # Supports deprecated usage
+Line 34:           when the_node[:zabbix][:templates].respond_to?(:each)
+Line 35:             the_node[:zabbix][:templates].each { |t| ts << t }
+Line 36:           end
+Line 37:         end
+Line 38:       end.to_a
+Line 39:     end
+Line 40: 
+Line 41:   end
+Line 42: end
+Line 43: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

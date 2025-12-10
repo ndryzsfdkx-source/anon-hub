@@ -1,0 +1,8 @@
+{
+  "source": "llm",
+  "method_key": "openrouter::openai/gpt-5::static_analysis_rules",
+  "display_name": "gpt-5-static-analysis-rules",
+  "provider": "openrouter",
+  "model": "openai/gpt-5",
+  "style": "static_analysis_rules"
+}

@@ -1,0 +1,195 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-nodejs-cookbooks-hbase-recipes-config_files.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.615641
+# Length: 7557 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-nodejs-cookbooks-hbase-recipes-config_files.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Cookbook Name::       hbase
+Line 3: # Description::         Finalizes the config, writes out the config files
+Line 4: # Recipe::              config_files
+Line 5: # Author::              Philip (flip) Kromer - Infochimps, Inc
+Line 6: #
+Line 7: # Copyright 2011, Philip (flip) Kromer - Infochimps, Inc
+Line 8: #
+Line 9: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 10: # you may not use this file except in compliance with the License.
+Line 11: # You may obtain a copy of the License at
+Line 12: #
+Line 13: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 14: #
+Line 15: # Unless required by applicable law or agreed to in writing, software
+Line 16: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 17: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 18: # See the License for the specific language governing permissions and
+Line 19: # limitations under the License.
+Line 20: #
+Line 21: 
+Line 22: include_recipe 'hbase'
+Line 23: 
+Line 24: #
+Line 25: # Configuration files
+Line 26: #
+Line 27: hbase_config = Mash.new({
+Line 28:   :namenode_fqdn   => (discover(:hadoop, :namenode)   && discover(:hadoop, :namenode  ).private_hostname),
+Line 29:   :jobtracker_addr => (discover(:hadoop, :jobtracker) && discover(:hadoop, :jobtracker).private_ip),
+Line 30:   :zookeeper_addrs => discover_all(:zookeeper, :server).map(&:private_ip).sort,
+Line 31:   :ganglia         => discover(:ganglia, :server),
+Line 32:   :ganglia_addr    => (discover(:ganglia, :server) && discover(:ganglia, :server).private_hostname),
+Line 33:   :private_ip      => private_ip_of(node),
+Line 34:   :ganglia_port    => 8649,
+Line 35:   :period          => 10
+Line 36:   })
+Line 37: 
+Line 38: 
+Line 39: [:hadoop].each do |component|
+Line 40:   next unless node[component]
+Line 41:   Array(node[component][:exported_jars]).flatten.each do |export|
+Line 42:     link "#{node[:hbase][:home_dir]}/lib/#{File.basename(export)}" do
+Line 43:       to  export
+Line 44:     end
+Line 45:   end
+Line 46: 
+Line 47: 
+Line 48: 
+Line 49:   # FIXME: this is brittle, but the best I can do. can you do better?
+Line 50:   Array(node[component][:exported_libs]).flatten.each do |export|
+Line 51:     pathsegs = export.gsub(%r{\A.*/native/([\w\.\-]+)/([^/]+)\z}, '\1/\2')
+Line 52:     Chef::Log.debug( [ 'hbase using hadoop native libs', pathsegs, node[:hadoop][:exported_libs], node[:hbase][:home_dir] ].inspect )
+Line 53:     link "#{node[:hbase][:home_dir]}/lib/native/#{pathsegs}" do
+Line 54:       to  export
+Line 55:     end
+Line 56:   end
+Line 57: end
+Line 58: 
+Line 59: 
+Line 60: %w[ hbase-env.sh hbase-site.xml hadoop-metrics.properties ].each do |conf_file|
+Line 61:   template "#{node[:hbase][:conf_dir]}/#{conf_file}" do
+Line 62:     owner       "root"
+Line 63:     mode        "0644"
+Line 64:     source      "#{conf_file}.erb"
+Line 65:     variables(hbase_config.merge(:hbase => node[:hbase]))
+Line 66:     notify_startable_services(:hbase, node[:hbase][:services])
+Line 67:   end
+Line 68: end
+Line 69: 
+Line 70: template "/etc/default/hbase" do
+Line 71:   owner         "root"
+Line 72:   mode          "0644"
+Line 73:   source        "etc_default_hbase.erb"
+Line 74:   variables(hbase_config.merge(:hbase => node[:hbase]))
+Line 75:   notify_startable_services(:hbase, node[:hbase][:services])
+Line 76: end
+Line 77: 
+Line 78: template "#{node[:hbase][:home_dir]}/bin/hbase" do
+Line 79:   owner         "root"
+Line 80:   mode          "0755"
+Line 81:   source        "bin-hbase.erb"
+Line 82:   variables(hbase_config.merge(:hbase => node[:hbase]))
+Line 83:   notify_startable_services(:hbase, node[:hbase][:services])
+Line 84: end
+Line 85: 
+Line 86: if node[:hadoop] && node[:hadoop][:conf_dir]
+Line 87:   link "#{node[:hadoop][:conf_dir]}/hbase-site.xml" do
+Line 88:     to "#{node[:hbase][:conf_dir]}/hbase-site.xml"
+Line 89:     only_if{ File.exists?(node[:hadoop][:conf_dir]) }
+Line 90:   end
+Line 91: end
+Line 92: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

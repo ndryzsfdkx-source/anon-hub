@@ -1,0 +1,163 @@
+# CONSTRUCTED PROMPT
+# File: openstack@fuel-library-deployment-puppet-osnailyfacter-manifests-ssh.pp
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.390854
+# Length: 7309 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack@fuel-library-deployment-puppet-osnailyfacter-manifests-ssh.pp (Puppet)**
+
+
+Line 1: # == Class: osnailyfacter::ssh
+Line 2: #
+Line 3: # Configures ssh server
+Line 4: #
+Line 5: # === Parameters
+Line 6: #
+Line 7: # [*ciphers*]
+Line 8: #   Specifies the ciphers allowed for protocol version 2
+Line 9: #
+Line 10: # [*macs*]
+Line 11: #   Specifies the available MAC (message authentication code) algorithms
+Line 12: #
+Line 13: # [*protocol_ver*]
+Line 14: #   SSH protocol version to use. Defaults to 2
+Line 15: #
+Line 16: # [*ports*]
+Line 17: #   Ports for SSH service to listen to. If more than one it shjould be an array
+Line 18: #   Defaults to 22
+Line 19: #
+Line 20: # [*log_lvl*]
+Line 21: #   SSH daemon log level. Defaults to VERBOSE
+Line 22: #
+Line 23: # [*password_auth*]
+Line 24: #   Use password authentication. Defaults to no
+Line 25: #
+Line 26: # [*permit_root*]
+Line 27: #   Specifies whether root can log in using ssh. Defaults: undef (don't add an
+Line 28: #   option PermitRootLogin to the config file)
+Line 29: #
+Line 30: # [*listen_address*]
+Line 31: #   Array of the local addresses sshd should listen on.
+Line 32: 
+Line 33: class osnailyfacter::ssh(
+Line 34:   $ciphers        = 'aes256-ctr,aes192-ctr,aes128-ctr,arcfour256,arcfour128',
+Line 35:   $macs           = 'hmac-sha2-512,hmac-sha2-256,hmac-ripemd160,hmac-sha1',
+Line 36:   $protocol_ver   = '2',
+Line 37:   $ports          = '22',
+Line 38:   $log_lvl        = 'VERBOSE',
+Line 39:   $password_auth  = 'no',
+Line 40:   $permit_root    = undef,
+Line 41:   $listen_address = [],
+Line 42:   $accept_env     = 'LANG LC_*',
+Line 43: ){
+Line 44: 
+Line 45:   case $::osfamily {
+Line 46:     'redhat': {
+Line 47:       $subsystem = 'sftp /usr/libexec/openssh/sftp-server'
+Line 48:     }
+Line 49:     'debian': {
+Line 50:       $subsystem = 'sftp /usr/lib/openssh/sftp-server'
+Line 51:     }
+Line 52:     default: {
+Line 53:       $subsystem = 'sftp /usr/lib/openssh/sftp-server'
+Line 54:     }
+Line 55:   }
+Line 56: 
+Line 57:   class { 'ssh::server':
+Line 58:     storeconfigs_enabled => false,
+Line 59:     options              => {
+Line 60:       'Protocol'                        => $protocol_ver,
+Line 61:       'Ciphers'                         => $ciphers,
+Line 62:       'MACs'                            => $macs,
+Line 63:       'Port'                            => $ports,
+Line 64:       'LogLevel'                        => $log_lvl,
+Line 65:       'Subsystem'                       => $subsystem,
+Line 66:       'PasswordAuthentication'          => $password_auth,
+Line 67:       'PermitRootLogin'                 => $permit_root,
+Line 68:       'ListenAddress'                   => $listen_address,
+Line 69:       'AllowTcpForwarding'              => 'yes',
+Line 70:       'X11Forwarding'                   => 'no',
+Line 71:       'UsePAM'                          => 'yes',
+Line 72:       'UseDNS'                          => 'no',
+Line 73:       'GSSAPIAuthentication'            => 'no',
+Line 74:       'ChallengeResponseAuthentication' => 'no',
+Line 75:       'PubkeyAuthentication'            => 'yes',
+Line 76:       'RSAAuthentication'               => 'yes',
+Line 77:       'UsePrivilegeSeparation'          => 'yes',
+Line 78:       'StrictModes'                     => 'yes',
+Line 79:       'AcceptEnv'                       => $accept_env,
+Line 80:     }
+Line 81:   }
+Line 82: 
+Line 83:   if $::osfamily == 'Debian' {
+Line 84:     # ensure all possible host keys have been generated LP#1484693
+Line 85:     exec { 'host-ssh-keygen':
+Line 86:       command => 'ssh-keygen -A',
+Line 87:       path    => ['/bin', '/usr/bin'],
+Line 88:       require => Class['ssh::server'],
+Line 89:       creates => '/etc/ssh/ssh_host_ed25519_key',
+Line 90:     }
+Line 91:   }
+Line 92: }
+Line 93: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

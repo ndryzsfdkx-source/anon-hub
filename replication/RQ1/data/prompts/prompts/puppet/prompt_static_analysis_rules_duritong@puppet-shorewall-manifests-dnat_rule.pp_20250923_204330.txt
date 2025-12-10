@@ -1,0 +1,171 @@
+# CONSTRUCTED PROMPT
+# File: duritong@puppet-shorewall-manifests-dnat_rule.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.635389
+# Length: 6175 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: duritong@puppet-shorewall-manifests-dnat_rule.pp (Puppet)**
+
+
+Line 1: # a wrapper for firewall dnat rules
+Line 2: # setting up rules for IPv4 DNAT
+Line 3: # including hairpinning for the local networks
+Line 4: # according to http://www.shorewall.net/FAQ.htm#faq2
+Line 5: # assumption is that by default
+Line 6: # ext (eth0) -> loc (eth1)
+Line 7: define shorewall::dnat_rule(
+Line 8:   $destination,
+Line 9:   $port,
+Line 10:   $ext_source    = undef,
+Line 11:   $ext_ip4       = undef,
+Line 12:   $local_src_ifs = undef,
+Line 13:   $ext_interface = 'eth0',
+Line 14:   $dest_if       = 'eth1',
+Line 15:   $ext_zone      = 'net',
+Line 16:   $dest_zone     = 'loc',
+Line 17:   $proto         = 'tcp',
+Line 18: ){
+Line 19:   $real_ext_source = pick($ext_source, $ext_zone)
+Line 20:   $real_ext_ip4 = pick($ext_ip4,$facts['networking']['interfaces'][$ext_interface]['ip'])
+Line 21:   $real_local_src_ifs = pick($local_src_ifs, Array($dest_if))
+Line 22: 
+Line 23:   shorewall::rule4{
+Line 24:     default:
+Line 25:       destination     => "${dest_zone}:${destination}",
+Line 26:       originaldest    => $real_ext_ip4,
+Line 27:       destinationport => $port,
+Line 28:       proto           => $proto,
+Line 29:       order           => 140,
+Line 30:       action          => 'DNAT';
+Line 31:     "dnat-${name}":
+Line 32:       source => $real_ext_source;
+Line 33:     "dnat-FW-${name}":
+Line 34:       source => '$FW';
+Line 35:     "hairpin-${name}":
+Line 36:       source => $dest_zone;
+Line 37:   }
+Line 38: 
+Line 39:   $real_local_src_ifs.each |$li| {
+Line 40:     # network/masklen - CIDR
+Line 41:     $local_net = "${facts['networking']['interfaces'][$li]['network']}/${netmask_to_masklen($facts['networking']['interfaces'][$li]['netmask'])}"
+Line 42:     # exclude the ip of the fw to be masqueraded as well
+Line 43:     if $li == $dest_if {
+Line 44:       $exclude_source = "!${facts['networking']['interfaces'][$dest_if]['ip']}"
+Line 45:     } else {
+Line 46:       $exclude_source = ''
+Line 47:     }
+Line 48:     $source = "${local_net}${exclude_source}"
+Line 49:     shorewall::snat4{
+Line 50:       "hairpin-${name}-${li}":
+Line 51:         action => "SNAT(${real_ext_ip4})",
+Line 52:         source => $source,
+Line 53:         dest   => "${dest_if}:${destination}",
+Line 54:         proto  => $proto,
+Line 55:         port   => $port,
+Line 56:     }
+Line 57: 
+Line 58:     shorewall::masq{
+Line 59:       "hairpin-${name}-${li}":
+Line 60:         interface => $li,
+Line 61:         source    => $source,
+Line 62:         address   => $ext_ip4,
+Line 63:         proto     => $proto,
+Line 64:         port      => $port,
+Line 65:     }
+Line 66:   }
+Line 67: }
+Line 68: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

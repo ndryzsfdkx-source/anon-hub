@@ -1,0 +1,56 @@
+PATH,LINE,CATEGORY
+Nikhil424_chef-repo-cookbooks-jdk-recipes-default.rb,11,Admin by default
+Nikhil424_chef-repo-cookbooks-jdk-recipes-default.rb,14,Admin by default
+Nikhil424_chef-repo-cookbooks-jdk-recipes-default.rb,15,Admin by default
+TaxiOS_zabbix-recipes-server_source.rb,14,Missing Default in Case Statement
+TaxiOS_zabbix-recipes-server_source.rb,17,Missing Default in Case Statement
+TaxiOS_zabbix-recipes-server_source.rb,32,Missing Default in Case Statement
+TaxiOS_zabbix-recipes-server_source.rb,57,Missing Default in Case Statement
+chef-boneyard_qa-chef-server-cluster-attributes-default.rb,1,Suspicious comment
+chef-boneyard_qa-chef-server-cluster-attributes-default.rb,3,Hard-coded secret
+chef-boneyard_qa-chef-server-cluster-attributes-default.rb,14,Hard-coded secret
+cookbooks_ic-ganglia-cookbooks-elasticsearch-recipes-plugins.rb,23,Admin by default
+cookbooks_ic-ganglia-cookbooks-elasticsearch-recipes-plugins.rb,24,Admin by default
+cookbooks_ic-ganglia-cookbooks-elasticsearch-recipes-plugins.rb,30,Admin by default
+cookbooks_ic-jenkins-cookbooks-zabbix-recipes-database_mysql.rb,129,Use of weak cryptography algorithms
+cookbooks_ic-nodejs-cookbooks-hbase-recipes-config_files.rb,49,Suspicious comment
+cookbooks_ic-tuning-cookbooks-zabbix-libraries-zabbix_hosts_and_templates.rb,11,Missing Default in Case Statement
+cookbooks_ic-tuning-cookbooks-zabbix-libraries-zabbix_hosts_and_templates.rb,28,Missing Default in Case Statement
+cookbooks_ic-volumes-cookbooks-strongswan-recipes-routing.rb,22,Suspicious comment
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,3,Use of HTTP without SSL/TLS
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,4,Use of weak cryptography algorithms
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,5,Use of weak cryptography algorithms
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,20,Suspicious comment
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,29,Unrestricted IP Address
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,35,Empty password
+cookbooks_ic-volumes_ebs-cookbooks-resque-attributes-default.rb,24,Unrestricted IP Address
+cookbooks_ic-zabbix-cookbooks-zabbix-providers-host.rb,28,Unrestricted IP Address
+cookbooks_ic-zabbix-cookbooks-zabbix-providers-host.rb,50,Unrestricted IP Address
+danielladd_Chef-Testing-cookbooks-mysql-attributes-server_rhel.rb,1,Missing Default in Case Statement
+danielladd_Chef-Testing-cookbooks-mysql-attributes-server_rhel.rb,10,Missing Default in Case Statement
+guymatz_chef-cookbooks-hive-attributes-default.rb,3,Missing Default in Case Statement
+guymatz_chef-cookbooks-hive-attributes-default.rb,11,Use of HTTP without SSL/TLS
+guymatz_chef-cookbooks-hive-attributes-default.rb,19,Hard-coded secret
+guymatz_chef-cookbooks-mysql-attributes-client.rb,41,Use of HTTP without SSL/TLS
+guymatz_chef-cookbooks-psql-resources-user.rb,6,Use of HTTP without SSL/TLS
+guymatz_chef-cookbooks-python-attributes-default.rb,36,Use of HTTP without SSL/TLS
+gwalbran_chef-cookbooks-imos_backup-attributes-restore.rb,10,Hard-coded secret
+havk64_chef-zero-playground-cookbooks-nginx-attributes-socketproxy.rb,2,Admin by default
+havk64_chef-zero-playground-cookbooks-runit-recipes-default.rb,29,Missing Default in Case Statement
+infochimps-labs_ironfan-pantry-cookbooks-windows-providers-batch.rb,30,Suspicious comment
+infochimps-labs_ironfan-pantry-cookbooks-windows-providers-batch.rb,31,Suspicious comment
+infochimps-labs_ironfan-pantry-cookbooks-zsh-recipes-default.rb,24,Missing Default in Case Statement
+jonmthomson_cookbooks-mingw-recipes-default.rb,14,Hard-coded secret
+kitchenplan_chef-applications-recipes-omnigraffle.rb,1,Missing Default in Case Statement
+kitchenplan_chef-applications-recipes-omnigraffle.rb,15,No integrity check
+kitchenplan_chef-applications-recipes-omnigraffle.rb,16,Use of HTTP without SSL/TLS
+kitchenplan_chef-applications-recipes-omnigraffle.rb,40,No integrity check
+kitchenplan_chef-applications-recipes-omnigraffle.rb,41,Use of HTTP without SSL/TLS
+kitchenplan_chef-applications-recipes-omnigraffle.rb,65,No integrity check
+kitchenplan_chef-applications-recipes-omnigraffle.rb,66,Use of HTTP without SSL/TLS
+kitchenware_master-chef-cookbooks-base-recipes-editor.rb,5,Admin by default
+openstreetmap_chef-cookbooks-accounts-recipes-default.rb,35,Missing Default in Case Statement
+scmgalaxy_chef-training-programs-recipes-raviteja-chef-repo-E4.rb,3,No integrity check
+scmgalaxy_chef-training-programs-recipes-raviteja-chef-repo-E4.rb,3,Use of HTTP without SSL/TLS
+thomasmeeus_chef-apache2-recipes-mod_php5.rb,20,Missing Default in Case Statement
+thomasmeeus_chef-apache2-recipes-mod_php5.rb,64,Missing Default in Case Statement

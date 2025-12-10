@@ -1,0 +1,222 @@
+# CONSTRUCTED PROMPT
+# File: SecGen@SecGen-modules-services-unix-smb-samba-manifests-params.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.629398
+# Length: 7366 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: SecGen@SecGen-modules-services-unix-smb-samba-manifests-params.pp (Puppet)**
+
+
+Line 1: # Class: samba::params
+Line 2: #
+Line 3: # This class defines default parameters used by the main module class samba
+Line 4: # Operating Systems differences in names and paths are addressed here
+Line 5: #
+Line 6: # == Variables
+Line 7: #
+Line 8: # Refer to samba class for the variables defined here.
+Line 9: #
+Line 10: # == Usage
+Line 11: #
+Line 12: # This class is not intended to be used directly.
+Line 13: # It may be imported or inherited by other classes
+Line 14: #
+Line 15: class samba::params {
+Line 16: 
+Line 17:   ### Application related parameters
+Line 18: 
+Line 19:   $package = $::operatingsystem ? {
+Line 20:     default => 'samba',
+Line 21:   }
+Line 22: 
+Line 23:   $service = $::operatingsystem ? {
+Line 24:     /(?i:Centos|RedHat|Scientific|Fedora|Amazon|Linux)/ => 'smb',
+Line 25:     /(?i:SLES|OpenSuSE)/                                => 'smb',
+Line 26:     /(?i:Ubuntu|Mint)/                                  => 'smbd',
+Line 27:     /(?i:Debian)/                                       => 'samba',
+Line 28:     default                                             => 'smb',
+Line 29:   }
+Line 30: 
+Line 31:   $service_status = $::operatingsystem ? {
+Line 32:     default => true,
+Line 33:   }
+Line 34: 
+Line 35:   $process = $::operatingsystem ? {
+Line 36:     default => 'smbd',
+Line 37:   }
+Line 38: 
+Line 39:   $process_args = $::operatingsystem ? {
+Line 40:     default => '',
+Line 41:   }
+Line 42: 
+Line 43:   $process_user = $::operatingsystem ? {
+Line 44:     default => 'root',
+Line 45:   }
+Line 46: 
+Line 47:   $config_dir = $::operatingsystem ? {
+Line 48:     default => '/etc/samba',
+Line 49:   }
+Line 50: 
+Line 51:   $config_file = $::operatingsystem ? {
+Line 52:     default => '/etc/samba/smb.conf',
+Line 53:   }
+Line 54: 
+Line 55:   $config_file_mode = $::operatingsystem ? {
+Line 56:     default => '0644',
+Line 57:   }
+Line 58: 
+Line 59:   $config_file_owner = $::operatingsystem ? {
+Line 60:     default => 'root',
+Line 61:   }
+Line 62: 
+Line 63:   $config_file_group = $::operatingsystem ? {
+Line 64:     default => 'root',
+Line 65:   }
+Line 66: 
+Line 67:   $config_file_init = $::operatingsystem ? {
+Line 68:     /(?i:Debian|Ubuntu|Mint)/ => '/etc/default/samba',
+Line 69:     default                   => '/etc/sysconfig/samba',
+Line 70:   }
+Line 71: 
+Line 72:   $pid_file = $::operatingsystem ? {
+Line 73:     /(?i:Debian|Ubuntu|Mint)/ => '/var/run/samba/smbd.pid',
+Line 74:     default                   => '/var/run/smbd.pid',
+Line 75:   }
+Line 76: 
+Line 77:   $data_dir = $::operatingsystem ? {
+Line 78:     default => '/etc/samba',
+Line 79:   }
+Line 80: 
+Line 81:   $log_dir = $::operatingsystem ? {
+Line 82:     default => '/var/log/samba',
+Line 83:   }
+Line 84: 
+Line 85:   $log_file = $::operatingsystem ? {
+Line 86:     default => [ '/var/log/samba/log.smbd','/var/log/samba/log.nmbd' ],
+Line 87:   }
+Line 88: 
+Line 89:   $port = '445'
+Line 90:   $protocol = 'tcp'
+Line 91: 
+Line 92:   # General Settings
+Line 93:   $my_class = ''
+Line 94:   $source = ''
+Line 95:   $source_dir = ''
+Line 96:   $source_dir_purge = false
+Line 97:   $template = ''
+Line 98:   $options = ''
+Line 99:   $service_autorestart = true
+Line 100:   $version = 'present'
+Line 101:   $absent = false
+Line 102:   $disable = false
+Line 103:   $disableboot = false
+Line 104: 
+Line 105:   ### General module variables that can have a site or per module default
+Line 106:   $monitor = false
+Line 107:   $monitor_tool = ''
+Line 108:   $monitor_target = $::ipaddress
+Line 109:   $firewall = false
+Line 110:   $firewall_tool = ''
+Line 111:   $firewall_src = '0.0.0.0/0'
+Line 112:   $firewall_dst = $::ipaddress
+Line 113:   $puppi = false
+Line 114:   $puppi_helper = 'standard'
+Line 115:   $debug = false
+Line 116:   $audit_only = false
+Line 117: 
+Line 118: }
+Line 119: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

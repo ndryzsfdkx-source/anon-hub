@@ -1,0 +1,184 @@
+# CONSTRUCTED PROMPT
+# File: TaxiOS_zabbix-recipes-server_source.rb
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.355956
+# Length: 8556 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: TaxiOS_zabbix-recipes-server_source.rb (Unknown)**
+
+
+Line 1: # Author:: Nacer Laradji (<nacer.laradji@gmail.com>)
+Line 2: # Cookbook Name:: zabbix
+Line 3: # Recipe:: server_source
+Line 4: #
+Line 5: # Copyright 2011, Efactures
+Line 6: #
+Line 7: # Apache 2.0
+Line 8: #
+Line 9: 
+Line 10: include_recipe "zabbix::common"
+Line 11: include_recipe "zabbix::server_common"
+Line 12: 
+Line 13: packages = Array.new
+Line 14: case node['platform']
+Line 15: when "ubuntu","debian"
+Line 16:   packages = %w{ fping libcurl4-openssl-dev libiksemel-utils libiksemel-dev libiksemel3 libsnmp-dev snmp}
+Line 17:   case node['zabbix']['database']['install_method']
+Line 18:   when 'mysql', 'rds_mysql'
+Line 19:     packages.push('libmysql++-dev', 'libmysql++3', 'libcurl3', 'php5-mysql', 'php5-gd' )
+Line 20:   when 'postgres'
+Line 21:     packages.push('libssh2-1-dev')
+Line 22:   end
+Line 23:   init_template = 'zabbix_server.init.erb'
+Line 24: when "redhat","centos","scientific","amazon","oracle"
+Line 25:   include_recipe "yum::epel"
+Line 26:   
+Line 27:   curldev = (node['platform_version'].to_i < 6) ? 'curl-devel' : 'libcurl-devel'
+Line 28: 
+Line 29:   packages = %w{ fping iksemel-devel iksemel-utils net-snmp-libs net-snmp-devel openssl-devel redhat-lsb }
+Line 30:   packages.push(curldev)
+Line 31: 
+Line 32:   case node['zabbix']['database']['install_method']
+Line 33:   when 'mysql', 'rds_mysql'
+Line 34:     php_packages = (node['platform_version'].to_i < 6)?
+Line 35:       %w{ php53-mysql php53-gd php53-bcmath php53-mbstring php53-xml } :
+Line 36:       %w{ php-mysql php-gd php-bcmath php-mbstring php-xml }
+Line 37:     packages.push(*php_packages)
+Line 38:   when 'postgres'
+Line 39:     php_packages = (node['platform_version'].to_i < 6)?
+Line 40:       %w{ php5-pgsql php5-gd php5-xml } :
+Line 41:       %w{ php-pgsql php-gd php-bcmath php-mbstring php-xml } 
+Line 42:     packages.push(*php_packages)
+Line 43:   end
+Line 44:   init_template = 'zabbix_server.init-rh.erb'
+Line 45: end
+Line 46: 
+Line 47: packages.each do |pck|
+Line 48:   package pck do
+Line 49:     action :install
+Line 50:   end
+Line 51: end
+Line 52: 
+Line 53: configure_options = node['zabbix']['server']['configure_options'].dup
+Line 54: configure_options = (configure_options || Array.new).delete_if do |option|
+Line 55:   option.match(/\s*--prefix(\s|=).+/)
+Line 56: end
+Line 57: case node['zabbix']['database']['install_method']
+Line 58: when 'mysql', 'rds_mysql'
+Line 59:   with_mysql = "--with-mysql"
+Line 60:   configure_options << with_mysql unless configure_options.include?(with_mysql)
+Line 61: when 'postgres'
+Line 62:   with_postgresql = "--with-postgresql"
+Line 63:   configure_options << with_postgresql unless configure_options.include?(with_postgresql)
+Line 64: end
+Line 65: node.normal['zabbix']['server']['configure_options'] = configure_options
+Line 66: 
+Line 67: zabbix_source "install_zabbix_server" do
+Line 68:   branch              node['zabbix']['server']['branch']
+Line 69:   version             node['zabbix']['server']['version']
+Line 70:   source_url          node['zabbix']['server']['source_url']
+Line 71:   branch              node['zabbix']['server']['branch']
+Line 72:   version             node['zabbix']['server']['version']
+Line 73:   code_dir            node['zabbix']['src_dir']
+Line 74:   target_dir          "zabbix-#{node['zabbix']['server']['version']}"  
+Line 75:   install_dir         node['zabbix']['install_dir']
+Line 76:   configure_options   configure_options.join(" ")
+Line 77: 
+Line 78:   action :install_server
+Line 79: end
+Line 80: 
+Line 81: # Install Init script
+Line 82: template "/etc/init.d/zabbix_server" do
+Line 83:   source init_template
+Line 84:   owner "root"
+Line 85:   group "root"
+Line 86:   mode "755"
+Line 87:   notifies :restart, "service[zabbix_server]", :delayed
+Line 88: end
+Line 89: 
+Line 90: # install zabbix server conf
+Line 91: template "#{node['zabbix']['etc_dir']}/zabbix_server.conf" do
+Line 92:   source "zabbix_server.conf.erb"
+Line 93:   owner "root"
+Line 94:   group "root"
+Line 95:   mode "644"
+Line 96:   variables ({
+Line 97:     :dbhost             => node['zabbix']['database']['dbhost'],
+Line 98:     :dbname             => node['zabbix']['database']['dbname'],
+Line 99:     :dbuser             => node['zabbix']['database']['dbuser'],
+Line 100:     :dbpassword         => node['zabbix']['database']['dbpassword'],
+Line 101:     :dbport             => node['zabbix']['database']['dbport'],
+Line 102:     :java_gateway       => node['zabbix']['server']['java_gateway'],
+Line 103:     :java_gateway_port  => node['zabbix']['server']['java_gateway_port'],
+Line 104:     :java_pollers       => node['zabbix']['server']['java_pollers']
+Line 105:   })
+Line 106:   notifies :restart, "service[zabbix_server]", :delayed
+Line 107: end
+Line 108: 
+Line 109: # Define zabbix_agentd service
+Line 110: service "zabbix_server" do
+Line 111:   supports :status => true, :start => true, :stop => true, :restart => true
+Line 112:   action [ :start, :enable ]
+Line 113: end
+Line 114: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

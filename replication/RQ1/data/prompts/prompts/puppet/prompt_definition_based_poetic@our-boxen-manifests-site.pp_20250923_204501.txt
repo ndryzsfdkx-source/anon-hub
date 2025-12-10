@@ -1,0 +1,163 @@
+# CONSTRUCTED PROMPT
+# File: poetic@our-boxen-manifests-site.pp
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.396267
+# Length: 6115 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: poetic@our-boxen-manifests-site.pp (Puppet)**
+
+
+Line 1: require boxen::environment
+Line 2: require homebrew
+Line 3: require gcc
+Line 4: 
+Line 5: Exec {
+Line 6:   group       => 'staff',
+Line 7:   logoutput   => on_failure,
+Line 8:   user        => $boxen_user,
+Line 9: 
+Line 10:   path => [
+Line 11:     "${boxen::config::home}/rbenv/shims",
+Line 12:     "${boxen::config::home}/rbenv/bin",
+Line 13:     "${boxen::config::home}/rbenv/plugins/ruby-build/bin",
+Line 14:     "${boxen::config::home}/homebrew/bin",
+Line 15:     '/usr/bin',
+Line 16:     '/bin',
+Line 17:     '/usr/sbin',
+Line 18:     '/sbin'
+Line 19:   ],
+Line 20: 
+Line 21:   environment => [
+Line 22:     "HOMEBREW_CACHE=${homebrew::config::cachedir}",
+Line 23:     "HOME=/Users/${::boxen_user}"
+Line 24:   ]
+Line 25: }
+Line 26: 
+Line 27: File {
+Line 28:   group => 'staff',
+Line 29:   owner => $boxen_user
+Line 30: }
+Line 31: 
+Line 32: Package {
+Line 33:   provider => homebrew,
+Line 34:   require  => Class['homebrew']
+Line 35: }
+Line 36: 
+Line 37: Repository {
+Line 38:   provider => git,
+Line 39:   extra    => [
+Line 40:     '--recurse-submodules'
+Line 41:   ],
+Line 42:   require  => File["${boxen::config::bindir}/boxen-git-credential"],
+Line 43:   config   => {
+Line 44:     'credential.helper' => "${boxen::config::bindir}/boxen-git-credential"
+Line 45:   }
+Line 46: }
+Line 47: 
+Line 48: Service {
+Line 49:   provider => ghlaunchd
+Line 50: }
+Line 51: 
+Line 52: Homebrew::Formula <| |> -> Package <| |>
+Line 53: 
+Line 54: node default {
+Line 55:   # core modules, needed for most things
+Line 56:   include dnsmasq
+Line 57:   include git
+Line 58:   include hub
+Line 59:   include nginx
+Line 60: 
+Line 61:   # fail if FDE is not enabled
+Line 62:   if $::root_encrypted == 'no' {
+Line 63:     fail('Please enable full disk encryption and try again')
+Line 64:   }
+Line 65: 
+Line 66:   # node versions
+Line 67:   include nodejs::v0_10
+Line 68: 
+Line 69:   # default ruby versions
+Line 70:   ruby::version { '1.9.3': }
+Line 71:   ruby::version { '2.0.0': }
+Line 72:   ruby::version { '2.1.0': }
+Line 73:   ruby::version { '2.1.1': }
+Line 74:   ruby::version { '2.1.2': }
+Line 75: 
+Line 76:   # common, useful packages
+Line 77:   package {
+Line 78:     [
+Line 79:       'ack',
+Line 80:       'findutils',
+Line 81:       'gnu-tar'
+Line 82:     ]:
+Line 83:   }
+Line 84: 
+Line 85:   file { "${boxen::config::srcdir}/our-boxen":
+Line 86:     ensure => link,
+Line 87:     target => $boxen::config::repodir
+Line 88:   }
+Line 89: 
+Line 90:   # poetic environment
+Line 91:   include poetic::environment
+Line 92: }
+Line 93: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

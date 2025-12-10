@@ -1,0 +1,149 @@
+PATH,LINE,CATEGORY,AGREEMENT
+AYCHIT_Asf-chef-cookbooks-rsnapshot-resources-script.rb,0,none,3
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb,130,Admin by default,2
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb,153,Admin by default,3
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb,160,Admin by default,2
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb,161,Admin by default,2
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb,162,Admin by default,2
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb,163,Admin by default,2
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb,164,Admin by default,2
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb,174,Admin by default,2
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-graphite.rb,184,Admin by default,3
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb,22,Hard-coded secret,2
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb,24,Hard-coded secret,2
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb,26,Hard-coded secret,2
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb,42,Admin by default,2
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb,50,Admin by default,2
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb,87,Admin by default,3
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb,99,Admin by default,2
+DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb,126,Admin by default,3
+EEDARIT_opsworks-cookbooks-iis-resources-root.rb,0,none,3
+EEDARIT_opsworks-cookbooks-windows-providers-feature_powershell.rb,0,none,3
+Nikhil424_chef-repo-cookbooks-jdk-recipes-default.rb,11,Admin by default,3
+Nikhil424_chef-repo-cookbooks-jdk-recipes-default.rb,15,Admin by default,3
+Nikhil424_chef-repo-cookbooks-windows-resources-pagefile.rb,0,none,3
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,8,Missing Default in Case Statement,3
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,12,Missing Default in Case Statement,3
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,14,Use of HTTP without SSL/TLS,2
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,16,Use of HTTP without SSL/TLS,2
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,18,Use of HTTP without SSL/TLS,2
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,20,Use of HTTP without SSL/TLS,2
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,26,Use of HTTP without SSL/TLS,2
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,28,Use of HTTP without SSL/TLS,2
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,30,Use of HTTP without SSL/TLS,2
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,33,Use of HTTP without SSL/TLS,2
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,36,Use of HTTP without SSL/TLS,2
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,23,Missing Default in Case Statement,2
+Soluciones_ey-cloud-recipes-cookbooks-solr-attributes-solr.rb,0,none,3
+TaxiOS_zabbix-recipes-server_source.rb,14,Missing Default in Case Statement,3
+TaxiOS_zabbix-recipes-server_source.rb,17,Missing Default in Case Statement,3
+TaxiOS_zabbix-recipes-server_source.rb,32,Missing Default in Case Statement,3
+TaxiOS_zabbix-recipes-server_source.rb,57,Missing Default in Case Statement,3
+aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb,75,Admin by default,2
+aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb,93,Suspicious comment,3
+aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb,101,Admin by default,2
+aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb,112,Suspicious comment,3
+aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb,117,Missing Default in Case Statement,2
+binary-com_chef-third-party-cookbooks-cron-attributes-default.rb,0,none,3
+binary-com_chef-third-party-cookbooks-datadog-recipes-network.rb,0,none,3
+binary-com_chef-third-party-cookbooks-datadog-recipes-openmetrics.rb,0,none,2
+binary-com_chef-third-party-cookbooks-poise-files-halite_gem-poise-subcontext-resource_collection.rb,0,none,3
+chef-boneyard_qa-chef-server-cluster-attributes-default.rb,3,Hard-coded secret,3
+chef_mixlib-install-acceptance-windows-server-2012r2-fips-.acceptance-acceptance-cookbook-recipes-verify.rb,12,Hard-coded secret,3
+cookbooks_hw-nginx-recipes-commons_dir.rb,0,none,2
+cookbooks_ic-cloud_utils-cookbooks-hadoop_cluster-recipes-default.rb,0,none,3
+cookbooks_ic-cloud_utils-cookbooks-redis-recipes-install_from_package.rb,0,none,3
+cookbooks_ic-elasticsearch-cookbooks-install_from-definitions-osx_application.rb,0,none,2
+cookbooks_ic-ganglia-cookbooks-elasticsearch-recipes-plugins.rb,30,Admin by default,2
+cookbooks_ic-ganglia-cookbooks-hadoop_cluster-example-clusters-science.rb,0,none,2
+cookbooks_ic-hadoop_cluster-cookbooks-hbase-recipes-stargate.rb,0,none,3
+cookbooks_ic-hadoop_cluster-cookbooks-zabbix-recipes-database_mysql.rb,25,Admin by default,2
+cookbooks_ic-hadoop_cluster-cookbooks-zabbix-recipes-database_mysql.rb,26,Admin by default,2
+cookbooks_ic-hadoop_cluster-cookbooks-zabbix-recipes-database_mysql.rb,47,Admin by default,2
+cookbooks_ic-hadoop_cluster-cookbooks-zabbix-recipes-database_mysql.rb,135,Admin by default,2
+cookbooks_ic-hadoop_cluster-roles-cassandra_client.rb,0,none,3
+cookbooks_ic-jenkins-cookbooks-zabbix-recipes-agent.rb,0,none,2
+cookbooks_ic-jenkins-cookbooks-zabbix-recipes-database_mysql.rb,25,Admin by default,2
+cookbooks_ic-jenkins-cookbooks-zabbix-recipes-database_mysql.rb,26,Admin by default,2
+cookbooks_ic-jenkins-cookbooks-zabbix-recipes-database_mysql.rb,47,Admin by default,2
+cookbooks_ic-jenkins-cookbooks-zabbix-recipes-database_mysql.rb,129,Use of weak cryptography algorithms,3
+cookbooks_ic-hadoop_cluster-cookbooks-zabbix-recipes-database_mysql.rb,135,Admin by default,2
+cookbooks_ic-motd-roles-elasticsearch_datanode.rb,0,none,3
+cookbooks_ic-nodejs-cookbooks-hbase-recipes-config_files.rb,49,Suspicious comment,2
+cookbooks_ic-package_set-cookbooks-rvm-providers-global_gem.rb,91,Admin by default,3
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,34,Hard-coded secret,2
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,35,Empty password,3
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,35,Hard-coded secret,2
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,36,Hard-coded secret,2
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,37,Empty password,3
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,37,Hard-coded secret,2
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,51,Hard-coded secret,2
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,52,Hard-coded secret,3
+cookbooks_ic-snappy-roles-statsd_server.rb,0,none,3
+cookbooks_ic-tuning-cookbooks-ganglia-recipes-default.rb,0,none,3
+cookbooks_ic-tuning-cookbooks-zabbix-libraries-zabbix_hosts_and_templates.rb,11,Missing Default in Case Statement,3
+cookbooks_ic-tuning-cookbooks-zabbix-libraries-zabbix_hosts_and_templates.rb,28,Missing Default in Case Statement,3
+cookbooks_ic-volumes-cookbooks-silverware-libraries-dump_aspects.rb,0,none,2
+cookbooks_ic-volumes-cookbooks-strongswan-recipes-routing.rb,22,Suspicious comment,3
+cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb,19,Unrestricted IP Address,3
+cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb,20,Unrestricted IP Address,3
+cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb,21,Unrestricted IP Address,3
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,29,Unrestricted IP Address,3
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,35,Hard-coded secret,2
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,35,Empty password,3
+cookbooks_ic-volumes_ebs-cookbooks-resque-attributes-default.rb,24,Unrestricted IP Address,2
+cookbooks_ic-volumes_ebs-cookbooks-zabbix-resources-user.rb,0,none,3
+cookbooks_ic-zabbix-cookbooks-zabbix-providers-host.rb,28,Unrestricted IP Address,3
+cookbooks_ic-zabbix-cookbooks-zabbix-providers-host.rb,50,Unrestricted IP Address,3
+danielladd_Chef-Testing-cookbooks-mysql-attributes-server_rhel.rb,1,Missing Default in Case Statement,3
+danielladd_Chef-Testing-cookbooks-mysql-attributes-server_rhel.rb,10,Missing Default in Case Statement,3
+davestarling_chef-features-data-cookbooks-manage_files-recipes-default.rb,0,none,3
+desirit_chef-bach-cookbooks-bcpc-hadoop-recipes-oozie.rb,142,Admin by default,2
+desirit_chef-bach-cookbooks-bcpc-hadoop-recipes-oozie.rb,152,Admin by default,2
+desirit_chef-bach-cookbooks-bcpc-hadoop-recipes-oozie.rb,155,Admin by default,2
+guymatz_chef-cookbooks-cutlery-libraries-notifying_action.rb,0,none,3
+guymatz_chef-cookbooks-hive-attributes-default.rb,3,Missing Default in Case Statement,3
+guymatz_chef-cookbooks-hive-attributes-default.rb,11,Use of HTTP without SSL/TLS,3
+guymatz_chef-cookbooks-mysql-attributes-client.rb,41,Use of HTTP without SSL/TLS,3
+guymatz_chef-cookbooks-nagios-recipes-server_package.rb,0,none,3
+guymatz_chef-cookbooks-psql-resources-user.rb,20,Empty password,2
+guymatz_chef-cookbooks-python-attributes-default.rb,36,Use of HTTP without SSL/TLS,2
+gwalbran_chef-cookbooks-imos_backup-attributes-restore.rb,0,none,2
+gwalbran_chef-cookbooks-imos_webapps-definitions-ncwms.rb,0,none,3
+havk64_chef-zero-playground-cookbooks-nginx-attributes-socketproxy.rb,0,none,1
+havk64_chef-zero-playground-cookbooks-runit-recipes-default.rb,29,Missing Default in Case Statement,2
+infochimps-labs_ironfan-pantry-cookbooks-iptables-recipes-default.rb,39,Missing Default in Case Statement,1
+infochimps-labs_ironfan-pantry-cookbooks-nodejs-recipes-install_from_binary.rb,0,none,3
+infochimps-labs_ironfan-pantry-cookbooks-python-attributes-default.rb,0,none,2
+infochimps-labs_ironfan-pantry-cookbooks-sudo-recipes-default.rb,0,none,2
+infochimps-labs_ironfan-pantry-cookbooks-windows-providers-batch.rb,0,none,3
+infochimps-labs_ironfan-pantry-cookbooks-zabbix-providers-media_type.rb,0,none,3
+infochimps-labs_ironfan-pantry-cookbooks-zsh-recipes-default.rb,24,Missing Default in Case Statement,3
+johnfitzpatrick_ChefTraining-cookbooks-apache-recipes-user01_index.rb,0,none,3
+jonmthomson_cookbooks-mingw-recipes-default.rb,14,Hard-coded secret,3
+kitchenplan_chef-applications-recipes-omnigraffle.rb,1,Missing Default in Case Statement,3
+kitchenplan_chef-applications-recipes-omnigraffle.rb,15,No integrity check,2
+kitchenplan_chef-applications-recipes-omnigraffle.rb,40,No integrity check,2
+kitchenplan_chef-applications-recipes-omnigraffle.rb,65,No integrity check,2
+kitchenware_master-chef-cookbooks-base-recipes-editor.rb,5,Admin by default,3
+michaelklishin_cassandra-chef-cookbook-recipes-opscenter_agent.rb,0,none,3
+newrelic_infrastructure-agent-chef-recipes-default.rb,0,none,3
+openstreetmap_chef-cookbooks-accounts-recipes-default.rb,35,Missing Default in Case Statement,3
+openstreetmap_chef-cookbooks-civicrm-recipes-default.rb,81,No integrity check,2
+openstreetmap_chef-cookbooks-civicrm-recipes-default.rb,90,No integrity check,2
+openstreetmap_chef-cookbooks-civicrm-recipes-default.rb,162,Use of HTTP without SSL/TLS,2
+openstreetmap_chef-cookbooks-networking-libraries-ipaddresses.rb,0,none,3
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb,88,Admin by default,2
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb,96,Admin by default,2
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb,134,Admin by default,3
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb,146,Admin by default,2
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb,173,Admin by default,3
+rcbops-cookbooks_keystone-recipes-default.rb,0,none,3
+sabarisankar27_chef-acceptance-fips-.acceptance-acceptance-cookbook-recipes-destroy.rb,0,none,3
+sabarisankar27_chef-acceptance-top-cookbooks-.acceptance-acceptance-cookbook-recipes-provision.rb,0,none,3
+scmgalaxy_chef-training-programs-recipes-raviteja-chef-repo-E4.rb,3,No integrity check,2
+scmgalaxy_chef-training-programs-uma-chef-repo-cookbooks-Application-.delivery-build_cookbook-recipes-provision.rb,0,none,3
+sous-chefs_nrpe-recipes-default.rb,0,none,3
+sous-chefs_php-recipes-package.rb,0,none,3
+thomasmeeus_chef-apache2-recipes-mod_php5.rb,20,Missing Default in Case Statement,3
+thomasmeeus_chef-apache2-recipes-mod_php5.rb,64,Missing Default in Case Statement,3

@@ -1,0 +1,248 @@
+# CONSTRUCTED PROMPT
+# File: mattheath@puppet-php-manifests-version.pp
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.388280
+# Length: 10004 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: mattheath@puppet-php-manifests-version.pp (Puppet)**
+
+
+Line 1: # Installs a php version, and sets up phpenv
+Line 2: #
+Line 3: # Usage:
+Line 4: #
+Line 5: #     php::version { '5.3.20': }
+Line 6: #
+Line 7: # There are a number of predefined classes which can be used rather than
+Line 8: # using this class directly, which allows the class to be defined multiple
+Line 9: # times - eg. if you define it within multiple projects. For example:
+Line 10: #
+Line 11: #     include php::5_3_20
+Line 12: #
+Line 13: define php::version(
+Line 14:   $ensure    = 'installed',
+Line 15:   $version   = $name
+Line 16: ) {
+Line 17:   require php
+Line 18:   include boxen::config
+Line 19:   include mysql::config
+Line 20: 
+Line 21:   # Install location
+Line 22:   $dest = "${php::config::root}/versions/${version}"
+Line 23: 
+Line 24:   # Log locations
+Line 25:   $error_log = "${php::config::logdir}/${version}.error.log"
+Line 26: 
+Line 27:   # Config locations
+Line 28:   $version_config_root  = "${php::config::configdir}/${version}"
+Line 29:   $php_ini              = "${version_config_root}/php.ini"
+Line 30:   $conf_d               = "${version_config_root}/conf.d"
+Line 31: 
+Line 32:   # Module location for PHP extensions
+Line 33:   $module_dir = "${dest}/modules"
+Line 34: 
+Line 35:   # Data directory for this version
+Line 36:   $version_data_root = "${php::config::datadir}/${version}"
+Line 37: 
+Line 38:   if $ensure == 'absent' {
+Line 39: 
+Line 40:     # If we're nuking a version of PHP also ensure we shut down
+Line 41:     # and get rid of the PHP FPM Service & config
+Line 42: 
+Line 43:     php::fpm { $version:
+Line 44:       ensure => 'absent'
+Line 45:     }
+Line 46: 
+Line 47:     file {
+Line 48:       [
+Line 49:         $dest,
+Line 50:         $version_config_root,
+Line 51:         $version_data_root,
+Line 52:       ]:
+Line 53:       ensure => absent,
+Line 54:       force  => true
+Line 55:     }
+Line 56: 
+Line 57:   } else {
+Line 58: 
+Line 59:     # Data directory
+Line 60: 
+Line 61:     file { $version_data_root:
+Line 62:       ensure => directory,
+Line 63:     }
+Line 64: 
+Line 65:     # Set up config directories
+Line 66: 
+Line 67:     file { $version_config_root:
+Line 68:       ensure => directory,
+Line 69:     }
+Line 70: 
+Line 71:     file { $conf_d:
+Line 72:       ensure  => directory,
+Line 73:       purge   => true,
+Line 74:       force   => true,
+Line 75:       require => File[$version_config_root],
+Line 76:     }
+Line 77: 
+Line 78:     # Ensure module dir is created for extensions AFTER php is installed
+Line 79:     file { $module_dir:
+Line 80:       ensure  => directory,
+Line 81:       require => Php_version[$version],
+Line 82:     }
+Line 83: 
+Line 84:     # Set up config files
+Line 85: 
+Line 86:     file { $php_ini:
+Line 87:       content => template('php/php.ini.erb'),
+Line 88:       require => File[$version_config_root]
+Line 89:     }
+Line 90: 
+Line 91:     # Log files
+Line 92: 
+Line 93:     file { $error_log:
+Line 94:       owner => $::boxen_user,
+Line 95:       mode  => '0644',
+Line 96:     }
+Line 97: 
+Line 98:     # Install PHP!
+Line 99: 
+Line 100:     php_version { $version:
+Line 101:       user          => $::boxen_user,
+Line 102:       user_home     => "/Users/${::boxen_user}",
+Line 103:       phpenv_root   => $php::config::root,
+Line 104:       version       => $version,
+Line 105:       homebrew_path => $boxen::config::homebrewdir,
+Line 106:       require       => [
+Line 107:         Repository["${php::config::root}/php-src"],
+Line 108:         Package['gettext'],
+Line 109:         Package['boxen/brews/freetypephp'],
+Line 110:         Package['gmp'],
+Line 111:         Package['icu4c'],
+Line 112:         Package['jpeg'],
+Line 113:         Package['libpng'],
+Line 114:         Package['mcrypt'],
+Line 115:         Package['boxen/brews/zlibphp'],
+Line 116:         Package['autoconf'],
+Line 117:         Package['boxen/brews/autoconf213'],
+Line 118:       ],
+Line 119:       notify        => Exec["phpenv-rehash-post-install-${version}"],
+Line 120:     }
+Line 121: 
+Line 122:     # Fix permissions for php versions installed prior to 0.3.5 of this module
+Line 123:     file { $dest:
+Line 124:       ensure  => directory,
+Line 125:       owner   => $::boxen_user,
+Line 126:       group   => 'staff',
+Line 127:       recurse => true,
+Line 128:       require => Php_version[$version],
+Line 129:     }
+Line 130: 
+Line 131:     # Rehash phpenv shims when a new version is installed
+Line 132:     exec { "phpenv-rehash-post-install-${version}":
+Line 133:       command     => "/bin/rm -rf ${php::config::root}/shims && PHPENV_ROOT=${php::config::root} ${php::config::root}/bin/phpenv rehash",
+Line 134:       require     => Php_version[$version],
+Line 135:       refreshonly => true,
+Line 136:     }
+Line 137: 
+Line 138:     # PEAR cruft
+Line 139: 
+Line 140:     # Ensure per version PEAR cache folder is present
+Line 141:     file { "${version_data_root}/cache":
+Line 142:       ensure  => directory,
+Line 143:       require => File[$version_data_root],
+Line 144:     }
+Line 145: 
+Line 146:     # Set cache_dir for PEAR
+Line 147:     exec { "pear-${version}-cache_dir":
+Line 148:       command => "${dest}/bin/pear config-set cache_dir ${php::config::datadir}/pear",
+Line 149:       unless  => "${dest}/bin/pear config-get cache_dir | grep -i ${php::config::datadir}/pear",
+Line 150:       require => [
+Line 151:         Php_version[$version],
+Line 152:         File["${php::config::datadir}/pear"],
+Line 153:       ],
+Line 154:     }
+Line 155: 
+Line 156:     # Set download_dir for PEAR
+Line 157:     exec { "pear-${version}-download_dir":
+Line 158:       command => "${dest}/bin/pear config-set download_dir ${php::config::datadir}/pear",
+Line 159:       unless  => "${dest}/bin/pear config-get download_dir | grep -i ${php::config::datadir}/pear",
+Line 160:       require => [
+Line 161:         Php_version[$version],
+Line 162:         File["${php::config::datadir}/pear"],
+Line 163:       ],
+Line 164:     }
+Line 165: 
+Line 166:     # Set temp_dir for PEAR
+Line 167:     exec { "pear-${version}-temp_dir":
+Line 168:       command => "${dest}/bin/pear config-set temp_dir ${php::config::datadir}/pear",
+Line 169:       unless  => "${dest}/bin/pear config-get temp_dir | grep -i ${php::config::datadir}/pear",
+Line 170:       require => [
+Line 171:         Php_version[$version],
+Line 172:         File["${php::config::datadir}/pear"],
+Line 173:       ],
+Line 174:     }
+Line 175: 
+Line 176:   }
+Line 177: }
+Line 178: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

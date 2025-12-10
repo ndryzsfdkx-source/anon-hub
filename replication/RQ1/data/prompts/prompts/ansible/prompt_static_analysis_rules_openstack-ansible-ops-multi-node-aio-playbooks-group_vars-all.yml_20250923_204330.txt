@@ -1,0 +1,273 @@
+# CONSTRUCTED PROMPT
+# File: openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.600229
+# Length: 11855 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 3: # you may not use this file except in compliance with the License.
+Line 4: # You may obtain a copy of the License at
+Line 5: #
+Line 6: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 7: #
+Line 8: # Unless required by applicable law or agreed to in writing, software
+Line 9: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 10: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 11: # See the License for the specific language governing permissions and
+Line 12: # limitations under the License.
+Line 13: 
+Line 14: default_interface: "{{ default_network | default('eth0') }}"
+Line 15: default_vm_image: "{{ default_image | default('ubuntu-16.04-amd64') }}"
+Line 16: default_vm_storage: "{{ vm_disk_size | default(92160) }}"
+Line 17: default_vm_root_disk_size: 8192
+Line 18: default_acng_bind_address: 0.0.0.0
+Line 19: default_os_families:
+Line 20:   ubuntu-16.04-amd64: debian
+Line 21:   ubuntu-14.04-amd64: debian
+Line 22: 
+Line 23: default_ubuntu_kernel: linux-generic
+Line 24: default_ubuntu_mirror_proxy: 'http://10.0.2.1:3142/'
+Line 25: default_ubuntu_mirror_hostname: archive.ubuntu.com
+Line 26: default_ubuntu_mirror_directory: /ubuntu
+Line 27: 
+Line 28: default_proxy_url: 'http://10.0.2.1:3142/'
+Line 29: 
+Line 30: default_container_tech: "{{ container_tech | default('lxc') }}"
+Line 31: 
+Line 32: ipxe_kernel_base_url: "http://boot.ipxe.org"
+Line 33: 
+Line 34: # The timeout for the SSH check to the vm_servers
+Line 35: vm_ssh_timeout: 1500
+Line 36: 
+Line 37: # Whether to use snapshots (if they are available) for file-backed VM's
+Line 38: vm_use_snapshot: yes
+Line 39: 
+Line 40: # IP address, or domain name of the TFTP server
+Line 41: tftp_server: "{{ hostvars[groups['pxe_hosts'][0]]['ansible_host'] | default(ansible_host) }}"
+Line 42: # tftp_ssh_key: ''  # user defined ssh key, used to access the host
+Line 43: tftp_port: 69
+Line 44: 
+Line 45: # Default ISO images
+Line 46: images:
+Line 47:   ubuntu-18.04-amd64:
+Line 48:     image_type: "debian"
+Line 49:     network_setup: "systemd-networkd"
+Line 50:     image_os: "ubuntu"
+Line 51:     image-version: "bionic"
+Line 52:     image_kernel_options: "biosdevname=0 net.ifnames=0 auto=true priority=critical"
+Line 53:     image_netboot_kernel_url: "http://archive.ubuntu.com/ubuntu/dists/bionic/main/installer-amd64/current/images/netboot/ubuntu-installer/amd64/linux"
+Line 54:     image_netboot_initrd_url: "http://archive.ubuntu.com/ubuntu/dists/bionic/main/installer-amd64/current/images/netboot/ubuntu-installer/amd64/initrd.gz"
+Line 55:     image_configs:
+Line 56:       vm:
+Line 57:         url: "http://{{ tftp_server }}/configs/vm.config"
+Line 58:         template_name: "vm.config"
+Line 59:       vm-compute:
+Line 60:         url: "http://{{ tftp_server }}/configs/vm-compute.config"
+Line 61:         template_name: "vm-compute.config"
+Line 62:   ubuntu-16.04-amd64:
+Line 63:     image_type: "debian"
+Line 64:     network_setup: "eni"
+Line 65:     image_os: "ubuntu"
+Line 66:     image-version: "xenial"
+Line 67:     image_kernel_options: "biosdevname=0 net.ifnames=0 auto=true priority=critical"
+Line 68:     image_netboot_kernel_url: "http://archive.ubuntu.com/ubuntu/dists/xenial/main/installer-amd64/current/images/netboot/ubuntu-installer/amd64/linux"
+Line 69:     image_netboot_initrd_url: "http://archive.ubuntu.com/ubuntu/dists/xenial/main/installer-amd64/current/images/netboot/ubuntu-installer/amd64/initrd.gz"
+Line 70:     image_configs:
+Line 71:       vm:
+Line 72:         url: "http://{{ tftp_server }}/configs/vm.config"
+Line 73:         template_name: "vm.config"
+Line 74:       vm-compute:
+Line 75:         url: "http://{{ tftp_server }}/configs/vm-compute.config"
+Line 76:         template_name: "vm-compute.config"
+Line 77:   ubuntu-14.04-amd64:
+Line 78:     image_type: "debian"
+Line 79:     network_setup: "eni"
+Line 80:     image_os: "ubuntu"
+Line 81:     image_version: "trusty"
+Line 82:     image_kernel_options: "biosdevname=0 net.ifnames=0 auto=true priority=critical quiet splash"
+Line 83:     image_netboot_kernel_url: "http://archive.ubuntu.com/ubuntu/dists/trusty/main/installer-amd64/current/images/netboot/ubuntu-installer/amd64/linux"
+Line 84:     image_netboot_initrd_url: "http://archive.ubuntu.com/ubuntu/dists/trusty/main/installer-amd64/current/images/netboot/ubuntu-installer/amd64/initrd.gz"
+Line 85:     image_configs:
+Line 86:       vm:
+Line 87:         url: "http://{{ tftp_server }}/configs/vm.config"
+Line 88:         template_name: "vm.config"
+Line 89:       vm-compute:
+Line 90:         url: "http://{{ tftp_server }}/configs/vm-compute.config"
+Line 91:         template_name: "vm-compute.config"
+Line 92:   centos-7-amd64:
+Line 93:     image_type: "redhat"
+Line 94:     network_setup: "systemd-networkd"
+Line 95:     image_version: 7
+Line 96:     image_netboot_kernel_url: "http://mirrors.edge.kernel.org/centos/7/os/x86_64/images/pxeboot/vmlinuz"
+Line 97:     image_netboot_initrd_url: "http://mirrors.edge.kernel.org/centos/7/os/x86_64/images/pxeboot/initrd.img"
+Line 98:     image_repo_base_url: "http://mirrors.edge.kernel.org/centos/7"
+Line 99:     image_kernel_options: ""
+Line 100:     image_configs:
+Line 101:       vm:
+Line 102:         url: "http://{{ tftp_server }}/configs/vm.config"
+Line 103:         template_name: "vm.config"
+Line 104:       vm-compute:
+Line 105:         url: "http://{{ tftp_server }}/configs/vm-compute.config"
+Line 106:         template_name: "vm-compute.config"
+Line 107: 
+Line 108: # mnaio_data_disk: 'sdc'  # str - not required, set this to define a given data disk if no data disk
+Line 109: #                                               is defined the largest unpartitioned disk will be used.
+Line 110: mnaio_host_networks:
+Line 111:   dhcp:
+Line 112:     iface: 'vm-br-dhcp'                 # str  - required, interface name
+Line 113:     inet_type: 'static'                 # str  - required, iface type [static, dhcp, manual]
+Line 114:     address: '10.0.2.1/22'              # str  - not required, must be in CIDR format
+Line 115:     iface_port: none                    # str  - required, physical port used within a host bridge
+Line 116:     address_aliases:                    # list - not required, items must be sting and in CIDR format
+Line 117:       - '10.0.2.2/22'
+Line 118:   mgmt:
+Line 119:     iface: 'vm-br-eth1'
+Line 120:     inet_type: 'static'
+Line 121:     address: '10.0.236.1/22'
+Line 122:     iface_port: none
+Line 123:   flat:
+Line 124:     iface: 'vm-br-eth2'
+Line 125:     inet_type: 'static'
+Line 126:     address: '10.0.248.1/22'
+Line 127:     iface_port: none
+Line 128:   vlan:
+Line 129:     iface: 'vm-br-eth3'
+Line 130:     inet_type: 'manual'
+Line 131:     iface_port: none
+Line 132:   vxlan:
+Line 133:     iface: 'vm-br-eth4'
+Line 134:     inet_type: 'static'
+Line 135:     address: '10.0.240.1/22'
+Line 136:     iface_port: none
+Line 137:   storage:
+Line 138:     iface: 'vm-br-eth5'
+Line 139:     inet_type: 'static'
+Line 140:     address: '10.0.244.1/22'
+Line 141:     iface_port: none
+Line 142:   lbaas:
+Line 143:     iface: 'vm-br-eth6'
+Line 144:     inet_type: 'static'
+Line 145:     address: '10.0.232.1/22'
+Line 146:     iface_port: none
+Line 147: 
+Line 148: osa_enable_infra: true
+Line 149: osa_enable_identity: true
+Line 150: osa_enable_block_storage: "{{ not (enable_ceph_storage | bool) }}"
+Line 151: osa_enable_image: true
+Line 152: osa_enable_lbaas: false
+Line 153: osa_enable_compute: true
+Line 154: osa_enable_orchestration: true
+Line 155: osa_enable_dashboard: true
+Line 156: osa_enable_network: true
+Line 157: osa_enable_meter: false
+Line 158: osa_enable_object_storage: "{{ not (enable_ceph_storage | bool) }}"
+Line 159: osa_enable_legacy_os_infra: "{{ (osa_enable_image | bool) and (osa_enable_orchestration | bool) and (osa_enable_dashboard | bool) and (osa_enable_compute | bool) }}"
+Line 160: osa_disable_serial: false
+Line 161: osa_enable_elk_metrics: false
+Line 162: osa_enable_os_profiler: false
+Line 163: osa_enable_uwsgi_stats: false
+Line 164: 
+Line 165: # Ceph
+Line 166: enable_ceph_storage: false
+Line 167: ceph_journal_size: 5120
+Line 168: ceph_osds_filesystem_type: 'xfs'
+Line 169: 
+Line 170: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

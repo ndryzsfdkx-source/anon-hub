@@ -1,0 +1,155 @@
+# CONSTRUCTED PROMPT
+# File: openstack@fuel-library-deployment-puppet-cluster-manifests-conntrackd_ocf.pp
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.389746
+# Length: 6589 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack@fuel-library-deployment-puppet-cluster-manifests-conntrackd_ocf.pp (Puppet)**
+
+
+Line 1: class cluster::conntrackd_ocf (
+Line 2:   $vrouter_name,
+Line 3:   $bind_address,
+Line 4:   $mgmt_bridge,
+Line 5: ) {
+Line 6:   $service_name = 'p_conntrackd'
+Line 7:   $conntrackd_package = 'conntrackd'
+Line 8: 
+Line 9:   package { $conntrackd_package:
+Line 10:     ensure => 'installed',
+Line 11:   } ->
+Line 12: 
+Line 13:   file { '/etc/conntrackd/conntrackd.conf':
+Line 14:     content => template('cluster/conntrackd.conf.erb'),
+Line 15:   } ->
+Line 16: 
+Line 17:   service { $service_name :
+Line 18:     ensure   => 'running',
+Line 19:     enable   => true,
+Line 20:   }
+Line 21: 
+Line 22:   tweaks::ubuntu_service_override { 'conntrackd': }
+Line 23: 
+Line 24:   $primitive_class    = 'ocf'
+Line 25:   $primitive_provider = 'fuel'
+Line 26:   $primitive_type     = 'ns_conntrackd'
+Line 27:   $metadata           = {
+Line 28:     'migration-threshold' => 'INFINITY',
+Line 29:     'failure-timeout'     => '180s'
+Line 30:   }
+Line 31:   $parameters = {
+Line 32:     'bridge' => $mgmt_bridge,
+Line 33:   }
+Line 34:   $complex_type       = 'master'
+Line 35:   $complex_metadata   = {
+Line 36:     'notify'          => 'true',
+Line 37:     'ordered'         => 'false',
+Line 38:     'interleave'      => 'true',
+Line 39:     'clone-node-max'  => '1',
+Line 40:     'master-max'      => '1',
+Line 41:     'master-node-max' => '1',
+Line 42:     'target-role'     => 'Master'
+Line 43:   }
+Line 44:   $operations         = {
+Line 45:     'monitor'  => {
+Line 46:       'interval' => '30',
+Line 47:       'timeout'  => '60'
+Line 48:     },
+Line 49:     'monitor:Master' => {
+Line 50:       'role'         => 'Master',
+Line 51:       'interval'     => '27',
+Line 52:       'timeout'      => '60'
+Line 53:     },
+Line 54:   }
+Line 55: 
+Line 56:   pacemaker::service { $service_name :
+Line 57:     prefix             => false,
+Line 58:     primitive_class    => $primitive_class,
+Line 59:     primitive_provider => $primitive_provider,
+Line 60:     primitive_type     => $primitive_type,
+Line 61:     metadata           => $metadata,
+Line 62:     parameters         => $parameters,
+Line 63:     complex_type       => $complex_type,
+Line 64:     complex_metadata   => $complex_metadata,
+Line 65:     operations         => $operations,
+Line 66:   }
+Line 67: 
+Line 68:   pcmk_colocation { "conntrackd-with-${vrouter_name}-vip":
+Line 69:     first  => "vip__vrouter_${vrouter_name}",
+Line 70:     second => 'master_p_conntrackd:Master',
+Line 71:   }
+Line 72: 
+Line 73:   File['/etc/conntrackd/conntrackd.conf'] ->
+Line 74:   Pcmk_resource[$service_name] ->
+Line 75:   Service[$service_name] ->
+Line 76:   Pcmk_colocation["conntrackd-with-${vrouter_name}-vip"]
+Line 77: 
+Line 78:   # Workaround to ensure log is rotated properly
+Line 79:   file { '/etc/logrotate.d/conntrackd':
+Line 80:     content => template('openstack/95-conntrackd.conf.erb'),
+Line 81:   }
+Line 82: 
+Line 83:   Package[$conntrackd_package] -> File['/etc/logrotate.d/conntrackd']
+Line 84: }
+Line 85: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

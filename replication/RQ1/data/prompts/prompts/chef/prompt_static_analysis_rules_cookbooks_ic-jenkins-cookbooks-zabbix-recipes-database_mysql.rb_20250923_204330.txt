@@ -1,0 +1,267 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-jenkins-cookbooks-zabbix-recipes-database_mysql.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.615209
+# Length: 11796 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-jenkins-cookbooks-zabbix-recipes-database_mysql.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Cookbook Name::       zabbix
+Line 3: # Description::         Configures Zabbix MySQL database.
+Line 4: # Recipe::              database_mysql
+Line 5: # Author::              Nacer Laradji (<nacer.laradji@gmail.com>)
+Line 6: #
+Line 7: # Copyright 2011, Efactures
+Line 8: #
+Line 9: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 10: # you may not use this file except in compliance with the License.
+Line 11: # You may obtain a copy of the License at
+Line 12: #
+Line 13: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 14: #
+Line 15: # Unless required by applicable law or agreed to in writing, software
+Line 16: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 17: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 18: # See the License for the specific language governing permissions and
+Line 19: # limitations under the License.
+Line 20: #
+Line 21: 
+Line 22: include_recipe 'mysql::client'
+Line 23: 
+Line 24: # Establish root MySQL connection
+Line 25: root_mysql_conn    = {:host => node.zabbix.database.host, :username => node.zabbix.database.root_user, :password => node.zabbix.database.root_password}
+Line 26: base_mysql_command = "/usr/bin/mysql -h #{node.zabbix.database.host} -u #{node.zabbix.database.root_user} #{node.zabbix.database.name} -p#{node.zabbix.database.root_password}"
+Line 27: 
+Line 28: # Ensure we have the mysql gem available at *compile* time.
+Line 29: begin
+Line 30:   require 'mysql'
+Line 31: rescue LoadError
+Line 32:   case node[:platform]
+Line 33:   when 'ubuntu', 'debian'
+Line 34:     package("libmysqlclient16-dev") {action :nothing }.run_action(:install)
+Line 35:   when 'centos'
+Line 36:     package("mysql-devel") {action :nothing }.run_action(:install)
+Line 37:   else
+Line 38:     Chef::Log.warn "No native MySQL client support for OS #{node[:platform]}"
+Line 39:   end
+Line 40:   gem_package("mysql") { action :nothing }.run_action(:install)
+Line 41:   Gem.clear_paths
+Line 42:   require 'mysql'
+Line 43: end
+Line 44: 
+Line 45: # Only execute if database is missing...
+Line 46: begin
+Line 47:   mysql_connection = Mysql.new(node.zabbix.database.host,node.zabbix.database.root_user,node.zabbix.database.root_password)
+Line 48: rescue Mysql::Error => e
+Line 49:   Chef::Log.error(e.message)
+Line 50:   mysql_connection = nil
+Line 51: end
+Line 52:   
+Line 53: if mysql_connection && mysql_connection.list_dbs.include?(node.zabbix.database.name) == false
+Line 54: 
+Line 55:   # Create Zabbix database
+Line 56:   mysql_database node.zabbix.database.name do
+Line 57:     connection root_mysql_conn
+Line 58:     action     :create
+Line 59:     notifies   :run,    "execute[zabbix_populate_schema]",          :immediately
+Line 60:     notifies   :run,    "execute[zabbix_populate_data]",            :immediately
+Line 61:     notifies   :run,    "execute[zabbix_populate_image]",           :immediately
+Line 62:     notifies   :run,    "execute[zabbix_clean_db]",                 :immediately
+Line 63:     notifies   :create, "template[/etc/zabbix/zabbix_server.conf]", :immediately
+Line 64:   end
+Line 65: 
+Line 66:   # Create Zabbix database user
+Line 67:   mysql_database_user node.zabbix.database.user do
+Line 68:     connection root_mysql_conn
+Line 69:     password   node.zabbix.database.password
+Line 70:     action     :create
+Line 71:   end
+Line 72: 
+Line 73:   # Grant Zabbix user to connect from *this* node.  We do this even if
+Line 74:   # the database already exists to handle the situation in which this
+Line 75:   # node's IP changes (e.g. - during stop/start).
+Line 76:   mysql_client_address = case node.zabbix.database.host
+Line 77:                          when 'localhost'; 'localhost';
+Line 78:                          else ; node.fqdn
+Line 79:                          end
+Line 80:   
+Line 81:   mysql_database_user node.zabbix.database.user do
+Line 82:     connection    root_mysql_conn
+Line 83:     password      node.zabbix.database.password
+Line 84:     host          mysql_client_address     # connections only allowed from *this* node
+Line 85:     database_name node.zabbix.database.name
+Line 86:     privileges    [:select,:update,:insert,:create,:drop,:delete]
+Line 87:     action        :grant
+Line 88:   end
+Line 89:   
+Line 90:   # Populate Zabbix database
+Line 91:   populate_command = "#{base_mysql_command} < /opt/zabbix-#{node.zabbix.server.version}"
+Line 92:   execute "zabbix_populate_schema" do
+Line 93:     command "#{populate_command}/create/schema/mysql.sql"
+Line 94:     action :nothing
+Line 95:   end
+Line 96:   execute "zabbix_populate_data" do
+Line 97:     command "#{populate_command}/create/data/data.sql"
+Line 98:     action :nothing
+Line 99:   end
+Line 100:   execute "zabbix_populate_image" do
+Line 101:     command "#{populate_command}/create/data/images_mysql.sql"
+Line 102:     action :nothing
+Line 103:   end
+Line 104: 
+Line 105:   # Clean Zabbix database
+Line 106:   # 
+Line 107:   # - get rid of the default admin user
+Line 108:   # - get rid of all the default hosts and templates
+Line 109:   execute "zabbix_clean_db" do
+Line 110:     command "#{base_mysql_command} -e 'DELETE FROM users WHERE `alias`=\"admin\"; DELETE FROM hosts;'"
+Line 111:     action :nothing
+Line 112:   end
+Line 113: end
+Line 114: 
+Line 115: # Sets up the Zabbix database for downstream access by other LWRP
+Line 116: # pairs.  This block will
+Line 117: #
+Line 118: # - create a Zabbix admin user
+Line 119: # - an "API access" group
+Line 120: # - put the "Admin" user in the group
+Line 121: #
+Line 122: # The created admin user will be used by other LWRP resources in this
+Line 123: # cookbook.
+Line 124: ruby_block "zabbix_ensure_super_admin_user_with_api_access" do
+Line 125:   block do
+Line 126:     username   = node.zabbix.api.username
+Line 127:     first_name = 'Zabbix'
+Line 128:     last_name  = 'Administrator'
+Line 129:     md5        = Digest::MD5.hexdigest(node.zabbix.api.password)
+Line 130:     rows       = 200
+Line 131:     type       = 3
+Line 132:     grp_name   = node.zabbix.api.user_group
+Line 133:     api_access = 1
+Line 134: 
+Line 135:     mysql_connection = Mysql.new(node.zabbix.database.host,node.zabbix.database.root_user,node.zabbix.database.root_password)
+Line 136:     mysql_connection.query(%Q{USE #{node.zabbix.database.name}})
+Line 137: 
+Line 138:     existing_users = mysql_connection.query(%Q{SELECT userid FROM users WHERE `alias`="#{username}"})
+Line 139:     if existing_users.num_rows == 0
+Line 140:       mysql_connection.query(%Q{INSERT INTO users (alias, name, surname, passwd, rows_per_page, type) VALUES ("#{username}", "#{first_name}", "#{last_name}", "#{md5}", #{rows}, #{type})})
+Line 141:       userid = mysql_connection.query(%Q{SELECT userid FROM users WHERE `alias`="#{username}"}).fetch_row.first.to_i
+Line 142:     else
+Line 143:       userid = existing_users.fetch_row.first.to_i
+Line 144:       mysql_connection.query(%Q{UPDATE users SET `alias`="#{username}", name="#{first_name}", surname="#{last_name}", passwd="#{md5}", rows_per_page=#{rows}, type=#{type} WHERE userid="#{userid}"})
+Line 145:     end
+Line 146: 
+Line 147:     existing_groups = mysql_connection.query(%Q{SELECT usrgrpid FROM usrgrp WHERE name="#{grp_name}"})
+Line 148:     if existing_groups.num_rows == 0
+Line 149:       mysql_connection.query(%Q{INSERT INTO usrgrp (name, api_access) VALUES ("#{grp_name}", #{api_access})})
+Line 150:       usrgrpid = mysql_connection.query(%Q{SELECT usrgrpid FROM usrgrp WHERE name="#{grp_name}"}).fetch_row.first.to_i
+Line 151:     else
+Line 152:       usrgrpid = existing_groups.fetch_row.first.to_i
+Line 153:       mysql_connection.query(%Q{UPDATE usrgrp SET name="#{grp_name}", api_access=#{api_access} WHERE usrgrpid=#{usrgrpid}})
+Line 154:     end
+Line 155: 
+Line 156:     existing_join = mysql_connection.query(%Q{SELECT id FROM users_groups WHERE usrgrpid=#{usrgrpid} AND userid=#{userid}})
+Line 157:     if existing_join.num_rows == 0
+Line 158:       mysql_connection.query(%Q{INSERT INTO users_groups (usrgrpid, userid) VALUES (#{usrgrpid}, #{userid})})
+Line 159:     end
+Line 160: 
+Line 161:   end
+Line 162:   notifies :restart, "service[zabbix_server]"
+Line 163: end
+Line 164: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

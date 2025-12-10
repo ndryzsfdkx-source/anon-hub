@@ -1,0 +1,115 @@
+# CONSTRUCTED PROMPT
+# File: openstack-ansible-ops-leap-upgrades-upgrade-utilities-mitaka-playbooks-deploy-config-changes-mitaka.yml
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.344850
+# Length: 5619 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack-ansible-ops-leap-upgrades-upgrade-utilities-mitaka-playbooks-deploy-config-changes-mitaka.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: # Copyright 2016, Rackspace US, Inc.
+Line 3: #
+Line 4: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 5: # you may not use this file except in compliance with the License.
+Line 6: # You may obtain a copy of the License at
+Line 7: #
+Line 8: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 9: #
+Line 10: # Unless required by applicable law or agreed to in writing, software
+Line 11: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 12: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 13: # See the License for the specific language governing permissions and
+Line 14: # limitations under the License.
+Line 15: 
+Line 16: - name: Upgrade environment/inventory configuration
+Line 17:   hosts: localhost
+Line 18:   connection: local
+Line 19:   gather_facts: false
+Line 20:   user: root
+Line 21:   tasks:
+Line 22:       - name: Create an old copy of openstack_deploy
+Line 23:         copy:
+Line 24:           src: "/etc/openstack_deploy/"
+Line 25:           dest: "/etc/openstack_deploy.LIBERTY/"
+Line 26:           force: no
+Line 27: 
+Line 28:       - name: Copy new env.d files into place
+Line 29:         copy:
+Line 30:             src: "{{ repo_root_dir }}/etc/openstack_deploy/env.d/{{ item }}.yml"
+Line 31:             dest: "/etc/openstack_deploy/env.d/{{ item }}.yml"
+Line 32:             force: no
+Line 33:         with_items:
+Line 34:             - ironic
+Line 35: 
+Line 36:       - name: Update OpenStack variable names
+Line 37:         command: "{{ playbook_dir }}/../scripts/migrate_openstack_vars.py {{ item }} {{ (item | basename)[:-4] }}"
+Line 38:         args:
+Line 39:             creates: "/etc/openstack_deploy.LIBERTY/VARS_MIGRATED_{{ (item | basename)[:-4] }}"
+Line 40:         with_fileglob:
+Line 41:           - "/etc/openstack_deploy/user_*.yml"
+Line 42:   vars:
+Line 43:       repo_root_dir: "{{ osa_playbook_dir }}/"
+Line 44: 
+Line 45: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

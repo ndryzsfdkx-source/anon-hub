@@ -1,0 +1,188 @@
+# CONSTRUCTED PROMPT
+# File: browbeat-ansible-install-roles-grafana-dashboards-templates-partials-ironic_metrics.yaml
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.338292
+# Length: 8546 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: browbeat-ansible-install-roles-grafana-dashboards-templates-partials-ironic_metrics.yaml (Ansible/YAML)**
+
+
+Line 1:     - title: Ironic StatsD power state
+Line 2:       collapse: true
+Line 3:       height: 200px
+Line 4:       showTitle: true
+Line 5:       panels:
+Line 6:         - title: "Power State Sync: 90th Percentile Mean"
+Line 7:           type: graph
+Line 8:           legend:
+Line 9:             show: true
+Line 10:           nullPointMode: 'null'
+Line 11:           span: 6
+Line 12:           targets:
+Line 13:             - target: stats.timers.$Cloud.ironic.conductor.manager.do_sync_power_state.mean_90
+Line 14:           yaxes:
+Line 15:             - format: short
+Line 16:               label: Milliseconds
+Line 17:             - format: short
+Line 18:         - title: "Change Node Power State: 90th percentile mean"
+Line 19:           type: graph
+Line 20:           legend:
+Line 21:             show: true
+Line 22:           nullPointMode: 'null'
+Line 23:           span: 6
+Line 24:           targets:
+Line 25:             - target: stats.timers.$Cloud.ironic.conductor.manager.ConductorManager.change_node_power_state.mean_90
+Line 26:           yaxes:
+Line 27:             - format: short
+Line 28:               label: Milliseconds
+Line 29:             - format: short
+Line 30:     - title: Ironic StatsD boot/deployment info
+Line 31:       collapse: true
+Line 32:       height: 200px
+Line 33:       showTitle: true
+Line 34:       panels:
+Line 35:         - title: "Set boot device: 90th percentile mean"
+Line 36:           type: graph
+Line 37:           legend:
+Line 38:             show: true
+Line 39:           nullPointMode: 'null'
+Line 40:           span: 6
+Line 41:           targets:
+Line 42:             - target: stats.timers.$Cloud.ironic.conductor.manager.ConductorManager.set_boot_device.mean_90
+Line 43:           yaxes:
+Line 44:             - format: short
+Line 45:               label: Milliseconds
+Line 46:             - format: short
+Line 47:         - title: "Do Node Deployment: 90th percentile mean"
+Line 48:           type: graph
+Line 49:           legend:
+Line 50:             show: true
+Line 51:           nullPointMode: 'null'
+Line 52:           span: 6
+Line 53:           targets:
+Line 54:             - target: stats.timers.$Cloud.ironic.conductor.manager.ConductorManager.do_node_deploy.mean_90
+Line 55:           yaxes:
+Line 56:             - format: short
+Line 57:               label: Milliseconds
+Line 58:             - format: short
+Line 59:     - title: Ironic StatsD API node details/list response time
+Line 60:       collapse: true
+Line 61:       height: 200px
+Line 62:       showTitle: true
+Line 63:       panels:
+Line 64:         - title: "Get Node Details API response time: 90th percentile mean"
+Line 65:           type: graph
+Line 66:           legend:
+Line 67:             show: true
+Line 68:           nullPointMode: 'null'
+Line 69:           span: 6
+Line 70:           targets:
+Line 71:             - target: stats.timers.$Cloud.ironic.api.controllers.v1.node.NodesController.detail.mean_90
+Line 72:           yaxes:
+Line 73:             - format: short
+Line 74:               label: Milliseconds
+Line 75:             - format: short
+Line 76:         - title: "Get Node List API response time: 90th Percentile mean"
+Line 77:           type: graph
+Line 78:           legend:
+Line 79:             show: true
+Line 80:           nullPointMode: 'null'
+Line 81:           span: 6
+Line 82:           targets:
+Line 83:             - target: stats.timers.$Cloud.ironic.api.controllers.v1.node.NodesController.get_all.mean_90
+Line 84:           yaxes:
+Line 85:             - format: short
+Line 86:               label: Milliseconds
+Line 87:             - format: short
+Line 88:     - title: Ironic StatsD API power/provision state
+Line 89:       collapse: true
+Line 90:       height: 200px
+Line 91:       showTitle: true
+Line 92:       panels:
+Line 93:         - title: "Node Power State API response time: 90th Percentile Mean"
+Line 94:           type: graph
+Line 95:           legend:
+Line 96:             show: true
+Line 97:           nullPointMode: 'null'
+Line 98:           span: 6
+Line 99:           targets:
+Line 100:             - target: stats.timers.$Cloud.ironic.api.controllers.v1.node.NodeStatesController.power.mean_90
+Line 101:           yaxes:
+Line 102:             - format: short
+Line 103:               label: Milliseconds
+Line 104:             - format: short
+Line 105:         - title: "Ironic Node Provision State API response time: 90th percentile mean"
+Line 106:           type: graph
+Line 107:           legend:
+Line 108:             show: true
+Line 109:           nullPointMode: 'null'
+Line 110:           span: 6
+Line 111:           targets:
+Line 112:             - target: stats.timers.$Cloud.ironic.api.controllers.v1.node.NodeStatesController.provision.mean_90
+Line 113:           yaxes:
+Line 114:             - format: short
+Line 115:               label: Milliseconds
+Line 116:             - format: short
+Line 117: 
+Line 118: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

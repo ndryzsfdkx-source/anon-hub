@@ -6,39 +6,26 @@
 
 > An Intelligent Analyzer for IaC Security Smell Detection via Rule and Neural Inference
 
-This is the research hub for **IntelliSA**, a system that combines static analysis with Large Language Models to reduce false positives in Infrastructure-as-Code (IaC) security scanning.
-
 **Paper**: "IntelliSA: An Intelligent Analyzer for IaC Security Smell Detection via Rule and Neural Inference"
 
 ## Overview
 
-**Problem**: Static analysis tools generate high false positive rates, causing alert fatigue and preventing widespread adoption.
+**Problem**: Static analysis tools generate high false positive rates, causing alert fatigue.
 
-**Solution**: IntelliSA uses rule-based detection combined with neural inference to distinguish true security vulnerabilities from false alarms while maintaining high recall.
+**Solution**: IntelliSA combines rule-based detection with neural inference to filter false positives while maintaining high recall.
 
 **Target**: 9 security smell categories across Ansible, Chef, and Puppet.
 
+## Artifact Scope
+
+- Datasets live in `replication/datasets/` (oracle + training splits).
+- Reproduce Tables 2–6 via `replication/RQ*/run_rq*.sh` (RQ1–RQ3).
+- Run the IntelliSA CLI on the oracle dataset to see end-to-end behavior.
+- Optional internals (for curiosity only): early experiments and training pipeline are linked below.
+
 ## Repositories
 
-### 1. IntelliSA-Experiments
-
-Early-stage methodology exploration and evaluation.
-
-- Comparative evaluation of pure vs post-filter LLM approaches
-- Pseudo-labeled dataset generation
-
-**GitHub**: [IntelliSA-Experiments](https://github.com/ndryzsfdkx-source/anon-experiments)
-
-### 2. IntelliSA-Models
-
-Systematic training pipeline for encoder models.
-
-- Broad candidate selection and Focused hyperparameter tuning
-- Final optimization and Multi-seed stability testing
-
-**GitHub**: [IntelliSA-Models](https://github.com/ndryzsfdkx-source/anon-models)
-
-### 3. IntelliSA-CLI
+### IntelliSA-CLI
 
 Production-ready CLI tool implementing the IntelliSA method.
 
@@ -49,21 +36,18 @@ Production-ready CLI tool implementing the IntelliSA method.
 
 **GitHub**: [intellisa-cli](https://github.com/ndryzsfdkx-source/anon-cli)
 
-## Paper Materials
+### Optional internals
 
-- Pre-print: `paper/preprint.pdf`
-- Camera-ready: `paper/camera-ready.pdf`
-- Supplementary: `paper/supplementary/`
-- Citation: `paper/citation.bib`
+- [anon-experiments](../anon-experiments): Early GLITCH analysis, LLM prompting trials, and pseudo-label generation scripts.
+- [anon-models](../anon-models): Full student-model training and distillation pipeline used to produce the CLI’s postfilter model.
+
+## Data & Replication
+
+- Everything to rerun Tables 2–6 and grab datasets: see `replication/` (details in `replication/README.md`).
 
 ## Artifact Reproducibility
 
 See `artifact/release-manifest.yaml` for pinned commit SHAs, model versions, dataset versions, and tool dependencies used to generate paper results.
-
-## Documentation
-
-- [Links](links.md) - Deep links to sub-repos and resources
-- User guide for CLI Tool: `intellisa-cli/docs/USER_HANDBOOK.md`
 
 ## License
 

@@ -1,0 +1,237 @@
+# CONSTRUCTED PROMPT
+# File: aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.610812
+# Length: 8629 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb (Unknown)**
+
+
+Line 1: # frozen_string_literal: true
+Line 2: 
+Line 3: #
+Line 4: # Cookbook:: aws-parallelcluster-slurm
+Line 5: # Recipe:: install_slurm
+Line 6: #
+Line 7: # Copyright:: 2013-2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+Line 8: #
+Line 9: # Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance with the
+Line 10: # License. A copy of the License is located at
+Line 11: #
+Line 12: # http://aws.amazon.com/apache2.0/
+Line 13: #
+Line 14: # or in the "LICENSE.txt" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+Line 15: # OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions and
+Line 16: # limitations under the License.
+Line 17: 
+Line 18: package %w(slurm* libslurm*) do
+Line 19:   action :purge
+Line 20: end
+Line 21: 
+Line 22: slurm_build_deps = value_for_platform(
+Line 23:   'ubuntu' => {
+Line 24:     'default' => %w(libjson-c-dev libhttp-parser-dev),
+Line 25:   },
+Line 26:   'default' => %w(json-c-devel http-parser-devel)
+Line 27: )
+Line 28: 
+Line 29: package slurm_build_deps do
+Line 30:   retries 3
+Line 31:   retry_delay 5
+Line 32: end
+Line 33: 
+Line 34: # Setup slurm group
+Line 35: group node['cluster']['slurm']['group'] do
+Line 36:   comment 'slurm group'
+Line 37:   gid node['cluster']['slurm']['group_id']
+Line 38:   system true
+Line 39: end
+Line 40: 
+Line 41: # Setup slurm user
+Line 42: user node['cluster']['slurm']['user'] do
+Line 43:   comment 'slurm user'
+Line 44:   uid node['cluster']['slurm']['user_id']
+Line 45:   gid node['cluster']['slurm']['group_id']
+Line 46:   # home is mounted from the head node
+Line 47:   manage_home ['HeadNode', nil].include?(node['cluster']['node_type'])
+Line 48:   home "/home/#{node['cluster']['slurm']['user']}"
+Line 49:   system true
+Line 50:   shell '/bin/bash'
+Line 51: end
+Line 52: 
+Line 53: slurm_tarball = "#{node['cluster']['sources_dir']}/slurm-#{node['cluster']['slurm']['version']}.tar.gz"
+Line 54: 
+Line 55: # Get slurm tarball
+Line 56: remote_file slurm_tarball do
+Line 57:   source node['cluster']['slurm']['url']
+Line 58:   mode '0644'
+Line 59:   retries 3
+Line 60:   retry_delay 5
+Line 61:   not_if { ::File.exist?(slurm_tarball) }
+Line 62: end
+Line 63: 
+Line 64: # Validate the authenticity of the downloaded archive based on the checksum published by SchedMD
+Line 65: ruby_block "Validate Slurm Tarball Checksum" do
+Line 66:   block do
+Line 67:     require 'digest'
+Line 68:     checksum = Digest::SHA1.file(slurm_tarball).hexdigest # nosemgrep
+Line 69:     raise "Downloaded Tarball Checksum #{checksum} does not match expected checksum #{node['cluster']['slurm']['sha1']}" if checksum != node['cluster']['slurm']['sha1']
+Line 70:   end
+Line 71: end
+Line 72: 
+Line 73: # Install Slurm
+Line 74: bash 'make install' do
+Line 75:   user 'root'
+Line 76:   group 'root'
+Line 77:   cwd Chef::Config[:file_cache_path]
+Line 78:   code <<-SLURM
+Line 79:     set -e
+Line 80: 
+Line 81:     # python3 is required to build slurm >= 20.02
+Line 82:     source #{node['cluster']['cookbook_virtualenv_path']}/bin/activate
+Line 83: 
+Line 84:     tar xf #{slurm_tarball}
+Line 85:     cd slurm-slurm-#{node['cluster']['slurm']['version']}
+Line 86:     ./configure --prefix=/opt/slurm --with-pmix=/opt/pmix --enable-slurmrestd
+Line 87:     CORES=$(grep processor /proc/cpuinfo | wc -l)
+Line 88:     make -j $CORES
+Line 89:     make install
+Line 90:     make install-contrib
+Line 91:     deactivate
+Line 92:   SLURM
+Line 93:   # TODO: Fix, so it works for upgrade
+Line 94:   creates '/opt/slurm/bin/srun'
+Line 95: end
+Line 96: 
+Line 97: # Copy required licensing files
+Line 98: directory "#{node['cluster']['license_dir']}/slurm"
+Line 99: 
+Line 100: bash 'copy license stuff' do
+Line 101:   user 'root'
+Line 102:   group 'root'
+Line 103:   cwd Chef::Config[:file_cache_path]
+Line 104:   code <<-SLURMLICENSE
+Line 105:     set -e
+Line 106:     cd slurm-slurm-#{node['cluster']['slurm']['version']}
+Line 107:     cp -v COPYING #{node['cluster']['license_dir']}/slurm/COPYING
+Line 108:     cp -v DISCLAIMER #{node['cluster']['license_dir']}/slurm/DISCLAIMER
+Line 109:     cp -v LICENSE.OpenSSL #{node['cluster']['license_dir']}/slurm/LICENSE.OpenSSL
+Line 110:     cp -v README.rst #{node['cluster']['license_dir']}/slurm/README.rst
+Line 111:   SLURMLICENSE
+Line 112:   # TODO: Fix, so it works for upgrade
+Line 113:   creates "#{node['cluster']['license_dir']}/slurm/README.rst"
+Line 114: end
+Line 115: 
+Line 116: # Install PerlSwitch
+Line 117: case node['platform']
+Line 118: when 'ubuntu'
+Line 119:   package 'libswitch-perl' do
+Line 120:     retries 3
+Line 121:     retry_delay 5
+Line 122:   end
+Line 123: when 'centos', 'amazon'
+Line 124:   package 'perl-Switch' do
+Line 125:     retries 3
+Line 126:     retry_delay 5
+Line 127:   end
+Line 128: end
+Line 129: 
+Line 130: file '/etc/ld.so.conf.d/slurm.conf' do
+Line 131:   content '/opt/slurm/lib/'
+Line 132:   mode '0744'
+Line 133: end
+Line 134: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

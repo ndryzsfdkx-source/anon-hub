@@ -1,0 +1,13 @@
+# Percent-of-LOC checkpoints for F1@N%LOC
+f1_n_percent: [0.5, 1, 2, 5, 10]
+
+# Recall targets for Effort@N%Recall
+effort_recall_targets: [60, 80, 90]
+
+# Technologies covered
+techs: [ansible, chef, puppet]
+
+# Input roots (relative to this config file's parent directory)
+paths:
+  ranking_root: inputs/ranking/by_repo_lines
+  oracle_root: inputs/oracle

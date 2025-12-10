@@ -1,0 +1,141 @@
+# CONSTRUCTED PROMPT
+# File: quintel@boxen-modules-osx-manifests-recovery_message.pp
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.398557
+# Length: 6499 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: quintel@boxen-modules-osx-manifests-recovery_message.pp (Puppet)**
+
+
+Line 1: # Public: Add a recovery message to the OS X Lock Screen
+Line 2: #
+Line 3: # Examples
+Line 4: #
+Line 5: #   osx::recovery_message { 'If this Mac is found, please call 123-123-1234': }
+Line 6: define osx::recovery_message(
+Line 7:   $ensure = 'present',
+Line 8:   $value  = $name,
+Line 9: ) {
+Line 10:   $kextdir     = '/System/Library/Extensions'
+Line 11:   $eficachedir = '/System/Library/Caches/com.apple.corestorage/EFILoginLocalizations'
+Line 12: 
+Line 13:   # The CoreStorage kext cache needs to be updated so the recovery message
+Line 14:   # is displayed on the FDE pre-boot screen.
+Line 15:   #
+Line 16:   # The CS cache can be updated directly by touching $eficachedir, if it exists.
+Line 17:   # Otherwise you will need to touch $kextdir to generate it.
+Line 18:   exec { 'Refresh system kext cache':
+Line 19:       command     => "/usr/bin/touch ${kextdir}",
+Line 20:       creates     => $eficachedir,
+Line 21:       refreshonly => true,
+Line 22:       user        => root
+Line 23:   }
+Line 24: 
+Line 25:   exec { 'Refresh CoreStorage EFI Cache':
+Line 26:       command     => "/usr/bin/touch ${eficachedir}",
+Line 27:       onlyif      => "test -d ${eficachedir}",
+Line 28:       refreshonly => true,
+Line 29:       user        => root
+Line 30:   }
+Line 31: 
+Line 32:   if $ensure == 'present' {
+Line 33:     if $value != undef {
+Line 34:       property_list_key { 'Set OS X Recovery Message':
+Line 35:         ensure => present,
+Line 36:         path   => '/Library/Preferences/com.apple.loginwindow.plist',
+Line 37:         key    => 'LoginwindowText',
+Line 38:         value  => $value,
+Line 39:         notify => [
+Line 40:           Exec['Refresh system kext cache'],
+Line 41:           Exec['Refresh CoreStorage EFI Cache']
+Line 42:         ]
+Line 43:       }
+Line 44: 
+Line 45:       exec { 'Set OS X Recovery Message NVRAM Variable':
+Line 46:         command => "nvram good-samaritan-message='${value}'",
+Line 47:         unless  => "nvram good-samaritan-message | awk -F'\t' '{ print \$2 }' | grep '^${value}$'",
+Line 48:         user    => root
+Line 49:       }
+Line 50:     } else {
+Line 51:       fail('Cannot set an OS X recovery message without a value')
+Line 52:     }
+Line 53:   } else {
+Line 54:     property_list_key { 'Remove OS X Recovery Message':
+Line 55:       ensure => absent,
+Line 56:       path   => '/Library/Preferences/com.apple.loginwindow.plist',
+Line 57:       key    => 'LoginwindowText',
+Line 58:       notify => [
+Line 59:         Exec['Refresh system kext cache'],
+Line 60:         Exec['Refresh CoreStorage EFI Cache']
+Line 61:       ]
+Line 62:     }
+Line 63: 
+Line 64:     exec { 'Remove OS X Recovery Message NVRAM Variable':
+Line 65:       command => 'nvram -d good-samaritan-message',
+Line 66:       onlyif  => 'nvram -p | grep good-samaritan-message',
+Line 67:       user    => root
+Line 68:     }
+Line 69:   }
+Line 70: }
+Line 71: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

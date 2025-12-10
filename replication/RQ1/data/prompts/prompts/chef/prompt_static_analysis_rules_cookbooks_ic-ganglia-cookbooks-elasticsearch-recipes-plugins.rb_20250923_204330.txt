@@ -1,0 +1,139 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-ganglia-cookbooks-elasticsearch-recipes-plugins.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.613569
+# Length: 5127 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-ganglia-cookbooks-elasticsearch-recipes-plugins.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Cookbook Name::       elasticsearch
+Line 3: # Description::         Install Plugins
+Line 4: # Recipe::              plugins
+Line 5: # Author::              GoTime, modifications by Infochimps
+Line 6: #
+Line 7: # Copyright 2011, GoTime, modifications by Infochimps
+Line 8: #
+Line 9: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 10: # you may not use this file except in compliance with the License.
+Line 11: # You may obtain a copy of the License at
+Line 12: #
+Line 13: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 14: #
+Line 15: # Unless required by applicable law or agreed to in writing, software
+Line 16: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 17: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 18: # See the License for the specific language governing permissions and
+Line 19: # limitations under the License.
+Line 20: #
+Line 21: 
+Line 22: directory "#{node[:elasticsearch][:home_dir]}/plugins" do
+Line 23:   owner         "root"
+Line 24:   group         "root"
+Line 25:   mode          0755
+Line 26: end
+Line 27: 
+Line 28: node[:elasticsearch][:plugins].each do |plugin|
+Line 29:   bash "install #{plugin} plugin for elasticsearch" do
+Line 30:     user          "root"
+Line 31:     cwd           "#{node[:elasticsearch][:home_dir]}"
+Line 32:     code          "./bin/plugin -install #{plugin}"
+Line 33:     not_if{ File.exist?("#{node[:elasticsearch][:home_dir]}/plugins/#{plugin}")  }
+Line 34:   end
+Line 35: end
+Line 36: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

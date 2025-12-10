@@ -1,0 +1,184 @@
+# CONSTRUCTED PROMPT
+# File: gwalbran_chef-cookbooks-imos_webapps-definitions-ncwms.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.621179
+# Length: 6937 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: gwalbran_chef-cookbooks-imos_webapps-definitions-ncwms.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Cookbook Name:: imos_webapps
+Line 3: # Definition:: ncwms
+Line 4: #
+Line 5: # Copyright 2012, IMOS
+Line 6: #
+Line 7: # All rights reserved - Do Not Redistribute
+Line 8: #
+Line 9: 
+Line 10: define :ncwms do
+Line 11: 
+Line 12:   app_parameters          = params[:app_parameters]
+Line 13:   instance_parameters     = params[:instance_parameters]
+Line 14:   instance_service_name   = params[:instance_service_name]
+Line 15:   instance_base_directory = params[:instance_base_directory]
+Line 16: 
+Line 17:   app_name                = app_parameters['name']
+Line 18: 
+Line 19:   # Overriding the WMS-servlet.xml file extracted by the WAR
+Line 20:   wms_servlet_xml = "#{instance_base_directory}/webapps/#{app_name}/WEB-INF/WMS-servlet.xml"
+Line 21: 
+Line 22:   template wms_servlet_xml do
+Line 23:     source   "#{app_name}/WMS-servlet.xml.erb"
+Line 24:     owner    node['tomcat']['user']
+Line 25:     group    node['tomcat']['group']
+Line 26:     mode     0644
+Line 27:     backup   3
+Line 28:     notifies :restart, "service[#{instance_service_name}]", :delayed
+Line 29: 
+Line 30:     variables({
+Line 31:       :cache_dir => app_parameters['cache_dir']
+Line 32:     })
+Line 33:   end
+Line 34: 
+Line 35:   # On dev machines, we'll create the ncwms cache dir, so it doesn't fail
+Line 36:   # On real production machines we'd like it to fail if the directory is not in
+Line 37:   # place
+Line 38:   if Chef::Config[:dev]
+Line 39:     directory app_parameters['cache_dir'] do
+Line 40:       owner     node['tomcat']['user']
+Line 41:       group     node['tomcat']['group']
+Line 42:       mode      0755
+Line 43:       recursive true
+Line 44:     end
+Line 45:   end
+Line 46: 
+Line 47:   password = Chef::EncryptedDataBagItem.load('passwords', 'ncwms')['password']
+Line 48: 
+Line 49:   # NcWMS is making funny things with config, such as updating the config file
+Line 50:   # while running. We want to be able to manage the config from chef so the way
+Line 51:   # we do it is that if the chef config have changed - we'll trigger a restart.
+Line 52:   # However if the chef config is different from what's on the node and the chef
+Line 53:   # config was unchanged - we'll avoid restarting NcWMS.
+Line 54:   ncwms_config_real = ::File.join(app_parameters['cache_dir'], "config.xml")
+Line 55:   ncwms_config_from_chef = ::File.join(app_parameters['cache_dir'], "config_base.xml")
+Line 56: 
+Line 57:   template ncwms_config_from_chef do
+Line 58:     cookbook "external_templates"
+Line 59:     source   "#{app_name}/config.xml.erb"
+Line 60:     owner    node['tomcat']['user']
+Line 61:     group    node['tomcat']['group']
+Line 62:     mode     00644
+Line 63:     notifies :create, "ruby_block[refresh_ncwms_config_#{instance_service_name}]", :immediately
+Line 64:     variables ({
+Line 65:       :root     => app_parameters['root'],
+Line 66:       :password => password
+Line 67:     })
+Line 68:   end
+Line 69: 
+Line 70:   ruby_block "refresh_ncwms_config_#{instance_service_name}" do
+Line 71:     block do
+Line 72:       FileUtils.cp ncwms_config_from_chef, ncwms_config_real
+Line 73:       FileUtils.chown node['tomcat']['user'], node['tomcat']['group'], ncwms_config_real
+Line 74:     end
+Line 75:     action   :nothing
+Line 76:     notifies :restart, "service[#{instance_service_name}]", :delayed
+Line 77:   end
+Line 78: 
+Line 79: end
+Line 80: 
+Line 81: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

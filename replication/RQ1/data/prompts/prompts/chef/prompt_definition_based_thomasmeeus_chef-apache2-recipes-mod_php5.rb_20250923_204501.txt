@@ -1,0 +1,140 @@
+# CONSTRUCTED PROMPT
+# File: thomasmeeus_chef-apache2-recipes-mod_php5.rb
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.372899
+# Length: 5934 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: thomasmeeus_chef-apache2-recipes-mod_php5.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Cookbook Name:: apache2
+Line 3: # Recipe:: mod_php5
+Line 4: #
+Line 5: # Copyright 2008-2013, Opscode, Inc.
+Line 6: #
+Line 7: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 8: # you may not use this file except in compliance with the License.
+Line 9: # You may obtain a copy of the License at
+Line 10: #
+Line 11: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 12: #
+Line 13: # Unless required by applicable law or agreed to in writing, software
+Line 14: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 15: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 16: # See the License for the specific language governing permissions and
+Line 17: # limitations under the License.
+Line 18: #
+Line 19: 
+Line 20: case node['platform_family']
+Line 21: when 'debian'
+Line 22:   package 'libapache2-mod-php5'
+Line 23: when 'arch'
+Line 24:   package 'php-apache' do
+Line 25:     notifies :run, 'execute[generate-module-list]', :immediately
+Line 26:   end
+Line 27: when 'rhel'
+Line 28:   package 'which'
+Line 29: 
+Line 30:   package 'php package' do
+Line 31:     if node['platform_version'].to_f < 6.0
+Line 32:       package_name 'php53'
+Line 33:     else
+Line 34:       package_name 'php'
+Line 35:     end
+Line 36:     notifies :run, 'execute[generate-module-list]', :immediately
+Line 37:     not_if 'which php'
+Line 38:   end
+Line 39: when 'fedora'
+Line 40:   package 'php package' do
+Line 41:     package_name 'php'
+Line 42:     notifies :run, 'execute[generate-module-list]', :immediately
+Line 43:     not_if 'which php'
+Line 44:   end
+Line 45: when 'freebsd'
+Line 46:   freebsd_port_options 'php5' do
+Line 47:     options 'APACHE' => true
+Line 48:     action :create
+Line 49:   end
+Line 50: 
+Line 51:   package 'php package' do
+Line 52:     package_name 'php5'
+Line 53:     source 'ports'
+Line 54:     notifies :run, 'execute[generate-module-list]', :immediately
+Line 55:   end
+Line 56: end
+Line 57: 
+Line 58: file "#{node['apache']['dir']}/conf.d/php.conf" do
+Line 59:   action :delete
+Line 60:   backup false
+Line 61: end
+Line 62: 
+Line 63: apache_module 'php5' do
+Line 64:   case node['platform_family']
+Line 65:   when 'rhel', 'fedora', 'freebsd'
+Line 66:     conf true
+Line 67:     filename 'libphp5.so'
+Line 68:   end
+Line 69: end
+Line 70: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

@@ -1,0 +1,8 @@
+{
+  "source": "llm",
+  "method_key": "openrouter::x-ai/grok-4-fast:free::static_analysis_rules",
+  "display_name": "grok-4-fast-static-analysis-rules",
+  "provider": "openrouter",
+  "model": "x-ai/grok-4-fast:free",
+  "style": "static_analysis_rules"
+}

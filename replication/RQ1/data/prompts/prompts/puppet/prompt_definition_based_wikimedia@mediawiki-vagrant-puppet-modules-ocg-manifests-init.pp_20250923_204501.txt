@@ -1,0 +1,137 @@
+# CONSTRUCTED PROMPT
+# File: wikimedia@mediawiki-vagrant-puppet-modules-ocg-manifests-init.pp
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.400887
+# Length: 6019 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: wikimedia@mediawiki-vagrant-puppet-modules-ocg-manifests-init.pp (Puppet)**
+
+
+Line 1: # == Class: ocg
+Line 2: # Sets up the OCG[https://www.mediawiki.org/wiki/Offline_content_generator] service
+Line 3: # for rendering PDF books from groups of wiki articles.
+Line 4: # See wikitech[https://wikitech.wikimedia.org/wiki/OCG] for technical documentation.
+Line 5: #
+Line 6: # === Parameters
+Line 7: #
+Line 8: # [*port*]
+Line 9: #   Port to listen on
+Line 10: #
+Line 11: class ocg(
+Line 12:     $port,
+Line 13: ) {
+Line 14:     include role::restbase
+Line 15: 
+Line 16:     require_package([
+Line 17:         'texlive-xetex',
+Line 18:         'texlive-latex-recommended',
+Line 19:         'texlive-latex-extra',
+Line 20:         'texlive-generic-extra',
+Line 21:         'texlive-fonts-recommended',
+Line 22:         'texlive-fonts-extra',
+Line 23:         'fonts-hosny-amiri',
+Line 24:         'fonts-farsiweb',
+Line 25:         'fonts-nafees',
+Line 26:         'fonts-arphic-uming',
+Line 27:         'fonts-arphic-ukai',
+Line 28:         'fonts-droid-fallback',
+Line 29:         'fonts-baekmuk',
+Line 30:         'lmodern',
+Line 31:         'texlive-lang-all',
+Line 32:         'latex-xcolor',
+Line 33:         'poppler-utils',
+Line 34:         'imagemagick',
+Line 35:         'librsvg2-bin',
+Line 36:         'libjpeg-progs',
+Line 37:         'djvulibre-bin',
+Line 38:         'unzip',
+Line 39:     ])
+Line 40: 
+Line 41:     $remote_suffix_hash = {
+Line 42:         mw-ocg-service => '',
+Line 43:         mw-ocg-bundler => '/bundler',
+Line 44:         mw-ocg-latexer => '/latex_renderer',
+Line 45:         mw-ocg-texter  => '/text_renderer',
+Line 46:     }
+Line 47:     $keys = keys($remote_suffix_hash)
+Line 48:     ocg::service{ $keys: hash => $remote_suffix_hash }
+Line 49: 
+Line 50:     $parsoid_port = $::parsoid::port
+Line 51:     $dir = "${::service::root_dir}/mw-ocg-service"
+Line 52:     $config = "${::service::root_dir}/mw-ocg-service/localsettings.js"
+Line 53:     $log_dir = $::service::log_dir
+Line 54: 
+Line 55:     file { $config:
+Line 56:         content => template('ocg/localsettings.js.erb'),
+Line 57:         require => Git::Clone['mw-ocg-service'],
+Line 58:     }
+Line 59: 
+Line 60:     systemd::service { 'mw-ocg-service':
+Line 61:         service_params => {
+Line 62:             subscribe => [ Npm::Install[$dir], File[$config] ],
+Line 63:         },
+Line 64:         require        => Ocg::Service[keys($remote_suffix_hash)],
+Line 65:     }
+Line 66: }
+Line 67: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

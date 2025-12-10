@@ -1,0 +1,151 @@
+# CONSTRUCTED PROMPT
+# File: fuel-infra@puppet-manifests-modules-obs_server-manifests-folders.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.635589
+# Length: 4941 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: fuel-infra@puppet-manifests-modules-obs_server-manifests-folders.pp (Puppet)**
+
+
+Line 1: # Class: obs_server::folders
+Line 2: #
+Line 3: # The folders and permissions which are required
+Line 4: # but not exist after package installation
+Line 5: #
+Line 6: class obs_server::folders{
+Line 7: 
+Line 8: file { [ '/srv/obs/','/srv/obs/certs',]:
+Line 9:   ensure  => 'directory',
+Line 10:   owner   => 'root',
+Line 11:   group   => 'root',
+Line 12:   mode    => '0700',
+Line 13:   require => Package['obs-api'],
+Line 14: }
+Line 15: 
+Line 16: file { '/srv/www/obs/api/log':
+Line 17:   ensure  => 'directory',
+Line 18:   owner   => 'wwwrun',
+Line 19:   group   => 'www',
+Line 20:   force   => true,
+Line 21:   recurse => true,
+Line 22:   require => Package['obs-api'],
+Line 23: }
+Line 24: 
+Line 25: file { '/srv/www/obs/api/tmp':
+Line 26:   ensure  => 'directory',
+Line 27:   owner   => 'wwwrun',
+Line 28:   group   => 'www',
+Line 29:   recurse => true,
+Line 30:   require => File['/srv/www/obs/api/log'],
+Line 31: }
+Line 32: 
+Line 33: file { '/srv/obs/repos':
+Line 34:   ensure  => 'directory',
+Line 35:   owner   => 'wwwrun',
+Line 36:   group   => 'www',
+Line 37:   recurse => true,
+Line 38: }
+Line 39: 
+Line 40: file {'/srv/www/obs/api/log/backend_access.log':
+Line 41:   ensure  => 'present',
+Line 42:   owner   => 'wwwrun',
+Line 43:   group   => 'www',
+Line 44:   require => File['/srv/www/obs/api/log'],
+Line 45: }
+Line 46: 
+Line 47: }
+Line 48: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

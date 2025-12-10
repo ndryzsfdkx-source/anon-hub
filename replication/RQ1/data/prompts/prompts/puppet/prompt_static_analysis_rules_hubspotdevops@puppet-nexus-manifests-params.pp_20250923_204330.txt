@@ -1,0 +1,149 @@
+# CONSTRUCTED PROMPT
+# File: hubspotdevops@puppet-nexus-manifests-params.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.635822
+# Length: 5271 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: hubspotdevops@puppet-nexus-manifests-params.pp (Puppet)**
+
+
+Line 1: # === Class: nexus::params
+Line 2: #
+Line 3: # module parameters.
+Line 4: #
+Line 5: # === Parameters
+Line 6: #
+Line 7: # NONE
+Line 8: #
+Line 9: # === Examples
+Line 10: #
+Line 11: # class nexus inherits nexus::params {
+Line 12: # }
+Line 13: #
+Line 14: # === Authors
+Line 15: #
+Line 16: # Tom McLaughlin <tmclaughlin@hubspot.com>
+Line 17: #
+Line 18: # === Copyright
+Line 19: #
+Line 20: # Copyright 2013 Hubspot
+Line 21: #
+Line 22: class nexus::params {
+Line 23:   # See nexus::package on why this won't increment the package version.
+Line 24:   $version                       = 'latest'
+Line 25:   $revision                      = '01'
+Line 26:   $type                          = 'bundle'
+Line 27:   $deploy_pro                    = false
+Line 28:   $download_site                 = 'http://download.sonatype.com/nexus/oss'
+Line 29:   $nexus_root                    = '/srv'
+Line 30:   $nexus_home_dir                = 'nexus'
+Line 31:   $nexus_work_recurse            = true
+Line 32:   $nexus_work_dir_manage         = true
+Line 33:   $nexus_selinux_ignore_defaults = true
+Line 34:   $nexus_user                    = 'nexus'
+Line 35:   $nexus_group                   = 'nexus'
+Line 36:   $nexus_host                    = '0.0.0.0'
+Line 37:   $nexus_port                    = '8081'
+Line 38:   $nexus_context                 = '/nexus'
+Line 39:   $nexus_manage_user             = true
+Line 40:   $pro_download_site             = 'http://download.sonatype.com/nexus/professional-bundle'
+Line 41:   $nexus_data_folder             = undef
+Line 42:   $download_folder               = '/srv'
+Line 43:   $manage_config                 = true
+Line 44:   $md5sum                        = undef
+Line 45: }
+Line 46: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

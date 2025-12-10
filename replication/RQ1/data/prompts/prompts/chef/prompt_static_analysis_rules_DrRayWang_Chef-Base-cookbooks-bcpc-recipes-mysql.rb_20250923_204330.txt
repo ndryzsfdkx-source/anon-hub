@@ -1,0 +1,248 @@
+# CONSTRUCTED PROMPT
+# File: DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.608800
+# Length: 9283 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: DrRayWang_Chef-Base-cookbooks-bcpc-recipes-mysql.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Cookbook Name:: bcpc
+Line 3: # Recipe:: mysql
+Line 4: #
+Line 5: # Copyright 2013, Bloomberg Finance L.P.
+Line 6: #
+Line 7: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 8: # you may not use this file except in compliance with the License.
+Line 9: # You may obtain a copy of the License at
+Line 10: #
+Line 11: # http://www.apache.org/licenses/LICENSE-2.0
+Line 12: #
+Line 13: # Unless required by applicable law or agreed to in writing, software
+Line 14: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 15: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 16: # See the License for the specific language governing permissions and
+Line 17: # limitations under the License.
+Line 18: #
+Line 19: 
+Line 20: include_recipe "bcpc::default"
+Line 21: 
+Line 22: make_config('mysql-root-user', "root")
+Line 23: make_config('mysql-root-password', secure_password)
+Line 24: make_config('mysql-galera-user', "sst")
+Line 25: make_config('mysql-galera-password', secure_password)
+Line 26: make_config('mysql-check-user', "check")
+Line 27: make_config('mysql-check-password', secure_password)
+Line 28: 
+Line 29: apt_repository "percona" do
+Line 30:   uri node['bcpc']['repos']['mysql']
+Line 31:   distribution node['lsb']['codename']
+Line 32:   components ["main"]
+Line 33:   key "percona-release.key"
+Line 34: end
+Line 35: 
+Line 36: package "percona-xtradb-cluster-server" do
+Line 37:     action :upgrade
+Line 38: end
+Line 39: 
+Line 40: bash "initial-mysql-config" do
+Line 41:   code <<-EOH
+Line 42:         mysql -u root -e "DROP USER ''@'localhost';
+Line 43:                           GRANT USAGE ON *.* to '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';
+Line 44:                           GRANT ALL PRIVILEGES on *.* TO '#{get_config('mysql-galera-user')}'@'%' IDENTIFIED BY '#{get_config('mysql-galera-password')}';
+Line 45:                           GRANT PROCESS ON *.* to '#{get_config('mysql-check-user')}'@'localhost' IDENTIFIED BY '#{get_config('mysql-check-password')}';
+Line 46:                           UPDATE mysql.user SET password=PASSWORD('#{get_config('mysql-root-password')}') WHERE user='root'; FLUSH PRIVILEGES;
+Line 47:                           UPDATE mysql.user SET host='%' WHERE user='root' and host='localhost';
+Line 48:                           FLUSH PRIVILEGES;"
+Line 49:         EOH
+Line 50:   only_if "mysql -u root -e 'SELECT COUNT(*) FROM mysql.user'"
+Line 51: end
+Line 52: 
+Line 53: directory "/etc/mysql" do
+Line 54:   owner "root"
+Line 55:   group "root"
+Line 56:   mode 00755
+Line 57: end
+Line 58: 
+Line 59: template "/etc/mysql/my.cnf" do
+Line 60:   source "my.cnf.erb"
+Line 61:   mode 00644
+Line 62:   notifies :reload, "service[mysql]", :delayed
+Line 63: end
+Line 64: 
+Line 65: template "/etc/mysql/debian.cnf" do
+Line 66:   source "my-debian.cnf.erb"
+Line 67:   mode 00644
+Line 68:   notifies :reload, "service[mysql]", :delayed
+Line 69: end
+Line 70: 
+Line 71: directory "/etc/mysql/conf.d" do
+Line 72:   owner "root"
+Line 73:   group "root"
+Line 74:   mode 00755
+Line 75: end
+Line 76: 
+Line 77: template "/etc/mysql/conf.d/wsrep.cnf" do
+Line 78:   source "wsrep.cnf.erb"
+Line 79:   mode 00644
+Line 80:   variables( :max_connections => [get_nodes_for('mysql','bcpc').length*50+get_all_nodes.length*5, 200].max,
+Line 81:              :servers => get_nodes_for('mysql','bcpc') )
+Line 82:   notifies :restart, "service[mysql]", :immediate
+Line 83: end
+Line 84: 
+Line 85: bash "remove-bare-gcomm" do
+Line 86:   action :nothing
+Line 87:   user "root"
+Line 88:   code <<-EOH
+Line 89:     sed --in-place 's/^\\(wsrep_urls=.*\\),gcomm:\\/\\/"/\\1"/' /etc/mysql/conf.d/wsrep.cnf
+Line 90:   EOH
+Line 91: end
+Line 92: 
+Line 93: service "mysql" do
+Line 94:   supports :status => true, :restart => true, :reload => false
+Line 95:   action [ :enable, :start ]
+Line 96: end
+Line 97: 
+Line 98: ruby_block "Check MySQL Quorum Status" do
+Line 99:   status_cmd="mysql -u root -p#{get_config('mysql-root-password')} -e \"SHOW STATUS LIKE 'wsrep_ready' \\G\" | grep -v 'Value: OFF'"
+Line 100:   iter = 0
+Line 101:   poll_time = 0.5
+Line 102:   block do
+Line 103:     status=`#{status_cmd}`
+Line 104:     while $?.to_i
+Line 105:       status=`#{status_cmd}`
+Line 106:       if $?.to_i != 0 and iter < 10
+Line 107:         sleep(poll_time)
+Line 108:         iter += 1
+Line 109:         Chef::Log.debug("MySQL is down #{iter*poll_time} seconds - #{status}")
+Line 110:       elsif $?.to_i != 0
+Line 111:         raise Chef::Application.fatal! "MySQL is not in a ready state per wsrep_ready for #{iter*poll_time} seconds!"
+Line 112:       else
+Line 113:         Chef::Log.debug("MySQL status is not failing - #{status}")
+Line 114:       end
+Line 115:     end
+Line 116:     Chef::Log.info("MySQL is up after #{iter*poll_time} seconds - #{status}")
+Line 117:   end
+Line 118:   not_if "#{status_cmd}"
+Line 119: end
+Line 120: 
+Line 121: package "xinetd" do
+Line 122:   action :upgrade
+Line 123: end
+Line 124: 
+Line 125: bash "add-mysqlchk-to-etc-services" do
+Line 126:   user "root"
+Line 127:   code <<-EOH
+Line 128:     printf "mysqlchk\t3307/tcp\n" >> /etc/services
+Line 129:     EOH
+Line 130:   not_if "grep mysqlchk /etc/services"
+Line 131: end
+Line 132: 
+Line 133: template "/etc/xinetd.d/mysqlchk" do
+Line 134:   source "xinetd-mysqlchk.erb"
+Line 135:   owner "root"
+Line 136:   group "root"
+Line 137:   mode 00440
+Line 138:   notifies :reload, "service[xinetd]", :immediately
+Line 139: end
+Line 140: 
+Line 141: service "xinetd" do
+Line 142:   supports :status => true, :restart => true, :reload => true
+Line 143:   action [ :enable, :start ]
+Line 144: end
+Line 145: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

@@ -1,0 +1,181 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.363205
+# Length: 8509 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb (Unknown)**
+
+
+Line 1: ### SOURCE PACKAGES
+Line 2: default[:mongodb][:version]           = "1.8.0"
+Line 3: default[:mongodb][:source]            = "http://fastdl.mongodb.org/linux/mongodb-linux-#{node[:kernel][:machine]}-#{mongodb[:version]}.tgz"
+Line 4: default[:mongodb][:i686][:checksum]   = "b0b4d98968960cc90d2900ab0135bc24"
+Line 5: default[:mongodb][:x86_64][:checksum] = "d764d869f2a3984251cfea5335cc6c53"
+Line 6: 
+Line 7: user = (node.platform == 'centos' ? 'mongod' : 'mongodb')
+Line 8: default[:mongodb][:user]        = user
+Line 9: default[:users ][user][:uid]    = 460
+Line 10: default[:groups][user][:gid]    = 460
+Line 11: 
+Line 12: ### GENERAL
+Line 13: default[:mongodb][:dir]         = "/opt/mongodb-#{mongodb[:version]}" # For install from source
+Line 14: 
+Line 15: # This is here for legacy reasons.  The templates should use
+Line 16: # node[:mongodb][:data_dir] (note the additional underscore) which
+Line 17: # will be dynamically populated by the volume_dirs helper based on
+Line 18: # available volumes.
+Line 19: #
+Line 20: # Basically this cookbook is fucked.
+Line 21: default[:mongodb][:datadir]     = "/var/db/mongodb"
+Line 22: default[:mongodb][:pid_dir]     = '/var/run/mongodb'
+Line 23: default[:mongodb][:config]      = "/etc/#{user}.conf"
+Line 24: default[:mongodb][:logfile]     = "/var/log/mongodb.log"
+Line 25: default[:mongodb][:pidfile]     = "/var/run/mongodb.pid"
+Line 26: default[:mongodb][:port]        = 27017
+Line 27: default[:mongodb][:init_system] = "sysv"
+Line 28: 
+Line 29: default[:mongodb][:bind_ip]     = "0.0.0.0"
+Line 30: 
+Line 31: ### EXTRA
+Line 32: default[:mongodb][:log_cpu_io]  = false
+Line 33: default[:mongodb][:auth]        = false
+Line 34: default[:mongodb][:username]    = ""
+Line 35: default[:mongodb][:password]    = ""
+Line 36: default[:mongodb][:verbose]     = false
+Line 37: default[:mongodb][:objcheck]    = false
+Line 38: default[:mongodb][:quota]       = false
+Line 39: default[:mongodb][:diaglog]     = false
+Line 40: default[:mongodb][:nocursors]   = false
+Line 41: default[:mongodb][:nohints]     = false
+Line 42: default[:mongodb][:nohttp]      = false
+Line 43: default[:mongodb][:noscripting] = false
+Line 44: default[:mongodb][:notablescan] = false
+Line 45: default[:mongodb][:noprealloc]  = false
+Line 46: default[:mongodb][:nssize]      = false
+Line 47: 
+Line 48: 
+Line 49: ### STARTUP
+Line 50: default[:mongodb][:rest]        = false
+Line 51: default[:mongodb][:syncdelay]   = 60
+Line 52: 
+Line 53: 
+Line 54: ### MMS
+Line 55: default[:mongodb][:mms]       = false
+Line 56: default[:mongodb][:token]     = ""
+Line 57: default[:mongodb][:name]      = ""
+Line 58: default[:mongodb][:interval]  = ""
+Line 59: 
+Line 60: 
+Line 61: ### REPLICATION
+Line 62: default[:mongodb][:replication]   = false
+Line 63: default[:mongodb][:slave]         = false
+Line 64: default[:mongodb][:slave_source]  = ""
+Line 65: default[:mongodb][:slave_only]    = ""
+Line 66: 
+Line 67: default[:mongodb][:master]        = false
+Line 68: 
+Line 69: default[:mongodb][:autoresync]    = false
+Line 70: default[:mongodb][:oplogsize]     = 0
+Line 71: default[:mongodb][:opidmem]       = 0
+Line 72: 
+Line 73: default[:mongodb][:replica_set]   = ""
+Line 74: 
+Line 75: 
+Line 76: ### SHARDING
+Line 77: default[:mongodb][:shard_server]  = false
+Line 78: 
+Line 79: 
+Line 80: ### BACKUP
+Line 81: default[:mongodb][:backup][:host]         = "localhost"
+Line 82: default[:mongodb][:backup][:backupdir]    = "/var/backups/mongodb"
+Line 83: default[:mongodb][:backup][:day]          = 6
+Line 84: default[:mongodb][:backup][:compression]  = "bzip2"
+Line 85: default[:mongodb][:backup][:cleanup]      = "yes"
+Line 86: default[:mongodb][:backup][:latest]       = "yes"
+Line 87: default[:mongodb][:backup][:mailaddress]  = false
+Line 88: default[:mongodb][:backup][:mailcontent]  = "stdout"
+Line 89: default[:mongodb][:backup][:maxemailsize] = 4000
+Line 90: 
+Line 91: 
+Line 92: ### CONFIG SERVER
+Line 93: default[:mongodb][:config_server][:datadir]     = "/var/db/mongodb-config"
+Line 94: default[:mongodb][:config_server][:config]      = "/etc/mongodb-config.conf"
+Line 95: default[:mongodb][:config_server][:logfile]     = "/var/log/mongodb-config.log"
+Line 96: default[:mongodb][:config_server][:pidfile]     = "/var/run/mongodb-config.pid"
+Line 97: default[:mongodb][:config_server][:host]        = "localhost"
+Line 98: default[:mongodb][:config_server][:port]        = 27019
+Line 99: 
+Line 100: 
+Line 101: ### MONGOS
+Line 102: default[:mongodb][:mongos][:config]      = "/etc/mongos.conf"
+Line 103: default[:mongodb][:mongos][:logfile]     = "/var/log/mongos.log"
+Line 104: default[:mongodb][:mongos][:pidfile]     = "/var/run/mongos.pid"
+Line 105: default[:mongodb][:mongos][:host]        = "localhost"
+Line 106: default[:mongodb][:mongos][:port]        = 27017
+Line 107: 
+Line 108: ## SILVERWARE
+Line 109: 
+Line 110: default[:mongodb][:server][:run_state] = :start
+Line 111: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

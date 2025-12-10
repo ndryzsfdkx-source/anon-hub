@@ -1,0 +1,153 @@
+# CONSTRUCTED PROMPT
+# File: SecGen@SecGen-modules-utilities-unix-firewall-firewall-manifests-linux-redhat.pp
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.375839
+# Length: 6795 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: SecGen@SecGen-modules-utilities-unix-firewall-firewall-manifests-linux-redhat.pp (Puppet)**
+
+
+Line 1: # = Class: firewall::linux::redhat
+Line 2: #
+Line 3: # Manages the `iptables` service on RedHat-alike systems.
+Line 4: #
+Line 5: # == Parameters:
+Line 6: #
+Line 7: # [*ensure*]
+Line 8: #   Ensure parameter passed onto Service[] resources.
+Line 9: #   Default: running
+Line 10: #
+Line 11: # [*enable*]
+Line 12: #   Enable parameter passed onto Service[] resources.
+Line 13: #   Default: true
+Line 14: #
+Line 15: class firewall::linux::redhat (
+Line 16:   $ensure         = running,
+Line 17:   $enable         = true,
+Line 18:   $service_name   = $::firewall::params::service_name,
+Line 19:   $package_name   = $::firewall::params::package_name,
+Line 20:   $package_ensure = $::firewall::params::package_ensure,
+Line 21: ) inherits ::firewall::params {
+Line 22: 
+Line 23:   # RHEL 7 and later and Fedora 15 and later require the iptables-services
+Line 24:   # package, which provides the /usr/libexec/iptables/iptables.init used by
+Line 25:   # lib/puppet/util/firewall.rb.
+Line 26:   if ($::operatingsystem != 'Amazon')
+Line 27:   and (($::operatingsystem != 'Fedora' and versioncmp($::operatingsystemrelease, '7.0') >= 0)
+Line 28:   or  ($::operatingsystem == 'Fedora' and versioncmp($::operatingsystemrelease, '15') >= 0)) {
+Line 29:     service { 'firewalld':
+Line 30:       ensure => stopped,
+Line 31:       enable => false,
+Line 32:       before => Package[$package_name],
+Line 33:     }
+Line 34:   }
+Line 35: 
+Line 36:   if $package_name {
+Line 37:     package { $package_name:
+Line 38:       ensure => $package_ensure,
+Line 39:       before => Service[$service_name],
+Line 40:     }
+Line 41:   }
+Line 42: 
+Line 43:   if ($::operatingsystem != 'Amazon')
+Line 44:   and (($::operatingsystem != 'Fedora' and versioncmp($::operatingsystemrelease, '7.0') >= 0)
+Line 45:   or  ($::operatingsystem == 'Fedora' and versioncmp($::operatingsystemrelease, '15') >= 0)) {
+Line 46:     if $ensure == 'running' {
+Line 47:       exec { '/usr/bin/systemctl daemon-reload':
+Line 48:         require => Package[$package_name],
+Line 49:         before  => Service[$service_name],
+Line 50:         unless  => "/usr/bin/systemctl is-active ${service_name}",
+Line 51:       }
+Line 52:     }
+Line 53:   }
+Line 54: 
+Line 55:   service { $service_name:
+Line 56:     ensure    => $ensure,
+Line 57:     enable    => $enable,
+Line 58:     hasstatus => true,
+Line 59:     require   => File["/etc/sysconfig/${service_name}"],
+Line 60:   }
+Line 61: 
+Line 62:   # Redhat 7 selinux user context for /etc/sysconfig/iptables is set to unconfined_u
+Line 63:   case $::selinux {
+Line 64:     #lint:ignore:quoted_booleans
+Line 65:     'true',true: {
+Line 66:       case $::operatingsystemrelease {
+Line 67:         /^(6|7)\..*/: { $seluser = 'unconfined_u' }
+Line 68:         default: { $seluser = 'system_u' }
+Line 69:       }
+Line 70:     }
+Line 71:     #lint:endignore
+Line 72:     default:     { $seluser = undef }
+Line 73:   }
+Line 74: 
+Line 75:   file { "/etc/sysconfig/${service_name}":
+Line 76:     ensure  => present,
+Line 77:     owner   => 'root',
+Line 78:     group   => 'root',
+Line 79:     mode    => '0600',
+Line 80:     seluser => $seluser,
+Line 81:   }
+Line 82: }
+Line 83: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

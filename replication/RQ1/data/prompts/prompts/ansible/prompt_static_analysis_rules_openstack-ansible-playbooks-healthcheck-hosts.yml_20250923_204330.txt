@@ -1,0 +1,199 @@
+# CONSTRUCTED PROMPT
+# File: openstack-ansible-playbooks-healthcheck-hosts.yml
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.601540
+# Length: 7755 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack-ansible-playbooks-healthcheck-hosts.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: # Copyright 2018, Rackspace US, Inc.
+Line 3: #
+Line 4: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 5: # you may not use this file except in compliance with the License.
+Line 6: # You may obtain a copy of the License at
+Line 7: #
+Line 8: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 9: #
+Line 10: # Unless required by applicable law or agreed to in writing, software
+Line 11: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 12: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 13: # See the License for the specific language governing permissions and
+Line 14: # limitations under the License.
+Line 15: 
+Line 16: # This playbook is meant to run after setup-hosts.
+Line 17: # To succeed, it expects the setup-hosts playbook to have run successfuly.
+Line 18: 
+Line 19: # Test if the openstack-hosts-setup play was a success.
+Line 20: # TO BE IMPLEMENTED
+Line 21: 
+Line 22: # Test if security-hardening was a success.
+Line 23: # TO BE IMPLEMENTED
+Line 24: 
+Line 25: # Test if containers-deploy was a success.
+Line 26: # Ensure the lxc containers are properly setup
+Line 27: - name: Ensuring hosts good behavior
+Line 28:   hosts: lxc_hosts
+Line 29:   gather_facts: yes
+Line 30:   tasks:
+Line 31:     - name: Looking for dnsmasq process
+Line 32:       command: pgrep dnsmasq
+Line 33:       changed_when: false
+Line 34: 
+Line 35: - name: Ensuring hosts good behavior
+Line 36:   hosts: nspawn_hosts
+Line 37:   gather_facts: yes
+Line 38:   tasks:
+Line 39:     - debug:
+Line 40:         msg: "To be implemented. Please help."
+Line 41: 
+Line 42: - name: Ensuring containers creation, connection and good behavior
+Line 43:   hosts: all_containers
+Line 44:   gather_facts: yes
+Line 45:   tasks:
+Line 46:     - name: Ensure the physical host has all the proper interfaces defined
+Line 47:       assert:
+Line 48:         that:
+Line 49:           - item.value.bridge in hostvars[physical_host]['ansible_interfaces']
+Line 50:       with_dict: "{{ container_networks }}"
+Line 51: 
+Line 52:     - name: Check if dns resolution and external connectivity is fine
+Line 53:       get_url:
+Line 54:         url: https://git.openstack.org/cgit/openstack/openstack-ansible/plain/ansible-role-requirements.yml
+Line 55:         dest: /tmp/osa-master-requirements
+Line 56:       environment: "{{ deployment_environment_variables | default({}) }}"
+Line 57: 
+Line 58: # Test extra settings before setup-infrastructure
+Line 59: - name: Ensure settings are not wrong with the usual suspects issues before trying to deploy infra
+Line 60:   hosts: haproxy
+Line 61:   gather_facts: yes
+Line 62:   tasks:
+Line 63:     - name: Checking that the LB vips are well configured.
+Line 64:       assert:
+Line 65:         that:
+Line 66:           - external_lb_vip_address != internal_lb_vip_address
+Line 67:         msg: |
+Line 68:           External and Internal LB vip addresses are the same.
+Line 69:           Run with -e vipcheck=False if you want to bypass this check.
+Line 70:       when:
+Line 71:         - vipcheck | default(True) | bool
+Line 72:         - inventory_hostname == ansible_play_hosts[0]
+Line 73: 
+Line 74:     - name: Checking that vip nics are well configured
+Line 75:       assert:
+Line 76:         that:
+Line 77:           - item in ansible_interfaces
+Line 78:         msg: "Misconfigured keepalived IP, the carrying interface {{ item }} doesn't exist"
+Line 79:       with_items:
+Line 80:         - "{{ haproxy_keepalived_external_interface }}"
+Line 81:         - "{{ haproxy_keepalived_internal_interface }}"
+Line 82:       when:
+Line 83:         - groups['haproxy'] | length > 1
+Line 84: 
+Line 85:     - name: Checking that vip address is well formed
+Line 86:       assert:
+Line 87:         that:
+Line 88:           - item | ipaddr('address')
+Line 89:         msg: "Misconfigured keepalived: The vip {{ item }} is not an IP address, but a network"
+Line 90:       with_items:
+Line 91:         - "{{ haproxy_keepalived_internal_vip_cidr }}"
+Line 92:         - "{{ haproxy_keepalived_external_vip_cidr }}"
+Line 93:       when:
+Line 94:         - groups['haproxy'] | length > 1
+Line 95: 
+Line 96: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

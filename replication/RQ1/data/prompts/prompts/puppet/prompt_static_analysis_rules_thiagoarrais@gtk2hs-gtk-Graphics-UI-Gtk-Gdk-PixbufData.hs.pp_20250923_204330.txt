@@ -1,0 +1,193 @@
+# CONSTRUCTED PROMPT
+# File: thiagoarrais@gtk2hs-gtk-Graphics-UI-Gtk-Gdk-PixbufData.hs.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.644253
+# Length: 7156 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: thiagoarrais@gtk2hs-gtk-Graphics-UI-Gtk-Gdk-PixbufData.hs.pp (Puppet)**
+
+
+Line 1: {-# OPTIONS_HADDOCK hide #-}
+Line 2: -- -*-haskell-*-
+Line 3: --  GIMP Toolkit (GTK) Pixbuf as Array
+Line 4: --
+Line 5: --  Author : Ciancia, Axel Simon
+Line 6: --
+Line 7: --  Created: 26 March 2002
+Line 8: --
+Line 9: --  Copyright (C) 2002-2005 Axel Simon
+Line 10: --
+Line 11: --  This library is free software; you can redistribute it and/or
+Line 12: --  modify it under the terms of the GNU Lesser General Public
+Line 13: --  License as published by the Free Software Foundation; either
+Line 14: --  version 2.1 of the License, or (at your option) any later version.
+Line 15: --
+Line 16: --  This library is distributed in the hope that it will be useful,
+Line 17: --  but WITHOUT ANY WARRANTY; without even the implied warranty of
+Line 18: --  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Line 19: --  Lesser General Public License for more details.
+Line 20: --
+Line 21: -- |
+Line 22: -- Maintainer  : gtk2hs-users@lists.sourceforge.net
+Line 23: -- Stability   : provisional
+Line 24: -- Portability : no (uses MTC, depends on internal GHC module)
+Line 25: --
+Line 26: -- 'PixbufData' exposes 'Pixbuf's as mutable array.
+Line 27: --
+Line 28: 
+Line 29: -- #hide
+Line 30: module Graphics.UI.Gtk.Gdk.PixbufData (
+Line 31:   PixbufData,
+Line 32:   mkPixbufData
+Line 33:   ) where
+Line 34: 
+Line 35: import System.Glib.FFI
+Line 36: import Graphics.UI.Gtk.Types
+Line 37: import Data.Ix
+Line 38: -- internal module of GHC
+Line 39: import Data.Array.Base ( MArray, newArray, newArray_, unsafeRead, unsafeWrite,
+Line 40: #if __GLASGOW_HASKELL__ < 605
+Line 41: 			 HasBounds, bounds
+Line 42: #else
+Line 43: 			 getBounds
+Line 44: #endif
+Line 45: #if __GLASGOW_HASKELL__ >= 608
+Line 46: 			 ,getNumElements
+Line 47: #endif
+Line 48:                        )
+Line 49: 
+Line 50: -- | An array that stored the raw pixel data of a 'Pixbuf'.
+Line 51: --
+Line 52: -- * See 'Graphics.UI.Gtk.Gdk.Pixbuf.pixbufGetPixels'.
+Line 53: --
+Line 54: data Ix i => PixbufData i e = PixbufData !Pixbuf
+Line 55:                           {-# UNPACK #-} !(Ptr e)
+Line 56:                                          !(i,i)
+Line 57:                           {-# UNPACK #-} !Int
+Line 58: 
+Line 59: mkPixbufData :: Storable e => Pixbuf -> Ptr e -> Int -> PixbufData Int e
+Line 60: mkPixbufData pb (ptr :: Ptr e) size =
+Line 61:   PixbufData pb ptr (0, count) count
+Line 62:   where count = fromIntegral (size `div` sizeOf (undefined :: e))
+Line 63: 
+Line 64: #if __GLASGOW_HASKELL__ < 605
+Line 65: instance HasBounds PixbufData where
+Line 66:   bounds (PixbufData pb ptr bd cnt) = bd
+Line 67: #endif
+Line 68: 
+Line 69: -- | 'PixbufData' is a mutable array.
+Line 70: instance Storable e => MArray PixbufData e IO where
+Line 71:   newArray (l,u) e = error "Gtk.Gdk.Pixbuf.newArray: not implemented"
+Line 72:   newArray_ (l,u)  = error "Gtk.Gdk.Pixbuf.newArray_: not implemented"
+Line 73:   {-# INLINE unsafeRead #-}
+Line 74:   unsafeRead (PixbufData (Pixbuf pb) pixPtr _ _) idx = do
+Line 75:       e <- peekElemOff pixPtr idx
+Line 76:       touchForeignPtr pb
+Line 77:       return e
+Line 78:   {-# INLINE unsafeWrite #-}
+Line 79:   unsafeWrite (PixbufData (Pixbuf pb) pixPtr _ _) idx elem = do
+Line 80:       pokeElemOff pixPtr idx elem
+Line 81:       touchForeignPtr pb
+Line 82: #if __GLASGOW_HASKELL__ >= 605
+Line 83:   {-# INLINE getBounds #-}
+Line 84:   getBounds (PixbufData _ _ bd _) = return bd
+Line 85: #endif
+Line 86: #if __GLASGOW_HASKELL__ >= 608
+Line 87:   {-# INLINE getNumElements #-}
+Line 88:   getNumElements (PixbufData _ _ _ count) = return count
+Line 89: #endif
+Line 90: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

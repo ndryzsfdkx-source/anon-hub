@@ -1,0 +1,8 @@
+{
+  "source": "llm",
+  "method_key": "anthropic::claude-sonnet-4-20250514::static_analysis_rules",
+  "display_name": "claude-sonnet-4.0-static-analysis-rules",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-20250514",
+  "style": "static_analysis_rules"
+}

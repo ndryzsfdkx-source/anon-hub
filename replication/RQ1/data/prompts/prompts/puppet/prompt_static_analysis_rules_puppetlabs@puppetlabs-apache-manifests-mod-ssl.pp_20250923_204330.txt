@@ -1,0 +1,224 @@
+# CONSTRUCTED PROMPT
+# File: puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.642750
+# Length: 8704 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp (Puppet)**
+
+
+Line 1: class apache::mod::ssl (
+Line 2:   Boolean $ssl_compression                                  = false,
+Line 3:   $ssl_cryptodevice                                         = 'builtin',
+Line 4:   $ssl_options                                              = [ 'StdEnvVars' ],
+Line 5:   $ssl_openssl_conf_cmd                                     = undef,
+Line 6:   Optional[String] $ssl_cert                                = undef,
+Line 7:   Optional[String] $ssl_key                                 = undef,
+Line 8:   $ssl_ca                                                   = undef,
+Line 9:   $ssl_cipher                                               = 'HIGH:MEDIUM:!aNULL:!MD5:!RC4:!3DES',
+Line 10:   Variant[Boolean, Enum['on', 'off']] $ssl_honorcipherorder = true,
+Line 11:   $ssl_protocol                                             = [ 'all', '-SSLv2', '-SSLv3' ],
+Line 12:   Array $ssl_proxy_protocol                                 = [],
+Line 13:   $ssl_pass_phrase_dialog                                   = 'builtin',
+Line 14:   $ssl_random_seed_bytes                                    = '512',
+Line 15:   String $ssl_sessioncache                                  = $::apache::params::ssl_sessioncache,
+Line 16:   $ssl_sessioncachetimeout                                  = '300',
+Line 17:   Boolean $ssl_stapling                                     = false,
+Line 18:   Optional[Boolean] $ssl_stapling_return_errors             = undef,
+Line 19:   $ssl_mutex                                                = undef,
+Line 20:   $apache_version                                           = undef,
+Line 21:   $package_name                                             = undef,
+Line 22: ) inherits ::apache::params {
+Line 23: 
+Line 24:   include ::apache
+Line 25:   include ::apache::mod::mime
+Line 26:   $_apache_version = pick($apache_version, $apache::apache_version)
+Line 27:   if $ssl_mutex {
+Line 28:     $_ssl_mutex = $ssl_mutex
+Line 29:   } else {
+Line 30:     case $::osfamily {
+Line 31:       'debian': {
+Line 32:         if versioncmp($_apache_version, '2.4') >= 0 {
+Line 33:           $_ssl_mutex = 'default'
+Line 34:         } elsif $::operatingsystem == 'Ubuntu' and $::operatingsystemrelease == '10.04' {
+Line 35:           $_ssl_mutex = 'file:/var/run/apache2/ssl_mutex'
+Line 36:         } else {
+Line 37:           $_ssl_mutex = "file:\${APACHE_RUN_DIR}/ssl_mutex"
+Line 38:         }
+Line 39:       }
+Line 40:       'redhat': {
+Line 41:         $_ssl_mutex = 'default'
+Line 42:       }
+Line 43:       'freebsd': {
+Line 44:         $_ssl_mutex = 'default'
+Line 45:       }
+Line 46:       'gentoo': {
+Line 47:         $_ssl_mutex = 'default'
+Line 48:       }
+Line 49:       'Suse': {
+Line 50:         $_ssl_mutex = 'default'
+Line 51:       }
+Line 52:       default: {
+Line 53:         fail("Unsupported osfamily ${::osfamily}, please explicitly pass in \$ssl_mutex")
+Line 54:       }
+Line 55:     }
+Line 56:   }
+Line 57: 
+Line 58:   if $ssl_honorcipherorder =~ Boolean {
+Line 59:     $_ssl_honorcipherorder = $ssl_honorcipherorder
+Line 60:   } else {
+Line 61:     $_ssl_honorcipherorder = $ssl_honorcipherorder ? {
+Line 62:       'on'    => true,
+Line 63:       'off'   => false,
+Line 64:       default => true,
+Line 65:     }
+Line 66:   }
+Line 67: 
+Line 68:   $stapling_cache = $::osfamily ? {
+Line 69:     'debian'  => "\${APACHE_RUN_DIR}/ocsp(32768)",
+Line 70:     'redhat'  => '/run/httpd/ssl_stapling(32768)',
+Line 71:     'freebsd' => '/var/run/ssl_stapling(32768)',
+Line 72:     'gentoo'  => '/var/run/ssl_stapling(32768)',
+Line 73:     'Suse'    => '/var/lib/apache2/ssl_stapling(32768)',
+Line 74:   }
+Line 75: 
+Line 76:   if $::osfamily == 'Suse' {
+Line 77:     if defined(Class['::apache::mod::worker']){
+Line 78:       $suse_path = '/usr/lib64/apache2-worker'
+Line 79:     } else {
+Line 80:       $suse_path = '/usr/lib64/apache2-worker'
+Line 81:     }
+Line 82:     ::apache::mod { 'ssl':
+Line 83:       package  => $package_name,
+Line 84:       lib_path => $suse_path,
+Line 85:     }
+Line 86:   } else {
+Line 87:     ::apache::mod { 'ssl':
+Line 88:       package => $package_name,
+Line 89:     }
+Line 90:   }
+Line 91: 
+Line 92:   if versioncmp($_apache_version, '2.4') >= 0 {
+Line 93:     include ::apache::mod::socache_shmcb
+Line 94:   }
+Line 95: 
+Line 96:   # Template uses
+Line 97:   #
+Line 98:   # $ssl_compression
+Line 99:   # $ssl_cryptodevice
+Line 100:   # $ssl_ca
+Line 101:   # $ssl_cipher
+Line 102:   # $ssl_honorcipherorder
+Line 103:   # $ssl_options
+Line 104:   # $ssl_openssl_conf_cmd
+Line 105:   # $ssl_sessioncache
+Line 106:   # $stapling_cache
+Line 107:   # $ssl_mutex
+Line 108:   # $ssl_random_seed_bytes
+Line 109:   # $ssl_sessioncachetimeout
+Line 110:   # $_apache_version
+Line 111:   file { 'ssl.conf':
+Line 112:     ensure  => file,
+Line 113:     path    => $::apache::_ssl_file,
+Line 114:     mode    => $::apache::file_mode,
+Line 115:     content => template('apache/mod/ssl.conf.erb'),
+Line 116:     require => Exec["mkdir ${::apache::mod_dir}"],
+Line 117:     before  => File[$::apache::mod_dir],
+Line 118:     notify  => Class['apache::service'],
+Line 119:   }
+Line 120: }
+Line 121: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

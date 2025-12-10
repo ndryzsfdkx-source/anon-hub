@@ -1,0 +1,213 @@
+# CONSTRUCTED PROMPT
+# File: openstack@puppet-monasca-manifests-virtualenv-instance.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.639001
+# Length: 8512 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack@puppet-monasca-manifests-virtualenv-instance.pp (Puppet)**
+
+
+Line 1: # == Define: virtualenv::instance
+Line 2: #
+Line 3: # This class will manage the installation of the monasca agent into a Python
+Line 4: # virtualenv.  It will also manage the config files needed by that software,
+Line 5: # with different policies for packages and virtualenvs.  By default the config
+Line 6: # files will be copied from the template files internal to the module.  This
+Line 7: # behavior can be overridden by providing a $config_files hash.
+Line 8: #
+Line 9: # Virtualenv installations are built by installing packages from a given
+Line 10: # requirements.txt file. For production use you will normally want to override
+Line 11: # the requirements.txt and provide one that contains pinned module versions,
+Line 12: # and possibly include information about a local pypi mirror in the
+Line 13: # requirements.txt.
+Line 14: #
+Line 15: # This module explicitly supports provisioning multiple virtualenv based
+Line 16: # installations in order to make upgrades and rollbacks easier.  To take
+Line 17: # advantage of this, you can define additional instances of
+Line 18: # monasca::virtualenv::instance type with the active flag set to false
+Line 19: # and with different $venv_prefix options.  The monasca::agent class will allow
+Line 20: # configuring multiple virtualenvs via hiera.
+Line 21: #
+Line 22: # If using virtualenv based installations it's *strongly* recommended that
+Line 23: # virtualenvs be treated as immutable once created.  Behavior with changing
+Line 24: # requirements.txt or code may not be what you expect, since the existing
+Line 25: # virtualenv will be updated, not rebuilt when requirements.txt or the git
+Line 26: # revision changes.
+Line 27: #
+Line 28: # === Parameters
+Line 29: #
+Line 30: # [*ensure*] (required) Whether or not the package should be removed or
+Line 31: # installed.  Should be 'present', or 'absent'. For package installs, other
+Line 32: # values such as a version number or 'latest' are also acceptable.
+Line 33: #
+Line 34: # [*venv_active*] (optional) Whether or not the virtualenv should be made
+Line 35: # active by managing symlinks into it and restarting services if the links are
+Line 36: # changed.  Only one virtualenv can be active at a time.  Defaults to false.
+Line 37: #
+Line 38: # [*basedir*] (required) Base directory for storing virtualenvs.
+Line 39: #
+Line 40: # [*symlink*] (required if venv_active is true) The path to link to the venv_dir
+Line 41: #
+Line 42: # [*venv_prefix*] Prefix to give to virtualenv directories
+Line 43: # This can be specified to provide more meaningful names, or to have multiple
+Line 44: # virtualenvs installed at the same time. Defaults to $name
+Line 45: #
+Line 46: # [*venv_requirements*] (required) Python requirements.txt to pass to pip when
+Line 47: # populating the virtualenv.  Required if the instance is ensured to be present.
+Line 48: #
+Line 49: # [*venv_extra_args*] (optional) Extra arguments that will be passed to `pip
+Line 50: # install` when creating the virtualenv.
+Line 51: 
+Line 52: define monasca::virtualenv::instance(
+Line 53:   $basedir,
+Line 54:   $venv_prefix       = $name,
+Line 55:   $ensure            = 'present',
+Line 56:   $symlink           = undef,
+Line 57:   $venv_requirements = undef,
+Line 58:   $venv_active       = false,
+Line 59:   $venv_extra_args   = undef,
+Line 60: ) {
+Line 61: 
+Line 62:   validate_legacy(String, 'validate_string', $ensure)
+Line 63: 
+Line 64:   $valid_values = [
+Line 65:     '^present$',
+Line 66:     '^absent$',
+Line 67:   ]
+Line 68: 
+Line 69:   validate_legacy(Enum['present', 'absent'], 'validate_re', $ensure,
+Line 70:     [$valid_values, "Unknown value '${ensure}' for ensure, must be present or absent"])
+Line 71: 
+Line 72:   $req_dest = "${basedir}/${venv_prefix}-requirements.txt"
+Line 73:   $venv_dir = "${basedir}/${venv_prefix}-venv"
+Line 74:   $venv_name = "${venv_prefix}-${name}"
+Line 75: 
+Line 76:   if $ensure == 'present' {
+Line 77:     validate_legacy(String, 'validate_string', $venv_requirements)
+Line 78: 
+Line 79:     file { $req_dest:
+Line 80:       ensure => 'file',
+Line 81:       owner  => 'root',
+Line 82:       group  => 'root',
+Line 83:       mode   => '0644',
+Line 84:       source => $venv_requirements,
+Line 85:       before => Python::Virtualenv[$venv_name],
+Line 86:     }
+Line 87:   } else {
+Line 88:     file { $req_dest:
+Line 89:       ensure => 'absent',
+Line 90:     }
+Line 91:   }
+Line 92: 
+Line 93:   python::virtualenv { $venv_name:
+Line 94:     ensure         => $ensure,
+Line 95:     venv_dir       => $venv_dir,
+Line 96:     requirements   => $req_dest,
+Line 97:     extra_pip_args => $venv_extra_args,
+Line 98:     owner          => 'root',
+Line 99:     group          => 'root',
+Line 100:   }
+Line 101: 
+Line 102:   if $venv_active {
+Line 103:     file { $symlink:
+Line 104:       ensure => 'link',
+Line 105:       force  => true,
+Line 106:       target => $venv_dir,
+Line 107:     }
+Line 108:   }
+Line 109: }
+Line 110: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

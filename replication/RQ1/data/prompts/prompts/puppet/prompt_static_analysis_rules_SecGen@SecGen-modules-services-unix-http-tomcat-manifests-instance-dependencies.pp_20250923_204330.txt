@@ -1,0 +1,151 @@
+# CONSTRUCTED PROMPT
+# File: SecGen@SecGen-modules-services-unix-http-tomcat-manifests-instance-dependencies.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.629178
+# Length: 6270 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: SecGen@SecGen-modules-services-unix-http-tomcat-manifests-instance-dependencies.pp (Puppet)**
+
+
+Line 1: # private
+Line 2: define tomcat::instance::dependencies (
+Line 3:   $catalina_home,
+Line 4:   $catalina_base,
+Line 5: ) {
+Line 6:   $home_sha = sha1($catalina_home)
+Line 7:   $base_sha = sha1($catalina_base)
+Line 8: 
+Line 9:   Tomcat::Install                      <| tag == $base_sha or tag == $home_sha |>
+Line 10:   -> Tomcat::Service                   <| tag == $base_sha |>
+Line 11: 
+Line 12:   Tomcat::Install                      <| tag == $base_sha or tag == $home_sha |>
+Line 13:   -> Tomcat::Instance::Copy_from_home  <| tag == $base_sha |>
+Line 14:   -> Tomcat::Service                   <| tag == $base_sha |>
+Line 15: 
+Line 16:   Tomcat::Install                      <| tag == $base_sha or tag == $home_sha |>
+Line 17:   -> Tomcat::Service                   <| tag == $base_sha |>
+Line 18:   -> Tomcat::Config::Properties        <| tag == $base_sha |>
+Line 19:   Tomcat::Instance::Copy_from_home     <| tag == $base_sha |>
+Line 20:   -> Tomcat::Config::Properties        <| tag == $base_sha |>
+Line 21: 
+Line 22:   Tomcat::Install                      <| tag == $base_sha or tag == $home_sha |>
+Line 23:   -> Tomcat::Config::Server            <| tag == $base_sha |>
+Line 24:   ~> Tomcat::Service                   <| tag == $base_sha |>
+Line 25:   Tomcat::Instance::Copy_from_home     <| tag == $base_sha |>
+Line 26:   -> Tomcat::Config::Server            <| tag == $base_sha |>
+Line 27: 
+Line 28:   Tomcat::Install                      <| tag == $base_sha or tag == $home_sha |>
+Line 29:   -> Tomcat::Config::Server::Realm     <| tag == $base_sha |>
+Line 30:   ~> Tomcat::Service                   <| tag == $base_sha |>
+Line 31:   Tomcat::Instance::Copy_from_home     <| tag == $base_sha |>
+Line 32:   -> Tomcat::Config::Server::Realm     <| tag == $base_sha |>
+Line 33: 
+Line 34:   Tomcat::Install                      <| tag == $base_sha or tag == $home_sha |>
+Line 35:   -> Tomcat::Config::Server::Connector <| tag == $base_sha |>
+Line 36:   ~> Tomcat::Service                   <| tag == $base_sha |>
+Line 37:   Tomcat::Instance::Copy_from_home     <| tag == $base_sha |>
+Line 38:   -> Tomcat::Config::Server::Connector <| tag == $base_sha |>
+Line 39: 
+Line 40:   Tomcat::Install                      <| tag == $base_sha or tag == $home_sha |>
+Line 41:   -> Tomcat::Setenv::Entry             <| tag == $base_sha |>
+Line 42:   -> Tomcat::Service                   <| tag == $base_sha |>
+Line 43: 
+Line 44:   Tomcat::Install                      <| tag == $base_sha or tag == $home_sha |>
+Line 45:   -> Tomcat::War                       <| tag == $base_sha |>
+Line 46:   -> Tomcat::Service                   <| tag == $base_sha |>
+Line 47: }
+Line 48: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

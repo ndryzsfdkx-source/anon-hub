@@ -1,0 +1,196 @@
+# CONSTRUCTED PROMPT
+# File: openstack-ansible-playbooks-lxc-containers-destroy.yml
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.601769
+# Length: 7269 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack-ansible-playbooks-lxc-containers-destroy.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: # Copyright 2016, Rackspace US, Inc.
+Line 3: #
+Line 4: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 5: # you may not use this file except in compliance with the License.
+Line 6: # You may obtain a copy of the License at
+Line 7: #
+Line 8: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 9: #
+Line 10: # Unless required by applicable law or agreed to in writing, software
+Line 11: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 12: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 13: # See the License for the specific language governing permissions and
+Line 14: # limitations under the License.
+Line 15: 
+Line 16: - name: Set lxc containers group
+Line 17:   hosts: "{{ container_group | default('all_containers') }}"
+Line 18:   gather_facts: false
+Line 19:   tasks:
+Line 20:     - name: Add hosts to dynamic inventory group
+Line 21:       group_by:
+Line 22:         key: lxc_containers
+Line 23:         parents: all_lxc_containers
+Line 24:       when:
+Line 25:         - container_tech == 'lxc'
+Line 26:   tags:
+Line 27:     - always
+Line 28:     - lxc-containers-create
+Line 29: 
+Line 30: - name: Destroy lxc containers
+Line 31:   hosts: all_lxc_containers
+Line 32:   gather_facts: false
+Line 33:   user: root
+Line 34:   tasks:
+Line 35:     - name: Slurp machine-id
+Line 36:       slurp:
+Line 37:         src: "/etc/machine-id"
+Line 38:       register: _container_machine_id
+Line 39:       changed_when: false
+Line 40:       failed_when: false
+Line 41:       tags:
+Line 42:         - always
+Line 43: 
+Line 44:     - name: Destroy a container
+Line 45:       lxc_container:
+Line 46:         name: "{{ container_name }}"
+Line 47:         state: "absent"
+Line 48:       delegate_to: "{{ physical_host }}"
+Line 49:       when:
+Line 50:         - force_containers_destroy | bool
+Line 51:         - force_containers_data_destroy | bool
+Line 52: 
+Line 53:     - include_tasks: "common-tasks/remove_container_journal.yml"
+Line 54:       vars:
+Line 55:         container_machine_id: "{{ ((_container_machine_id.content | default('bm9uZQo=')) | b64decode).strip() }}"
+Line 56: 
+Line 57:     - name: Destroy container service directories
+Line 58:       file:
+Line 59:         path: "{{ item }}"
+Line 60:         state: "absent"
+Line 61:       with_items:
+Line 62:         - "/var/lib/lxc/{{ container_name }}"
+Line 63:       delegate_to: "{{ physical_host }}"
+Line 64:       when:
+Line 65:         - force_containers_destroy | bool
+Line 66:     - name: Destroy container data
+Line 67:       file:
+Line 68:         path: "{{ item }}"
+Line 69:         state: "absent"
+Line 70:       with_items:
+Line 71:         - "/openstack/{{ container_name }}"
+Line 72:         - "/openstack/backup/{{ container_name }}"
+Line 73:         - "/openstack/log/{{ container_name }}"
+Line 74:         - "/var/log/lxc/lxc-{{ container_name }}.log"
+Line 75:       delegate_to: "{{ physical_host }}"
+Line 76:       when:
+Line 77:         - force_containers_destroy | bool
+Line 78:         - force_containers_data_destroy | bool
+Line 79:   vars_prompt:
+Line 80:     - name: "force_containers_destroy"
+Line 81:       prompt: "Are you sure you want to destroy the LXC containers?"
+Line 82:       default: "no"
+Line 83:       private: no
+Line 84:       when: force_containers_destroy is undefined
+Line 85:     - name: "force_containers_data_destroy"
+Line 86:       prompt: "Are you sure you want to destroy the LXC container data?"
+Line 87:       default: "no"
+Line 88:       private: no
+Line 89:       when: force_containers_data_destroy is undefined
+Line 90:   tags:
+Line 91:     - lxc-containers-destroy
+Line 92: 
+Line 93: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

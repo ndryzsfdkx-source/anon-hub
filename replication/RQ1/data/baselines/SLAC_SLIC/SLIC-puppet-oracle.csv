@@ -1,0 +1,165 @@
+PATH,ERROR,LINE
+Automattic@vip-quickstart-puppet-manifests-sections-mail.pp,hardcoded-secret,7
+Automattic@vip-quickstart-puppet-manifests-sections-mail.pp,hardcoded-username,7
+Juniper@contrail-puppet-contrail-environment-modules-contrail-manifests-collector-config.pp,hardcoded-secret,166
+Juniper@contrail-puppet-contrail-environment-modules-contrail-manifests-collector-config.pp,hardcoded-secret,171
+Juniper@contrail-puppet-contrail-environment-modules-contrail-manifests-collector-config.pp,hardcoded-secret,176
+Juniper@contrail-puppet-contrail-environment-modules-contrail-manifests-collector-config.pp,improper ip address binding,74
+Juniper@contrail-puppet-contrail-environment-modules-contrail-manifests-collector-config.pp,empty-password,51
+SecGen@SecGen-modules-services-unix-database-mysql-manifests-backup-xtrabackup.pp,hardcoded-secret,32
+SecGen@SecGen-modules-services-unix-database-mysql-manifests-backup-xtrabackup.pp,hardcoded-secret,42
+SecGen@SecGen-modules-services-unix-database-mysql-manifests-backup-xtrabackup.pp,empty-password,4
+SecGen@SecGen-modules-services-unix-database-mysql-manifests-backup-xtrabackup.pp,hardcoded-username,32
+SecGen@SecGen-modules-services-unix-database-mysql-manifests-backup-xtrabackup.pp,hardcoded-username,42
+SecGen@SecGen-modules-services-unix-http-tomcat-manifests-instance-dependencies.pp,weak cryptography algorithms,6
+SecGen@SecGen-modules-services-unix-http-tomcat-manifests-instance-dependencies.pp,weak cryptography algorithms,7
+SecGen@SecGen-modules-services-unix-smb-samba-manifests-params.pp,improper ip address binding,111
+SecGen@SecGen-modules-utilities-unix-firewall-firewall-manifests-linux-redhat.pp,hardcoded-secret,67
+SecGen@SecGen-modules-utilities-unix-firewall-firewall-manifests-linux-redhat.pp,hardcoded-secret,68
+SecGen@SecGen-modules-utilities-unix-firewall-firewall-manifests-linux-redhat.pp,suspicious comment,23
+SecGen@SecGen-modules-utilities-unix-firewall-firewall-manifests-linux-redhat.pp,hardcoded-username,67
+SecGen@SecGen-modules-utilities-unix-firewall-firewall-manifests-linux-redhat.pp,hardcoded-username,68
+SecGen@SecGen-modules-vulnerabilities-unix-access_control_misconfigurations-uid_less_root-uid_less_root.pp,hardcoded-secret,2
+SecGen@SecGen-modules-vulnerabilities-unix-access_control_misconfigurations-uid_less_root-uid_less_root.pp,hardcoded-username,2
+Vizir@carnival-vagrant-modules-apt-manifests-backports.pp,hardcoded-secret,45
+alphagov@govuk-puppet-modules-govuk-manifests-node-s_calculators_frontend.pp,suspicious comment,1
+alphagov@govuk-puppet-modules-govuk-manifests-node-s_calculators_frontend.pp,improper ip address binding,29
+alphagov@govuk-puppet-modules-govuk_beat-manifests-repo.pp,use of http,16
+alphagov@govuk-puppet-modules-govuk_elasticsearch-manifests-dump.pp,hardcoded-secret,31
+alphagov@govuk-puppet-modules-govuk_elasticsearch-manifests-dump.pp,suspicious comment,1
+alphagov@govuk-puppet-modules-govuk_elasticsearch-manifests-dump.pp,use of http,30
+alphagov@govuk-puppet-modules-govuk_elasticsearch-manifests-dump.pp,hardcoded-username,31
+alphagov@govuk-puppet-modules-govuk_jenkins-manifests-jobs-smokey.pp,hardcoded-secret,17
+alphagov@govuk-puppet-modules-govuk_mysql-manifests-server.pp,hardcoded-secret,52
+alphagov@govuk-puppet-modules-govuk_mysql-manifests-server.pp,improper ip address binding,84
+alphagov@govuk-puppet-modules-govuk_postgresql-manifests-env_sync_user.pp,hardcoded-secret,15
+alphagov@govuk-puppet-modules-govuk_postgresql-manifests-env_sync_user.pp,hardcoded-secret,22
+alphagov@govuk-puppet-modules-govuk_postgresql-manifests-env_sync_user.pp,weak cryptography algorithms,23
+alphagov@govuk-puppet-modules-govuk_postgresql-manifests-env_sync_user.pp,hardcoded-username,22
+alphagov@govuk-puppet-modules-govuk_postgresql-manifests-env_sync_user.pp,hardcoded-password,15
+alphagov@govuk-puppet-modules-govuk_rabbitmq-manifests-monitoring.pp,suspicious comment,1
+alphagov@govuk-puppet-modules-govuk_rbenv-manifests-all.pp,hardcoded-secret,21
+alphagov@govuk-puppet-modules-govuk_rbenv-manifests-all.pp,use of http,18
+alphagov@govuk-puppet-modules-icinga-manifests-init.pp,suspicious comment,1
+alphagov@govuk-puppet-modules-users-manifests-felisialoukou.pp,hardcoded-secret,2
+alphagov@govuk-puppet-modules-users-manifests-felisialoukou.pp,hardcoded-username,2
+boxbilling@boxbilling-puphpet-puppet-modules-yum-manifests-repo-jpackage6.pp,hardcoded-secret,12
+boxbilling@boxbilling-puphpet-puppet-modules-yum-manifests-repo-jpackage6.pp,use of http,9
+boxbilling@boxbilling-puphpet-puppet-modules-yum-manifests-repo-jpackage6.pp,use of http,12
+cargomedia@puppet-packages-modules-backup-manifests-agent.pp,hardcoded-secret,21
+cargomedia@puppet-packages-modules-backup-manifests-agent.pp,hardcoded-secret,26
+cargomedia@puppet-packages-modules-backup-manifests-agent.pp,hardcoded-secret,33
+cargomedia@puppet-packages-modules-backup-manifests-agent.pp,hardcoded-username,21
+cargomedia@puppet-packages-modules-backup-manifests-agent.pp,hardcoded-username,26
+cargomedia@puppet-packages-modules-backup-manifests-agent.pp,hardcoded-username,33
+cargomedia@puppet-packages-modules-mysql-manifests-server-instance.pp,empty-password,1
+ceph@puppet-ceph-manifests-mds.pp,hardcoded-secret,35
+danofthewired@puppet-bitbucket-examples-bitbucket_mysql_java_install.pp,hardcoded-secret,9
+danofthewired@puppet-bitbucket-examples-bitbucket_mysql_java_install.pp,hardcoded-secret,13
+danofthewired@puppet-bitbucket-examples-bitbucket_mysql_java_install.pp,hardcoded-secret,14
+danofthewired@puppet-bitbucket-examples-bitbucket_mysql_java_install.pp,hardcoded-username,13
+danofthewired@puppet-bitbucket-examples-bitbucket_mysql_java_install.pp,hardcoded-password,9
+danofthewired@puppet-bitbucket-examples-bitbucket_mysql_java_install.pp,hardcoded-password,14
+hubspotdevops@puppet-nexus-manifests-params.pp,hardcoded-secret,34
+hubspotdevops@puppet-nexus-manifests-params.pp,weak cryptography algorithms,44
+hubspotdevops@puppet-nexus-manifests-params.pp,use of http,28
+hubspotdevops@puppet-nexus-manifests-params.pp,use of http,40
+hubspotdevops@puppet-nexus-manifests-params.pp,improper ip address binding,36
+hubspotdevops@puppet-nexus-manifests-params.pp,hardcoded-username,34
+mattheath@puppet-php-manifests-version.pp,hardcoded-secret,102
+mattheath@puppet-php-manifests-version.pp,hardcoded-username,102
+openstack@fuel-library-deployment-puppet-openstack_tasks-manifests-ironic-db.pp,hardcoded-secret,9
+openstack@fuel-library-deployment-puppet-openstack_tasks-manifests-ironic-db.pp,hardcoded-secret,13
+openstack@fuel-library-deployment-puppet-openstack_tasks-manifests-ironic-db.pp,hardcoded-username,9
+openstack@fuel-library-deployment-puppet-openstack_tasks-manifests-ironic-db.pp,hardcoded-username,13
+openstack@fuel-library-deployment-puppet-osnailyfacter-manifests-ssh.pp,hardcoded-secret,39
+openstack@fuel-library-deployment-puppet-osnailyfacter-manifests-ssh.pp,weak cryptography algorithms,35
+openstack@fuel-library-deployment-puppet-osnailyfacter-manifests-ssh.pp,hardcoded-password,39
+openstack@puppet-neutron-manifests-params.pp,hardcoded-secret,45
+openstack@puppet-neutron-manifests-params.pp,hardcoded-secret,95
+openstack@puppet-neutron-manifests-params.pp,hardcoded-username,45
+openstack@puppet-neutron-manifests-params.pp,hardcoded-username,95
+openstack@puppet-neutron-manifests-server-placement.pp,hardcoded-secret,71
+openstack@puppet-neutron-manifests-server-placement.pp,hardcoded-secret,75
+openstack@puppet-neutron-manifests-server-placement.pp,hardcoded-secret,76
+openstack@puppet-neutron-manifests-server-placement.pp,use of http,77
+openstack@puppet-neutron-manifests-server-placement.pp,hardcoded-username,71
+openstack@puppet-neutron-manifests-server-placement.pp,hardcoded-username,75
+openstack@puppet-neutron-manifests-server-placement.pp,hardcoded-username,76
+openstack@puppet-openstack-integration-manifests-designate.pp,hardcoded-secret,11
+openstack@puppet-openstack-integration-manifests-designate.pp,hardcoded-secret,16
+openstack@puppet-openstack-integration-manifests-designate.pp,hardcoded-secret,39
+openstack@puppet-openstack-integration-manifests-designate.pp,hardcoded-secret,45
+openstack@puppet-openstack-integration-manifests-designate.pp,hardcoded-secret,46
+openstack@puppet-openstack-integration-manifests-designate.pp,suspicious comment,37
+openstack@puppet-openstack-integration-manifests-designate.pp,suspicious comment,61
+openstack@puppet-openstack-integration-manifests-designate.pp,suspicious comment,100
+openstack@puppet-openstack-integration-manifests-designate.pp,use of http,40
+openstack@puppet-openstack-integration-manifests-designate.pp,use of http,41
+openstack@puppet-openstack-integration-manifests-designate.pp,use of http,42
+openstack@puppet-openstack-integration-manifests-designate.pp,use of http,55
+openstack@puppet-openstack-integration-manifests-designate.pp,hardcoded-username,46
+openstack@puppet-openstack-integration-manifests-designate.pp,hardcoded-password,11
+openstack@puppet-openstack-integration-manifests-designate.pp,hardcoded-password,16
+openstack@puppet-openstack-integration-manifests-designate.pp,hardcoded-password,39
+openstack@puppet-openstack-integration-manifests-designate.pp,hardcoded-password,45
+openstack@puppet-tripleo-manifests-profile-base-aide-installdb.pp,hardcoded-secret,36
+openstack@puppet-tripleo-manifests-profile-base-aide-installdb.pp,hardcoded-secret,44
+openstack@puppet-tripleo-manifests-profile-base-aide-installdb.pp,hardcoded-username,36
+openstack@puppet-tripleo-manifests-profile-base-aide-installdb.pp,hardcoded-username,44
+openstack@puppet-tripleo-manifests-stunnel-service_proxy.pp,hardcoded-secret,57
+puphpet@puppet-puphpet-manifests-nginx-params.pp,hardcoded-secret,5
+puphpet@puppet-puphpet-manifests-nginx-params.pp,weak cryptography algorithms,33
+puphpet@puppet-puphpet-manifests-nginx-params.pp,hardcoded-username,5
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,hardcoded-secret,3
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,hardcoded-secret,9
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,hardcoded-secret,13
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,hardcoded-secret,14
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,hardcoded-secret,16
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,hardcoded-secret,33
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,hardcoded-secret,35
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,hardcoded-secret,37
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,hardcoded-secret,41
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,hardcoded-secret,44
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,hardcoded-secret,47
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,hardcoded-secret,50
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,hardcoded-secret,58
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,weak cryptography algorithms,9
+puppetlabs@puppetlabs-apache-manifests-mod-ssl.pp,hardcoded-password,13
+purpleidea@puppet-gluster-manifests-simple.pp,suspicious comment,8
+purpleidea@puppet-gluster-manifests-simple.pp,suspicious comment,22
+purpleidea@puppet-gluster-manifests-simple.pp,suspicious comment,81
+purpleidea@puppet-gluster-manifests-simple.pp,suspicious comment,145
+purpleidea@puppet-gluster-manifests-simple.pp,empty-password,26
+purpleidea@puppet-gluster-manifests-simple.pp,empty-password,98
+quintel@boxen-modules-osx-manifests-recovery_message.pp,hardcoded-secret,22
+quintel@boxen-modules-osx-manifests-recovery_message.pp,hardcoded-secret,29
+quintel@boxen-modules-osx-manifests-recovery_message.pp,hardcoded-secret,34
+quintel@boxen-modules-osx-manifests-recovery_message.pp,hardcoded-secret,37
+quintel@boxen-modules-osx-manifests-recovery_message.pp,hardcoded-secret,48
+quintel@boxen-modules-osx-manifests-recovery_message.pp,hardcoded-secret,54
+quintel@boxen-modules-osx-manifests-recovery_message.pp,hardcoded-secret,57
+quintel@boxen-modules-osx-manifests-recovery_message.pp,hardcoded-secret,67
+quintel@boxen-modules-osx-manifests-recovery_message.pp,hardcoded-username,22
+quintel@boxen-modules-osx-manifests-recovery_message.pp,hardcoded-username,29
+quintel@boxen-modules-osx-manifests-recovery_message.pp,hardcoded-username,48
+quintel@boxen-modules-osx-manifests-recovery_message.pp,hardcoded-username,67
+redhat-openstack@puppet-galera-manifests-server.pp,hardcoded-secret,98
+redhat-openstack@puppet-galera-manifests-server.pp,improper ip address binding,106
+redhat-openstack@puppet-galera-manifests-server.pp,hardcoded-username,98
+voxpupuli@puppet-nginx-examples-server_ssl.pp,hardcoded-secret,7
+voxpupuli@puppet-nginx-examples-server_ssl.pp,hardcoded-secret,8
+voxpupuli@puppet-nginx-examples-server_ssl.pp,hardcoded-secret,9
+voxpupuli@puppet-nginx-examples-server_ssl.pp,hardcoded-secret,16
+voxpupuli@puppet-nginx-examples-server_ssl.pp,hardcoded-secret,17
+voxpupuli@puppet-rabbitmq-examples-permissions-add.pp,hardcoded-secret,1
+voxpupuli@puppet-rabbitmq-examples-permissions-add.pp,hardcoded-secret,2
+voxpupuli@puppet-rabbitmq-examples-permissions-add.pp,hardcoded-secret,5
+voxpupuli@puppet-rabbitmq-examples-permissions-add.pp,hardcoded-username,1
+voxpupuli@puppet-rabbitmq-examples-permissions-add.pp,hardcoded-username,5
+voxpupuli@puppet-rabbitmq-examples-permissions-add.pp,hardcoded-password,2
+voxpupuli@puppet-rundeck-manifests-config-global-framework.pp,hardcoded-secret,36
+voxpupuli@puppet-rundeck-manifests-config-global-framework.pp,use of http,28
+voxpupuli@puppet-rundeck-manifests-config-global-framework.pp,hardcoded-username,36
+wikimedia@mediawiki-vagrant-puppet-modules-ocg-manifests-init.pp,hardcoded-secret,47
+wikimedia@mediawiki-vagrant-puppet-modules-ocg-manifests-init.pp,hardcoded-secret,48

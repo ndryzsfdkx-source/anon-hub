@@ -1,0 +1,232 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-zabbix-cookbooks-zabbix-providers-host.rb
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.363863
+# Length: 11099 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-zabbix-cookbooks-zabbix-providers-host.rb (Unknown)**
+
+
+Line 1: include Chef::RubixConnection
+Line 2: 
+Line 3: action :create do
+Line 4:   zabbix_host.save if connected_to_zabbix? && zabbix_host
+Line 5: end
+Line 6: 
+Line 7: action :destroy do
+Line 8:   zabbix_host.destroy if connected_to_zabbix? && zabbix_host
+Line 9: end
+Line 10: 
+Line 11: attr_accessor :zabbix_host, :chef_node
+Line 12: 
+Line 13: def virtual?
+Line 14:   new_resource.virtual
+Line 15: end
+Line 16: 
+Line 17: def load_current_resource
+Line 18:   return unless connect_to_zabbix_server(new_resource.server)
+Line 19:   begin
+Line 20:     self.zabbix_host           = (Rubix::Host.find(:name => new_resource.name) || Rubix::Host.new(:name => new_resource.name))
+Line 21:     self.zabbix_host.monitored = new_resource.monitored
+Line 22:     
+Line 23:     load_host_groups
+Line 24:     load_templates
+Line 25:     load_user_macros
+Line 26:     if virtual?
+Line 27:       self.zabbix_host.use_ip = true
+Line 28:       self.zabbix_host.ip     = '0.0.0.0'
+Line 29:     else
+Line 30:       load_machine_fields unless new_resource.monitored == false
+Line 31:     end
+Line 32:   rescue ArgumentError, ::Rubix::Error, ::Errno::ECONNREFUSED => e
+Line 33:     ::Chef::Log.warn("Could not create Zabbix host #{new_resource.name}: #{e.message}")
+Line 34:   end
+Line 35: end
+Line 36: 
+Line 37: def load_machine_fields
+Line 38:   if zabbix_host.name == node.name
+Line 39:     self.chef_node = node
+Line 40:   else
+Line 41:     self.chef_node = search(:node, "name:#{zabbix_host.name}").first
+Line 42:   end
+Line 43:   if self.chef_node
+Line 44:     self.zabbix_host.profile = (chef_node_profile rescue nil)
+Line 45:     self.zabbix_host.port    = 10050
+Line 46:     self.zabbix_host.use_ip  = true
+Line 47:     if new_resource.monitored
+Line 48:       self.zabbix_host.ip = self.chef_node[:ipaddress]
+Line 49:     else
+Line 50:       self.zabbix_host.ip = '0.0.0.0'
+Line 51:     end
+Line 52:   else
+Line 53:     Chef::Log.error("Cannot find a Chef node named '#{zabbix_host.name}' to register in Zabbix.")
+Line 54:   end
+Line 55: end
+Line 56: 
+Line 57: def load_host_groups
+Line 58:   # Remember - we are *adding* the host groups to the host's current
+Line 59:   # groups, not replacing...
+Line 60:   current_host_groups      = self.zabbix_host.host_groups || []
+Line 61:   current_host_group_names = current_host_groups.map(&:name).to_set
+Line 62:   (new_resource.host_groups || []).flatten.compact.uniq.each do |host_group_name|
+Line 63:     next if current_host_group_names.include?(host_group_name)
+Line 64:     current_host_groups      << Rubix::HostGroup.find_or_create(:name => host_group_name)
+Line 65:     current_host_group_names << host_group_name
+Line 66:   end
+Line 67:   self.zabbix_host.host_groups = current_host_groups
+Line 68: end
+Line 69: 
+Line 70: def load_templates
+Line 71:   # Remember - we are *adding* the templates to the host's current
+Line 72:   # templates, not replacing...
+Line 73:   current_templates      = self.zabbix_host.templates || []
+Line 74:   current_template_names = current_templates.map(&:name).to_set
+Line 75:   (new_resource.templates || []).flatten.compact.uniq.each do |template_name|
+Line 76:     next if current_template_names.include?(template_name)
+Line 77:     t = Rubix::Template.find(:name => template_name)
+Line 78:     if t
+Line 79:       current_templates      << t
+Line 80:       current_template_names << template_name
+Line 81:     else
+Line 82:       Chef::Log.error("Cannot find a Zabbix template named '#{template_name}' for host '#{new_resource.name}', skipping....")
+Line 83:     end
+Line 84:   end
+Line 85:   self.zabbix_host.templates = current_templates
+Line 86: end
+Line 87: 
+Line 88: def load_user_macros
+Line 89:   # Remember - we are *adding* the user macros to the host's current
+Line 90:   # user macros, not replacing...
+Line 91:   current_user_macros = {}.tap do |macros|
+Line 92:     (self.zabbix_host.user_macros || []).each do |macro|
+Line 93:       macros[macro.name] = macro
+Line 94:     end
+Line 95:   end
+Line 96:   (new_resource.user_macros || {}).each_pair do |macro_name, macro_value|
+Line 97:     if current_user_macros[macro_name]
+Line 98:       current_user_macros[macro_name].value = macro_value
+Line 99:     else
+Line 100:       current_user_macros[macro_name] = Rubix::UserMacro.new(:name => macro_name, :value => macro_value)
+Line 101:     end
+Line 102:   end
+Line 103: 
+Line 104:   self.zabbix_host.user_macros = current_user_macros.values
+Line 105: end
+Line 106: 
+Line 107: def chef_node_profile
+Line 108:   if (!virtual? && chef_node)
+Line 109:     {}.tap do |pro|
+Line 110:       pro['devicetype'] = (chef_node[:ec2] && chef_node[:ec2][:instance_type])            rescue nil
+Line 111:       pro['name']       = zabbix_host.name                                                rescue nil
+Line 112:       pro['os']         = [chef_node[:platform], chef_node[:platform_version]].join('] ') rescue nil
+Line 113:       pro['serialno']   = (chef_node[:ec2] && chef_node[:ec2][:instance_id])              rescue nil
+Line 114:       pro['tag']        = tag                                                             rescue nil
+Line 115:       pro['macaddress'] = chef_node[:macaddress]                                          rescue nil
+Line 116:       pro['hardware']   = hardware                                                        rescue nil
+Line 117:       pro['software']   = software                                                        rescue nil
+Line 118:       pro['contact']    = contact                                                         rescue nil
+Line 119:       pro['location']   = location                                                        rescue nil
+Line 120:       pro['notes']      = notes                                                           rescue nil
+Line 121:     end
+Line 122:   else
+Line 123:     {}
+Line 124:   end
+Line 125: end
+Line 126: 
+Line 127: def tag
+Line 128:   ''
+Line 129: end
+Line 130: 
+Line 131: def hardware
+Line 132:   num_cpus   = chef_node[:cpu][:total].to_i rescue nil
+Line 133:   cpu_models = (0...num_cpus).map { |index| chef_node[:cpu][index.to_s][:model_name] rescue '' }.compact.to_set.to_a.join(', ') if num_cpus
+Line 134:   ram        = chef_node[:cpu][:memory][:total] rescue 0
+Line 135:   swap       = chef_node[:cpu][:memory][:swap][:total] rescue 0
+Line 136:   ["CPU: #{num_cpus} (#{cpu_models})", "RAM: #{ram}, SWAP: #{swap}"].join("\n")
+Line 137: end
+Line 138: 
+Line 139: def software
+Line 140:   node_roles     = (chef_node[:roles] || []).join(', ')
+Line 141:   node_announces = (chef_node[:announces] || {}).keys.join(', ')
+Line 142:   ["Roles: #{node_roles}", "Announces: #{node_announces}"].join("\n")
+Line 143: end
+Line 144: 
+Line 145: def contact
+Line 146:   ["Public: #{chef_node[:ec2][:public_hostname]}", "Private: #{chef_node[:ipaddress]}", "FQDN: #{chef_node[:fqdn]}"].join("\n") rescue ''
+Line 147: end
+Line 148: 
+Line 149: def location
+Line 150:   node_security_groups = (chef_node[:ec2][:security_groups] || []).join(', ')
+Line 151:   ["Availability Zone: #{chef_node[:ec2][:placement_availability_zone]}", "Security Groups: #{node_security_groups}"].join("\n") rescue ''
+Line 152: end
+Line 153: 
+Line 154: def notes
+Line 155:   [].tap do |lines|
+Line 156:     (chef_node[:filesystem] || {}).each_pair do |dev, dev_data|
+Line 157:       next unless dev =~ /dev/
+Line 158:       lines << "#{dev}: #{dev_data[:mount]} (#{dev_data[:kb_size]})" rescue nil
+Line 159:     end
+Line 160:   end.join("\n")
+Line 161: end
+Line 162: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

@@ -1,0 +1,250 @@
+# CONSTRUCTED PROMPT
+# File: openstack@puppet-neutron-manifests-params.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.639402
+# Length: 12711 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack@puppet-neutron-manifests-params.pp (Puppet)**
+
+
+Line 1: # == Class: neutron::params
+Line 2: #
+Line 3: # Parameters for puppet-neutron
+Line 4: #
+Line 5: class neutron::params {
+Line 6:   include ::openstacklib::defaults
+Line 7:   $pyvers = $::openstacklib::defaults::pyvers
+Line 8: 
+Line 9:   $client_package              = "python${pyvers}-neutronclient"
+Line 10:   $ovs_agent_service           = 'neutron-openvswitch-agent'
+Line 11:   $destroy_patch_ports_service = 'neutron-destroy-patch-ports'
+Line 12:   $linuxbridge_agent_service   = 'neutron-linuxbridge-agent'
+Line 13:   $cisco_config_file           = '/etc/neutron/plugins/cisco/cisco_plugins.ini'
+Line 14:   $opencontrail_plugin_package = 'neutron-plugin-contrail'
+Line 15:   $opencontrail_config_file    = '/etc/neutron/plugins/opencontrail/ContrailPlugin.ini'
+Line 16:   $midonet_server_package      = "python${pyvers}-networking-midonet"
+Line 17:   $midonet_server_package_ext  = "python${pyvers}-networking-midonet-ext"
+Line 18:   $midonet_config_file         = '/etc/neutron/plugins/midonet/midonet.ini'
+Line 19:   $ovn_plugin_package          = "python${pyvers}-networking-ovn"
+Line 20:   $vpp_plugin_package          = "python${pyvers}-networking-vpp"
+Line 21:   $vpp_agent_service           = 'neutron-vpp-agent'
+Line 22:   $plumgrid_plugin_package     = 'networking-plumgrid'
+Line 23:   $plumgrid_pythonlib_package  = 'plumgrid-pythonlib'
+Line 24:   $plumgrid_config_file        = '/etc/neutron/plugins/plumgrid/plumgrid.ini'
+Line 25:   $nuage_config_file           = '/etc/neutron/plugins/nuage/plugin.ini'
+Line 26:   $dhcp_agent_service          = 'neutron-dhcp-agent'
+Line 27:   $lbaasv2_agent_service       = 'neutron-lbaasv2-agent'
+Line 28:   $haproxy_package             = 'haproxy'
+Line 29:   $metering_agent_service      = 'neutron-metering-agent'
+Line 30:   $l3_agent_service            = 'neutron-l3-agent'
+Line 31:   $metadata_agent_service      = 'neutron-metadata-agent'
+Line 32:   $ovn_metadata_agent_service  = 'networking-ovn-metadata-agent'
+Line 33:   $bgp_dragent_service         = 'neutron-bgp-dragent'
+Line 34:   $bagpipe_bgp_package         = 'openstack-bagpipe-bgp'
+Line 35:   $bgpvpn_bagpipe_package      = "python${pyvers}-networking-bagpipe"
+Line 36:   $bgpvpn_bagpipe_service      = 'bagpipe-bgp'
+Line 37:   $bgpvpn_plugin_package       = "python${pyvers}-networking-bgpvpn"
+Line 38:   $l2gw_agent_service          = 'neutron-l2gw-agent'
+Line 39:   $nsx_plugin_package          = 'vmware-nsx'
+Line 40:   $nsx_config_file             = '/etc/neutron/plugins/vmware/nsx.ini'
+Line 41:   $sfc_package                 = "python${pyvers}-networking-sfc"
+Line 42:   $group                       = 'neutron'
+Line 43: 
+Line 44:   if($::osfamily == 'Redhat') {
+Line 45:     $nobody_user_group                  = 'nobody'
+Line 46:     $package_name                       = 'openstack-neutron'
+Line 47:     $server_service                     = 'neutron-server'
+Line 48:     $server_package                     = false
+Line 49:     $api_package_name                   = false
+Line 50:     $api_service_name                   = false
+Line 51:     $rpc_package_name                   = false
+Line 52:     $rpc_service_name                   = false
+Line 53:     $ml2_server_package                 = 'openstack-neutron-ml2'
+Line 54:     $ovs_agent_package                  = false
+Line 55:     $ovs_server_package                 = 'openstack-neutron-openvswitch'
+Line 56:     $ovs_cleanup_service                = 'neutron-ovs-cleanup'
+Line 57:     $libnl_package                      = 'libnl'
+Line 58:     $package_provider                   = 'rpm'
+Line 59:     $linuxbridge_agent_package          = false
+Line 60:     $linuxbridge_server_package         = 'openstack-neutron-linuxbridge'
+Line 61:     $sriov_nic_agent_service            = 'neutron-sriov-nic-agent'
+Line 62:     $sriov_nic_agent_package            = 'openstack-neutron-sriov-nic-agent'
+Line 63:     $bigswitch_lldp_package             = 'openstack-neutron-bigswitch-lldp'
+Line 64:     $bigswitch_agent_package            = 'openstack-neutron-bigswitch-agent'
+Line 65:     $bigswitch_lldp_service             = 'neutron-bsn-lldp'
+Line 66:     $bigswitch_agent_service            = 'neutron-bsn-agent'
+Line 67:     $cisco_server_package               = 'openstack-neutron-cisco'
+Line 68:     $nvp_server_package                 = 'openstack-neutron-nicira'
+Line 69:     $dhcp_agent_package                 = false
+Line 70:     $lbaasv2_agent_package              = 'openstack-neutron-lbaas'
+Line 71:     $metering_agent_package             = 'openstack-neutron-metering-agent'
+Line 72:     $vpnaas_agent_package               = 'openstack-neutron-vpnaas'
+Line 73:     $l2gw_agent_package                 = 'openstack-neutron-l2gw-agent'
+Line 74:     $l2gw_package                       = "python${pyvers}-networking-l2gw"
+Line 75:     $ovn_metadata_agent_package         = "python${pyvers}-networking-ovn-metadata-agent"
+Line 76:     $dynamic_routing_package            = false
+Line 77:     $bgp_dragent_package                = 'openstack-neutron-bgp-dragent'
+Line 78:     if $::operatingsystemrelease =~ /^7.*/ or $::operatingsystem == 'Fedora' {
+Line 79:       $openswan_package = 'libreswan'
+Line 80:     } else {
+Line 81:       $openswan_package = 'openswan'
+Line 82:     }
+Line 83:     $libreswan_package                  = 'libreswan'
+Line 84:     $metadata_agent_package             = false
+Line 85:     $l3_agent_package                   = false
+Line 86:     $lbaas_package                      = false
+Line 87:     $fwaas_package                      = 'openstack-neutron-fwaas'
+Line 88:     $neutron_wsgi_script_path           = '/var/www/cgi-bin/neutron'
+Line 89:     $neutron_wsgi_script_source         = '/usr/bin/neutron-api'
+Line 90:     $networking_baremetal_package       = 'python2-networking-baremetal'
+Line 91:     $networking_baremetal_agent_package = 'python2-ironic-neutron-agent'
+Line 92:     $networking_baremetal_agent_service = 'ironic-neutron-agent'
+Line 93:     $networking_ansible_package         = "python${pyvers}-networking-ansible"
+Line 94:   } elsif($::osfamily == 'Debian') {
+Line 95:     $nobody_user_group          = 'nogroup'
+Line 96:     $package_name               = 'neutron-common'
+Line 97:     if $::os_package_type =='debian' {
+Line 98:       $ml2_server_package       = false
+Line 99:       $server_service           = false
+Line 100:       $server_package           = false
+Line 101:       $api_package_name         = 'neutron-api'
+Line 102:       $api_service_name         = 'neutron-api'
+Line 103:       $rpc_package_name         = 'neutron-rpc-server'
+Line 104:       $rpc_service_name         = 'neutron-rpc-server'
+Line 105:       $dynamic_routing_package  = 'python3-neutron-dynamic-routing'
+Line 106:       $lbaas_package            = 'python3-neutron-lbaas'
+Line 107:     } else {
+Line 108:       $ml2_server_package = 'neutron-plugin-ml2'
+Line 109:       $server_service           = 'neutron-server'
+Line 110:       $server_package           = 'neutron-server'
+Line 111:       $api_package_name         = false
+Line 112:       $api_service_name         = false
+Line 113:       $rpc_package_name         = false
+Line 114:       $rpc_service_name         = false
+Line 115:       $dynamic_routing_package  = "python${pyvers}-neutron-dynamic-routing"
+Line 116:       $lbaas_package            = "python${pyvers}-neutron-lbaas"
+Line 117:     }
+Line 118:     $bgp_dragent_package        = 'neutron-bgp-dragent'
+Line 119:     $ovs_agent_package          = 'neutron-openvswitch-agent'
+Line 120:     $ovs_server_package         = 'neutron-plugin-openvswitch'
+Line 121:     $ovs_cleanup_service        = false
+Line 122:     $libnl_package              = 'libnl1'
+Line 123:     $package_provider           = 'dpkg'
+Line 124:     $linuxbridge_agent_package  = 'neutron-linuxbridge-agent'
+Line 125:     $linuxbridge_server_package = 'neutron-plugin-linuxbridge'
+Line 126:     $sriov_nic_agent_service    = 'neutron-sriov-agent'
+Line 127:     $sriov_nic_agent_package    = 'neutron-sriov-agent'
+Line 128:     $cisco_server_package       = 'neutron-plugin-cisco'
+Line 129:     $nvp_server_package         = 'neutron-plugin-nicira'
+Line 130:     $dhcp_agent_package         = 'neutron-dhcp-agent'
+Line 131:     $lbaasv2_agent_package      = 'neutron-lbaasv2-agent'
+Line 132:     $metering_agent_package     = 'neutron-metering-agent'
+Line 133:     $vpnaas_agent_package       = 'neutron-vpn-agent'
+Line 134:     $openswan_package           = 'openswan'
+Line 135:     $libreswan_package          = false
+Line 136:     $metadata_agent_package     = 'neutron-metadata-agent'
+Line 137:     $l3_agent_package           = 'neutron-l3-agent'
+Line 138:     $fwaas_package              = "python${pyvers}-neutron-fwaas"
+Line 139:     $l2gw_agent_package         = 'neutron-l2gateway-agent'
+Line 140:     $l2gw_package               = "python${pyvers}-networking-l2gw"
+Line 141:     $neutron_wsgi_script_path   = '/usr/lib/cgi-bin/neutron'
+Line 142:     $neutron_wsgi_script_source = '/usr/bin/neutron-api'
+Line 143:   } else {
+Line 144:     fail("Unsupported osfamily ${::osfamily}")
+Line 145:   }
+Line 146: }
+Line 147: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

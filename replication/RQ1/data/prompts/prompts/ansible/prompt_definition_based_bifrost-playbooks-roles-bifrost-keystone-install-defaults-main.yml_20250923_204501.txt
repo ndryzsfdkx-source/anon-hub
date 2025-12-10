@@ -1,0 +1,139 @@
+# CONSTRUCTED PROMPT
+# File: bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.333804
+# Length: 6461 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: keystone_source_install: true
+Line 3: # *_git_url can be overridden by local clones for offline installs
+Line 4: keystone_git_url: https://git.openstack.org/openstack/keystone
+Line 5: keystone_git_folder: /opt/stack/keystone
+Line 6: 
+Line 7: # set to true to skip installing ironic dependencies
+Line 8: skip_package_install: False
+Line 9: # set to true to skip generation of configs, ironic db and rabbitmq configuration
+Line 10: skip_bootstrap: False
+Line 11: # set to true to skip starting ironic services and dependencies
+Line 12: skip_start: False
+Line 13: 
+Line 14: # Parameters for connecting to mysql for database manipulation.
+Line 15: mysql_username: "root"
+Line 16: mysql_password: ""
+Line 17: 
+Line 18: # Support for CORS configuration
+Line 19: # By default CORS support is disabled.
+Line 20: enable_cors: false
+Line 21: # Origin to accept for CORS requests
+Line 22: cors_allowed_origin: "http://localhost:8000"
+Line 23: cors_allowed_origin2: "www.google.com"
+Line 24: # bifrost utilizes noauth mode by default and as such
+Line 25: # the setting should be set to false. This setting should
+Line 26: # not need to be modified by the user.
+Line 27: enable_cors_credential_support: false
+Line 28: 
+Line 29: # Defaults required by this role that are normally inherited via
+Line 30: # other roles.
+Line 31: file_url_port: 8080
+Line 32: http_boot_folder: /httpboot
+Line 33: 
+Line 34: # Settings related to installing bifrost in a virtual environment
+Line 35: enable_venv: false
+Line 36: bifrost_venv_dir: "{{ lookup('env', 'VENV') | default('/opt/stack/bifrost') }}"
+Line 37: bifrost_venv_env:
+Line 38:   VIRTUAL_ENV: "{{ bifrost_venv_dir }}"
+Line 39:   PATH: "{{ bifrost_venv_dir }}/bin:{{ ansible_env.PATH }}" # include regular path via lookup env
+Line 40:   pydoc: "python -m pydoc"
+Line 41: 
+Line 42: 
+Line 43: keystone:
+Line 44:   debug: true
+Line 45:   bootstrap:
+Line 46:     enabled: true
+Line 47:     username: admin
+Line 48:     password: ChangeThisPa55w0rd
+Line 49:     project_name: admin
+Line 50:     admin_url: "http://127.0.0.1:35357/v3/"
+Line 51:     public_url: "http://127.0.0.1:5000/v3/"
+Line 52:     internal_url: "http://127.0.0.1:5000/v3/"
+Line 53:     region_name: "RegionOne"
+Line 54:   message_queue:
+Line 55:     username: keystone
+Line 56:     password: ChangeThisPa55w0rd
+Line 57:     host: localhost
+Line 58:     port: 5672
+Line 59:   database:
+Line 60:     name: keystone
+Line 61:     username: keystone
+Line 62:     password: ChangeThisPa55w0rd
+Line 63:     host: localhost
+Line 64: 
+Line 65: # NOTE(hwoarang): openSUSE distros may come with recent pip versions so
+Line 66: # upgrade only what's necessary
+Line 67: pip_opts: "{{ ((ansible_os_family | lower == 'suse') or (enable_venv | bool)) | ternary('--upgrade-strategy only-if-needed', '--force-reinstall') }}"
+Line 68: 
+Line 69: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

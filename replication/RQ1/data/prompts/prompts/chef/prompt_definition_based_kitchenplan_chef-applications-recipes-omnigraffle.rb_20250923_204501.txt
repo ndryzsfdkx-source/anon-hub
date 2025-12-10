@@ -1,0 +1,153 @@
+# CONSTRUCTED PROMPT
+# File: kitchenplan_chef-applications-recipes-omnigraffle.rb
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.369685
+# Length: 8385 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: kitchenplan_chef-applications-recipes-omnigraffle.rb (Unknown)**
+
+
+Line 1: case node["platform_family"]
+Line 2:     when 'mac_os_x'
+Line 3:         include_recipe "homebrewalt::default"
+Line 4:         homebrewalt_cask "omnigraffle"
+Line 5: 
+Line 6:         gtemplate = "#{node['etc']['passwd'][node['current_user']]['dir']}/Library/Application Support/OmniGraffle/Templates/Konigi-UX-Template.gtemplate"
+Line 7:         unless File.exists?(gtemplate)
+Line 8:             directory "#{node['etc']['passwd'][node['current_user']]['dir']}/Library/Application Support/OmniGraffle/Templates" do
+Line 9:                 owner node['current_user']
+Line 10:                 mode 0755
+Line 11:                 action :create
+Line 12:                 recursive true
+Line 13:             end
+Line 14: 
+Line 15:             remote_file "#{Chef::Config[:file_cache_path]}/Konigi-UX-Template-2-5-1.gtemplate.zip" do
+Line 16:                 source "http://media.konigi.com/tools/og-ux-template/Konigi-UX-Template-2-5-1.gtemplate.zip"
+Line 17:                 owner node['current_user']
+Line 18:             end
+Line 19: 
+Line 20:             execute "unzip Konigi-UX-Template-2-5-1.gtemplate.zip" do
+Line 21:                 command "unzip #{Chef::Config[:file_cache_path]}/Konigi-UX-Template-2-5-1.gtemplate.zip -d #{Chef::Config[:file_cache_path]}/"
+Line 22:                 user node['current_user']
+Line 23:             end
+Line 24: 
+Line 25:             execute "move Konigi-UX-Template.gtemplate" do
+Line 26:                 command "mv #{Chef::Config[:file_cache_path]}/Konigi-UX-Template.gtemplate #{Regexp.escape(gtemplate)}"
+Line 27:                 user node['current_user']
+Line 28:             end
+Line 29:         end
+Line 30: 
+Line 31:         gdiagramstyle = "#{node['etc']['passwd'][node['current_user']]['dir']}/Library/Application Support/OmniGraffle/Diagram Styles/Konigi.gdiagramstyle"
+Line 32:         unless File.exists?(gdiagramstyle)
+Line 33:             directory "#{node['etc']['passwd'][node['current_user']]['dir']}/Library/Application Support/OmniGraffle/Diagram Styles" do
+Line 34:                 owner node['current_user']
+Line 35:                 mode 0755
+Line 36:                 action :create
+Line 37:                 recursive true
+Line 38:             end
+Line 39: 
+Line 40:             remote_file "#{Chef::Config[:file_cache_path]}/Konigi.gdiagramstyle.zip" do
+Line 41:                 source "http://media.konigi.com/tools/og-ux-template/Konigi.gdiagramstyle.zip"
+Line 42:                 owner node['current_user']
+Line 43:             end
+Line 44: 
+Line 45:             execute "unzip Konigi.gdiagramstyle.zip" do
+Line 46:                 command "unzip #{Chef::Config[:file_cache_path]}/Konigi.gdiagramstyle.zip -d #{Chef::Config[:file_cache_path]}/"
+Line 47:                 user node['current_user']
+Line 48:             end
+Line 49: 
+Line 50:             execute "move Konigi.gdiagramstyle" do
+Line 51:                 command "mv #{Chef::Config[:file_cache_path]}/Konigi.gdiagramstyle #{Regexp.escape(gdiagramstyle)}"
+Line 52:                 user node['current_user']
+Line 53:             end
+Line 54:         end
+Line 55: 
+Line 56:         stencils = "#{node['etc']['passwd'][node['current_user']]['dir']}/Library/Application Support/OmniGraffle/Stencils/Konigi Wireframe Stencils v3"
+Line 57:         unless File.exists?(stencils)
+Line 58:             directory "#{node['etc']['passwd'][node['current_user']]['dir']}/Library/Application Support/OmniGraffle/Stencils" do
+Line 59:                 owner node['current_user']
+Line 60:                 mode 0755
+Line 61:                 action :create
+Line 62:                 recursive true
+Line 63:             end
+Line 64: 
+Line 65:             remote_file "#{Chef::Config[:file_cache_path]}/Konigi-Wireframe-Stencils-v3-02.zip" do
+Line 66:                 source "http://media.konigi.com/tools/og-wireframe-stencil/Konigi-Wireframe-Stencils-v3-02.zip"
+Line 67:                 owner node['current_user']
+Line 68:             end
+Line 69: 
+Line 70:             execute "unzip Konigi-Wireframe-Stencils-v3-02.zip" do
+Line 71:                 command "unzip #{Chef::Config[:file_cache_path]}/Konigi-Wireframe-Stencils-v3-02.zip -d #{Chef::Config[:file_cache_path]}/"
+Line 72:                 user node['current_user']
+Line 73:             end
+Line 74: 
+Line 75:             execute "move Konigi.gdiagramstyle" do
+Line 76:                 command "mv #{Chef::Config[:file_cache_path]}/#{Regexp.escape("Konigi Wireframe Stencils v3")} #{Regexp.escape("#{node['etc']['passwd'][node['current_user']]['dir']}/Library/Application Support/OmniGraffle/Stencils/")}"
+Line 77:                 user node['current_user']
+Line 78:             end
+Line 79:         end
+Line 80:     when 'debian'
+Line 81:         Chef::Log.debug("This recipe is OSX only")
+Line 82: end
+Line 83: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

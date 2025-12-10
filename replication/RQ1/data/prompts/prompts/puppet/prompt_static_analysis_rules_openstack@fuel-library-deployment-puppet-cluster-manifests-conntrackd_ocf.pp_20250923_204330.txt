@@ -1,0 +1,188 @@
+# CONSTRUCTED PROMPT
+# File: openstack@fuel-library-deployment-puppet-cluster-manifests-conntrackd_ocf.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.637583
+# Length: 6553 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack@fuel-library-deployment-puppet-cluster-manifests-conntrackd_ocf.pp (Puppet)**
+
+
+Line 1: class cluster::conntrackd_ocf (
+Line 2:   $vrouter_name,
+Line 3:   $bind_address,
+Line 4:   $mgmt_bridge,
+Line 5: ) {
+Line 6:   $service_name = 'p_conntrackd'
+Line 7:   $conntrackd_package = 'conntrackd'
+Line 8: 
+Line 9:   package { $conntrackd_package:
+Line 10:     ensure => 'installed',
+Line 11:   } ->
+Line 12: 
+Line 13:   file { '/etc/conntrackd/conntrackd.conf':
+Line 14:     content => template('cluster/conntrackd.conf.erb'),
+Line 15:   } ->
+Line 16: 
+Line 17:   service { $service_name :
+Line 18:     ensure   => 'running',
+Line 19:     enable   => true,
+Line 20:   }
+Line 21: 
+Line 22:   tweaks::ubuntu_service_override { 'conntrackd': }
+Line 23: 
+Line 24:   $primitive_class    = 'ocf'
+Line 25:   $primitive_provider = 'fuel'
+Line 26:   $primitive_type     = 'ns_conntrackd'
+Line 27:   $metadata           = {
+Line 28:     'migration-threshold' => 'INFINITY',
+Line 29:     'failure-timeout'     => '180s'
+Line 30:   }
+Line 31:   $parameters = {
+Line 32:     'bridge' => $mgmt_bridge,
+Line 33:   }
+Line 34:   $complex_type       = 'master'
+Line 35:   $complex_metadata   = {
+Line 36:     'notify'          => 'true',
+Line 37:     'ordered'         => 'false',
+Line 38:     'interleave'      => 'true',
+Line 39:     'clone-node-max'  => '1',
+Line 40:     'master-max'      => '1',
+Line 41:     'master-node-max' => '1',
+Line 42:     'target-role'     => 'Master'
+Line 43:   }
+Line 44:   $operations         = {
+Line 45:     'monitor'  => {
+Line 46:       'interval' => '30',
+Line 47:       'timeout'  => '60'
+Line 48:     },
+Line 49:     'monitor:Master' => {
+Line 50:       'role'         => 'Master',
+Line 51:       'interval'     => '27',
+Line 52:       'timeout'      => '60'
+Line 53:     },
+Line 54:   }
+Line 55: 
+Line 56:   pacemaker::service { $service_name :
+Line 57:     prefix             => false,
+Line 58:     primitive_class    => $primitive_class,
+Line 59:     primitive_provider => $primitive_provider,
+Line 60:     primitive_type     => $primitive_type,
+Line 61:     metadata           => $metadata,
+Line 62:     parameters         => $parameters,
+Line 63:     complex_type       => $complex_type,
+Line 64:     complex_metadata   => $complex_metadata,
+Line 65:     operations         => $operations,
+Line 66:   }
+Line 67: 
+Line 68:   pcmk_colocation { "conntrackd-with-${vrouter_name}-vip":
+Line 69:     first  => "vip__vrouter_${vrouter_name}",
+Line 70:     second => 'master_p_conntrackd:Master',
+Line 71:   }
+Line 72: 
+Line 73:   File['/etc/conntrackd/conntrackd.conf'] ->
+Line 74:   Pcmk_resource[$service_name] ->
+Line 75:   Service[$service_name] ->
+Line 76:   Pcmk_colocation["conntrackd-with-${vrouter_name}-vip"]
+Line 77: 
+Line 78:   # Workaround to ensure log is rotated properly
+Line 79:   file { '/etc/logrotate.d/conntrackd':
+Line 80:     content => template('openstack/95-conntrackd.conf.erb'),
+Line 81:   }
+Line 82: 
+Line 83:   Package[$conntrackd_package] -> File['/etc/logrotate.d/conntrackd']
+Line 84: }
+Line 85: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

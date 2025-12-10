@@ -1,0 +1,205 @@
+# CONSTRUCTED PROMPT
+# File: ansible-role-systemd_mount-tasks-systemd_mounts.yml
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.588228
+# Length: 7777 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: ansible-role-systemd_mount-tasks-systemd_mounts.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: # Copyright 2018, Rackspace US, Inc.
+Line 3: #
+Line 4: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 5: # you may not use this file except in compliance with the License.
+Line 6: # You may obtain a copy of the License at
+Line 7: #
+Line 8: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 9: #
+Line 10: # Unless required by applicable law or agreed to in writing, software
+Line 11: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 12: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 13: # See the License for the specific language governing permissions and
+Line 14: # limitations under the License.
+Line 15: 
+Line 16: - name: Set mount facts
+Line 17:   set_fact:
+Line 18:     systemd_mount_suffix: "{{ (item.type == 'swap') | ternary('swap', 'mount') }}"
+Line 19:     systemd_mount_item: "{{ item.where | default(item.what) }}"
+Line 20: 
+Line 21: - name: Escape mount service file name
+Line 22:   command: systemd-escape -p --suffix="{{ systemd_mount_suffix }}" "{{ systemd_mount_item }}"
+Line 23:   changed_when: false
+Line 24:   register: mount_service_name
+Line 25: 
+Line 26: - name: Create mount target(s)
+Line 27:   file:
+Line 28:     path: "{{ item.where }}"
+Line 29:     state: directory
+Line 30:     owner: "{{ item.owner | default(omit) }}"
+Line 31:     group: "{{ item.group | default(omit) }}"
+Line 32:     mode: "0755"
+Line 33:   when:
+Line 34:     - item.where is defined
+Line 35:     - item.state | default('unknown') != 'absent'
+Line 36:     - item.type != 'swap'
+Line 37:   tags:
+Line 38:     - systemd-mount
+Line 39: 
+Line 40: - name: Create systemd mount services(s)
+Line 41:   config_template:
+Line 42:     src: "systemd-mount.j2"
+Line 43:     dest: "/etc/systemd/system/{{ mount_service_name.stdout }}"
+Line 44:     owner: "root"
+Line 45:     group: "root"
+Line 46:     mode: "0640"
+Line 47:     config_overrides: "{{ item.config_overrides | default({}) }}"
+Line 48:     config_type: "ini"
+Line 49:   when:
+Line 50:     - item.state | default('unknown') != 'absent'
+Line 51:   tags:
+Line 52:     - systemd-mount
+Line 53: 
+Line 54: - name: Load or Unload mount(s)
+Line 55:   systemd:
+Line 56:     daemon_reload: yes
+Line 57:     name: "{{ mount_service_name.stdout }}"
+Line 58:     enabled: "{{ item.enabled | default(true) }}"
+Line 59:   when:
+Line 60:     - item.state | default('unknown') != 'absent'
+Line 61: 
+Line 62: # NOTE(cloudnull): The systemd module is not used to start the
+Line 63: #                  mount because we don't want to inavertently
+Line 64: #                  "restart" a mount unnecessarily. To ensure
+Line 65: #                  we're able to load new options without
+Line 66: #                  requiring a mount restart the systemctl
+Line 67: #                  command is used with the "reload-or-restart"
+Line 68: #                  argument. Additionally this command escapes
+Line 69: #                  the name of the mount. If this command fails
+Line 70: #                  the task will be rescued and the regular
+Line 71: #                  systemd module will be attempted before
+Line 72: #                  failing the task run.
+Line 73: - name: Mount state block
+Line 74:   block:
+Line 75:     - name: Set the state of the mount
+Line 76:       shell: >-
+Line 77:         systemctl
+Line 78:         {{ systemd_mount_states[item.state] }}
+Line 79:         $(systemd-escape -p --suffix="{{ systemd_mount_suffix }}" "{{ systemd_mount_item }}")
+Line 80:       args:
+Line 81:         warn: no
+Line 82:       when:
+Line 83:         - item.state is defined
+Line 84:       tags:
+Line 85:         - skip_ansible_lint
+Line 86:   rescue:
+Line 87:     - name: Set the state of the mount (fallback)
+Line 88:       systemd:
+Line 89:         name: "{{ mount_service_name.stdout }}"
+Line 90:         state: "{{ item.state }}"
+Line 91: 
+Line 92: - name: Unload mount(s)
+Line 93:   systemd:
+Line 94:     daemon_reload: yes
+Line 95:     name: "{{ mount_service_name.stdout }}"
+Line 96:     enabled: false
+Line 97:     no_block: yes
+Line 98:   when:
+Line 99:     - item.state | default('unknown') == 'absent'
+Line 100:   notify: Remove mount
+Line 101: 
+Line 102: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

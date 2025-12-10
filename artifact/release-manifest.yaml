@@ -3,21 +3,27 @@
 
 paper_title: "IntelliSA: An Intelligent Analyzer for IaC Security Smell Detection via Rule and Neural Inference"
 paper_tag: v1.0-paper
-generated_date: 2025-10-21
+generated_date: 2025-12-10
 
 # Repository versions (recorded from GitHub remotes)
 repositories:
+  hub:
+    github: https://github.com/ndryzsfdkx-source/anon-hub
+    commit: 99b9bcbb4244633359c4c6edcea84adc679530ff
+
+  cli:
+    github: https://github.com/ndryzsfdkx-source/anon-cli
+    commit: 792ec5f134ef3e8ea2023de2ce60c9cd4df04421
+
   experiments:
     github: https://github.com/ndryzsfdkx-source/anon-experiments
     commit: 751c05901e37b04900319ad4af901b547bcf3f10
+    optional: true
 
   models:
     github: https://github.com/ndryzsfdkx-source/anon-models
     commit: bf1838e8167ab22db450ae54d46dac67c0f6de91
-
-  cli:
-    github: https://github.com/ndryzsfdkx-source/anon-cli
-    commit: 1848d1f800bc3786275fc078f159a35266686065
+    optional: true
 
 # Model used
 model:

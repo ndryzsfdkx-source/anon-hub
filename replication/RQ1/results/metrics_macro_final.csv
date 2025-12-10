@@ -1,0 +1,4 @@
+Method,Ansible,Chef,Puppet,Macro-F1
+GLITCH,0.843,0.661,0.578,0.694
+SLAC/SLIC,0.505,0.376,0.357,0.413
+IntelliSA,0.878,0.768,0.846,0.831

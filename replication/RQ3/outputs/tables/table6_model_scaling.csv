@@ -1,0 +1,6 @@
+Student Model,Params (M),Macro F1 (argmax)
+CodeBERT-base,110,0.766
+UniXcoder-base,110,0.746
+CodeT5p-220M,220,0.794
+CodeT5-base,220,0.769
+CodeT5p-770M,770,0.785

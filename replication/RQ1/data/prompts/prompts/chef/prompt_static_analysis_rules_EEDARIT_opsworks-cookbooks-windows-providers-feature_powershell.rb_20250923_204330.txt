@@ -1,0 +1,142 @@
+# CONSTRUCTED PROMPT
+# File: EEDARIT_opsworks-cookbooks-windows-providers-feature_powershell.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.609423
+# Length: 4962 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: EEDARIT_opsworks-cookbooks-windows-providers-feature_powershell.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Author:: Greg Zapp (<greg.zapp@gmail.com>)
+Line 3: # Cookbook Name:: windows
+Line 4: # Provider:: feature_powershell
+Line 5: #
+Line 6: 
+Line 7: include Chef::Provider::WindowsFeature::Base
+Line 8: include Chef::Mixin::PowershellOut
+Line 9: include Windows::Helper
+Line 10: 
+Line 11: def install_feature(name)
+Line 12:   cmd = powershell_out("Install-WindowsFeature #{@new_resource.feature_name}")
+Line 13:   Chef::Log.info(cmd.stdout)
+Line 14: end
+Line 15: 
+Line 16: def remove_feature(name)
+Line 17:   cmd = powershell_out("Uninstall-WindowsFeature #{@new_resource.feature_name}")
+Line 18:   Chef::Log.info(cmd.stdout)
+Line 19: end
+Line 20: 
+Line 21: def delete_feature(name)
+Line 22:   cmd = powershell_out("Uninstall-WindowsFeature #{@new_resource.feature_name} -Remove")
+Line 23:   Chef::Log.info(cmd.stdout)
+Line 24: end
+Line 25: 
+Line 26: def installed?
+Line 27:   @installed ||= begin
+Line 28:     cmd = powershell_out("Get-WindowsFeature #{@new_resource.feature_name} | Select Installed | % { Write-Host $_.Installed }")
+Line 29:     cmd.stderr.empty? &&  cmd.stdout =~ /True/i
+Line 30:   end
+Line 31: end
+Line 32: 
+Line 33: def available?
+Line 34:   @available ||= begin
+Line 35:     cmd = powershell_out("Get-WindowsFeature #{@new_resource.feature_name}")
+Line 36:     cmd.stderr.empty? && cmd.stdout !~ /Removed/i
+Line 37:   end
+Line 38: end
+Line 39: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

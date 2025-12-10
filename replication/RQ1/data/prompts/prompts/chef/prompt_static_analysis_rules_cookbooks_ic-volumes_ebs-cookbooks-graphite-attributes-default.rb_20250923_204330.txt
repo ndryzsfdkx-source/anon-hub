@@ -1,0 +1,141 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.617545
+# Length: 6079 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb (Unknown)**
+
+
+Line 1: graphite_prefix_dir= '/usr/local' # changed from graphite's default of /opt
+Line 2: 
+Line 3: default[:graphite][:prefix_dir]                       = '/usr/local/share'
+Line 4: default[:graphite][:home_dir]                         = '/usr/local/share/graphite'
+Line 5: default[:graphite][:conf_dir]                         = '/etc/graphite'
+Line 6: default[:graphite][:pid_dir]                          = '/var/run/graphite'
+Line 7: default[:graphite][:carbon   ][:log_dir]              = '/var/log/graphite/carbon'
+Line 8: default[:graphite][:dashboard][:log_dir]              = '/var/log/graphite/dashboard'
+Line 9: 
+Line 10: default[:graphite][:user]                             = 'www-data'
+Line 11: default[:graphite][:carbon   ][:user]                 = 'www-data'
+Line 12: default[:graphite][:dashboard][:user]                 = 'www-data'
+Line 13: 
+Line 14: default[:users ]['graphite'][:uid]                    = 446
+Line 15: default[:groups]['graphite'][:gid]                    = 446
+Line 16: 
+Line 17: default[:graphite][:carbon   ][:run_state]            = :start
+Line 18: 
+Line 19: default[:graphite][:carbon   ][:line_rcvr_addr]       = "0.0.0.0"
+Line 20: default[:graphite][:carbon   ][:pickle_rcvr_addr]     = "0.0.0.0"
+Line 21: default[:graphite][:carbon   ][:cache_query_addr]     = "0.0.0.0"
+Line 22: default[:graphite][:carbon   ][:line_rcvr_port]       = "2003"
+Line 23: default[:graphite][:carbon   ][:pickle_rcvr_port]     = "2004"
+Line 24: default[:graphite][:carbon   ][:cache_query_port]     = "7002"
+Line 25: 
+Line 26: default[:graphite][:carbon   ][:version]              = "0.9.10"
+Line 27: default[:graphite][:carbon   ][:release_url]          = "https://launchpadlibrarian.net/106575865/carbon-0.9.10.tar.gz"
+Line 28: default[:graphite][:carbon   ][:release_url_checksum] = "053b2df1c928250f59518e9bb9f35ad5"
+Line 29: 
+Line 30: default[:graphite][:whisper  ][:version]              = "0.9.10"
+Line 31: default[:graphite][:whisper  ][:release_url]          = "https://launchpadlibrarian.net/106575859/whisper-0.9.10.tar.gz"
+Line 32: default[:graphite][:whisper  ][:release_url_checksum] = "cf7d7d73e115f50e682f46c4eb52be09"
+Line 33: 
+Line 34: 
+Line 35: default[:graphite][:dashboard][:version]              = "0.9.10"
+Line 36: default[:graphite][:dashboard][:release_url]          = "https://launchpadlibrarian.net/106575888/graphite-web-0.9.10.tar.gz"
+Line 37: default[:graphite][:dashboard][:release_url_checksum] = "f54bf784139c7aef441f5cc1bc66dab4"
+Line 38: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

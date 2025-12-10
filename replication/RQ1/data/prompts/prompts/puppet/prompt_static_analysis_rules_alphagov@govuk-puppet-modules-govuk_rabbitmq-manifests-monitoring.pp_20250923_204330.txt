@@ -1,0 +1,138 @@
+# CONSTRUCTED PROMPT
+# File: alphagov@govuk-puppet-modules-govuk_rabbitmq-manifests-monitoring.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.632302
+# Length: 5291 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: alphagov@govuk-puppet-modules-govuk_rabbitmq-manifests-monitoring.pp (Puppet)**
+
+
+Line 1: # FIXME: This class needs better documentation as per https://docs.puppetlabs.com/guides/style_guide.html#puppet-doc
+Line 2: class govuk_rabbitmq::monitoring (
+Line 3:   $monitoring_user,
+Line 4:   $monitoring_password,
+Line 5: ) {
+Line 6: 
+Line 7:   include icinga::plugin::check_http_timeout_noncrit
+Line 8:   include icinga::plugin::check_rabbitmq_watermark
+Line 9: 
+Line 10:   @icinga::nrpe_config { 'check_rabbitmq_network_partition':
+Line 11:     content => template('govuk_rabbitmq/check_rabbitmq_network_partition.cfg.erb'),
+Line 12:     require => Icinga::Plugin['check_http_timeout_noncrit'],
+Line 13:   }
+Line 14: 
+Line 15:   @@icinga::check { "check_rabbitmq_running_${::hostname}":
+Line 16:     check_command       => 'check_nrpe!check_proc_running!rabbitmq-server',
+Line 17:     service_description => 'rabbitmq-server not running',
+Line 18:     host_name           => $::fqdn,
+Line 19:     notes_url           => monitoring_docs_url(check-process-running),
+Line 20:   }
+Line 21: 
+Line 22:   @@icinga::check { "check_rabbitmq_network_partitions_${::hostname}":
+Line 23:     check_command       => 'check_nrpe_1arg!check_rabbitmq_network_partition',
+Line 24:     service_description => 'RabbitMQ network partition has occurred',
+Line 25:     host_name           => $::fqdn,
+Line 26:   }
+Line 27: 
+Line 28:   @@icinga::check { "check_rabbitmq_watermark_${::hostname}":
+Line 29:     check_command       => 'check_nrpe_1arg!check_rabbitmq_watermark',
+Line 30:     service_description => 'RabbitMQ high watermark has been exceeded',
+Line 31:     host_name           => $::fqdn,
+Line 32:     notes_url           => monitoring_docs_url(rabbitmq-high-watermark),
+Line 33:   }
+Line 34: }
+Line 35: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

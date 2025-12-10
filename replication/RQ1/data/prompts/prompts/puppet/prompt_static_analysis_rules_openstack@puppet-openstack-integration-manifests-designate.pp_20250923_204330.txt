@@ -1,0 +1,219 @@
+# CONSTRUCTED PROMPT
+# File: openstack@puppet-openstack-integration-manifests-designate.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.640027
+# Length: 8598 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack@puppet-openstack-integration-manifests-designate.pp (Puppet)**
+
+
+Line 1: # Configure the Designate service
+Line 2: #
+Line 3: 
+Line 4: class openstack_integration::designate {
+Line 5: 
+Line 6:   include ::openstack_integration::config
+Line 7:   include ::openstack_integration::params
+Line 8:   include ::openstack_integration::bind
+Line 9: 
+Line 10:   openstack_integration::mq_user { 'designate':
+Line 11:     password => 'an_even_bigger_secret',
+Line 12:     before   => Anchor['designate::service::begin'],
+Line 13:   }
+Line 14: 
+Line 15:   class { '::designate::db::mysql':
+Line 16:     password => 'designate',
+Line 17:   }
+Line 18:   class { '::designate::logging':
+Line 19:     debug => true,
+Line 20:   }
+Line 21:   class { '::designate':
+Line 22:     default_transport_url => os_transport_url({
+Line 23:       'transport' => 'rabbit',
+Line 24:       'host'      => $::openstack_integration::config::host,
+Line 25:       'port'      => $::openstack_integration::config::rabbit_port,
+Line 26:       'username'  => 'designate',
+Line 27:       'password'  => 'an_even_bigger_secret',
+Line 28:     }),
+Line 29:     rabbit_use_ssl        => $::openstack_integration::config::ssl,
+Line 30:   }
+Line 31:   class { '::designate::db':
+Line 32:     database_connection => 'mysql+pymysql://designate:designate@127.0.0.1/designate?charset=utf8'
+Line 33:   }
+Line 34: 
+Line 35:   include '::designate::client'
+Line 36: 
+Line 37:   # TODO: Support SSL
+Line 38:   class { '::designate::keystone::auth':
+Line 39:     password     => 'a_big_secret',
+Line 40:     public_url   => "http://${::openstack_integration::config::ip_for_url}:9001",
+Line 41:     internal_url => "http://${::openstack_integration::config::ip_for_url}:9001",
+Line 42:     admin_url    => "http://${::openstack_integration::config::ip_for_url}:9001",
+Line 43:   }
+Line 44:   class { '::designate::keystone::authtoken':
+Line 45:     password             => 'a_big_secret',
+Line 46:     user_domain_name     => 'Default',
+Line 47:     project_domain_name  => 'Default',
+Line 48:     auth_url             => $::openstack_integration::config::keystone_admin_uri,
+Line 49:     www_authenticate_uri => $::openstack_integration::config::keystone_auth_uri,
+Line 50:     memcached_servers    => $::openstack_integration::config::memcached_servers,
+Line 51:   }
+Line 52: 
+Line 53:   class { '::designate::api':
+Line 54:     listen           => "${::openstack_integration::config::ip_for_url}:9001",
+Line 55:     api_base_uri     => "http://${::openstack_integration::config::ip_for_url}:9001",
+Line 56:     auth_strategy    => 'keystone',
+Line 57:     enable_api_v2    => true,
+Line 58:     enable_api_admin => true
+Line 59:   }
+Line 60: 
+Line 61:   # IPv6 doesn't work for mdns ? https://bugs.launchpad.net/designate/+bug/1501396
+Line 62:   class { '::designate::mdns':
+Line 63:     listen => '127.0.0.1:5354'
+Line 64:   }
+Line 65: 
+Line 66:   class { '::designate::central': }
+Line 67: 
+Line 68:   class { '::designate::pool_manager':
+Line 69:     pool_id => '794ccc2c-d751-44fe-b57f-8894c9f5c842',
+Line 70:   }
+Line 71: 
+Line 72:   # pool_manager and designate worker cannot be enabled together
+Line 73:   class { '::designate::worker':
+Line 74:     enabled        => false,
+Line 75:     service_ensure => 'stopped',
+Line 76:   }
+Line 77: 
+Line 78:   class { '::designate::pool_manager_cache::memcache':
+Line 79:     memcached_servers => $::openstack_integration::config::memcached_servers,
+Line 80:   }
+Line 81: 
+Line 82:   class { '::designate::backend::bind9':
+Line 83:     rndc_host        => '127.0.0.1',
+Line 84:     rndc_config_file => '/etc/rndc.conf',
+Line 85:     rndc_key_file    => $::dns::params::rndckeypath,
+Line 86:   }
+Line 87: 
+Line 88:   # Validate that designate-central is ready for pool update
+Line 89:   $command = "openstack --os-auth-url ${::openstack_integration::config::keystone_auth_uri} \
+Line 90: --os-identity-api-version 3 \
+Line 91: --os-project-name services --os-username designate --os-password a_big_secret \
+Line 92: --os-project-domain-name Default --os-user-domain-name Default zone list"
+Line 93:   openstacklib::service_validation { 'designate-central':
+Line 94:     command     => $command,
+Line 95:     timeout     => '15',
+Line 96:     refreshonly => true,
+Line 97:     subscribe   => Anchor['designate::service::end'],
+Line 98:   }
+Line 99: 
+Line 100:   # TODO: Implement pools.yaml management in puppet-designate
+Line 101:   file { '/etc/designate/pools.yaml':
+Line 102:     ensure  => present,
+Line 103:     content => template("${module_name}/pools.yaml.erb"),
+Line 104:     require => Service['designate-central'],
+Line 105:   }
+Line 106: 
+Line 107:   exec { 'Update designate pools':
+Line 108:     command     => 'designate-manage pool update --file /etc/designate/pools.yaml',
+Line 109:     path        => '/usr/bin',
+Line 110:     refreshonly => true,
+Line 111:     logoutput   => 'on_failure',
+Line 112:     subscribe   => File['/etc/designate/pools.yaml'],
+Line 113:     require     => Openstacklib::Service_validation['designate-central'],
+Line 114:   }
+Line 115: }
+Line 116: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

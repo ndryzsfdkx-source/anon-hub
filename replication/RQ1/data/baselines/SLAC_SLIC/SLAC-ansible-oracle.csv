@@ -1,0 +1,85 @@
+PATH,ERROR,LINE
+openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml,suspicious comment,96
+openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml,suspicious comment,98
+openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml,suspicious comment,96
+openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml,suspicious comment,98
+openstack-ansible-playbooks-os-tempest-install.yml,hardcoded-secret,19
+openstack-ansible-playbooks-os-tempest-install.yml,hardcoded-username,19
+openstack-ansible-ops-pxelinux-provisioning-playbooks-deploy-dhcp.yml,hardcoded-secret,49
+openstack-ansible-ops-pxelinux-provisioning-playbooks-deploy-dhcp.yml,hardcoded-username,49
+openstack-ansible-ops-pxelinux-provisioning-playbooks-deploy-dhcp.yml,hardcoded-secret,49
+openstack-ansible-ops-pxelinux-provisioning-playbooks-deploy-dhcp.yml,hardcoded-username,49
+browbeat-ansible-browbeat-roles-gnocchi-config-tasks-main.yml,suspicious comment,11
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-required_defaults_Debian_jessie.yml,hardcoded-secret,5
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-required_defaults_Debian_jessie.yml,hardcoded-username,5
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,improper ip address binding,18
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,24
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,28
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,32
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,53
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,54
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,57
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,60
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,68
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,69
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,57
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,60
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,83
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,84
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,57
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,60
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,96
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,97
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,98
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,57
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,use of http,60
+openstack-ansible-ops-elk_metrics_6x-roles-elastic_filebeat-tasks-main.yml,no-integrity-check,46
+openstack-ansible-ops-elk_metrics_6x-roles-elastic_filebeat-tasks-main.yml,hardcoded-secret,60
+openstack-ansible-ops-elk_metrics_6x-roles-elastic_filebeat-tasks-main.yml,hardcoded-username,60
+browbeat-ansible-install-roles-fluentd-tasks-main.yml,hardcoded-secret,17
+browbeat-ansible-install-roles-fluentd-tasks-main.yml,use of http,189
+openstack-ansible-ops-leap-upgrades-upgrade-utilities-mitaka-playbooks-deploy-config-changes-mitaka.yml,hardcoded-secret,20
+openstack-ansible-ops-leap-upgrades-upgrade-utilities-mitaka-playbooks-deploy-config-changes-mitaka.yml,hardcoded-username,20
+bifrost-playbooks-roles-bifrost-keystone-client-config-defaults-main.yml,use of http,2
+bifrost-playbooks-roles-bifrost-keystone-client-config-defaults-main.yml,use of http,3
+ansible-role-systemd_mount-tasks-systemd_mounts.yml,hardcoded-secret,44
+ansible-role-systemd_mount-tasks-systemd_mounts.yml,hardcoded-username,44
+openstack-ansible-playbooks-utility-install.yml,hardcoded-secret,18
+openstack-ansible-playbooks-utility-install.yml,hardcoded-username,18
+openstack-ansible-playbooks-utility-install.yml,hardcoded-secret,70
+openstack-ansible-playbooks-utility-install.yml,hardcoded-secret,72
+openstack-ansible-playbooks-utility-install.yml,hardcoded-username,72
+bifrost-playbooks-roles-bifrost-ironic-install-defaults-required_defaults_Fedora_26.yml,hardcoded-secret,8
+bifrost-playbooks-roles-bifrost-ironic-install-defaults-required_defaults_Fedora_26.yml,hardcoded-username,8
+ansible-role-tripleo-modify-image-tasks-modify_image.yml,suspicious comment,35
+browbeat-ansible-install-roles-epel-defaults-main.yml,no-integrity-check,2
+browbeat-ansible-install-roles-epel-defaults-main.yml,hardcoded-secret,3
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,hardcoded-secret,15
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,hardcoded-username,15
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,empty-password,16
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,use of http,22
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,use of http,23
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,hardcoded-secret,47
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,hardcoded-username,47
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,hardcoded-secret,48
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,hardcoded-password,48
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,use of http,50
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,use of http,51
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,use of http,52
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,hardcoded-secret,55
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,hardcoded-username,55
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,hardcoded-secret,48
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,hardcoded-password,48
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,hardcoded-secret,55
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,hardcoded-username,55
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,hardcoded-secret,48
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,hardcoded-password,48
+openstack-ansible-playbooks-os-designate-install.yml,hardcoded-secret,22
+openstack-ansible-playbooks-os-designate-install.yml,hardcoded-username,22
+openstack-ansible-ops-elk_metrics_6x-roles-elasticsearch-meta-main.yml,hardcoded-secret,38
+openstack-ansible-ops-elk_metrics_6x-roles-elasticsearch-meta-main.yml,hardcoded-username,38
+tripleo-quickstart-roles-libvirt-setup-overcloud-tasks-vars-libvirt_nodepool_vars.yml,hardcoded-secret,16
+tripleo-quickstart-roles-libvirt-setup-overcloud-tasks-vars-libvirt_nodepool_vars.yml,hardcoded-password,16
+openstack-ansible-playbooks-lxc-containers-destroy.yml,hardcoded-secret,22
+openstack-ansible-playbooks-lxc-containers-destroy.yml,hardcoded-secret,33
+openstack-ansible-playbooks-lxc-containers-destroy.yml,hardcoded-username,33

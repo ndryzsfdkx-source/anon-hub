@@ -1,0 +1,250 @@
+# CONSTRUCTED PROMPT
+# File: openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.601307
+# Length: 10464 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: # Copyright 2016, Rackspace US, Inc.
+Line 3: #
+Line 4: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 5: # you may not use this file except in compliance with the License.
+Line 6: # You may obtain a copy of the License at
+Line 7: #
+Line 8: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 9: #
+Line 10: # Unless required by applicable law or agreed to in writing, software
+Line 11: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 12: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 13: # See the License for the specific language governing permissions and
+Line 14: # limitations under the License.
+Line 15: 
+Line 16: # Usage:
+Line 17: #  This common task will update lxc containers to use the lxc-openstack
+Line 18: #  app-armor profile by default however this profile can be changed as needed.
+Line 19: 
+Line 20: #  This will also load in a list of bind mounts for a given container. To load
+Line 21: #  in a list of bind mounts the variable, "list_of_bind_mounts" must be used
+Line 22: #  containing at least one dictionary with the keys "bind_dir_path",
+Line 23: #  "relative_bind_dir_path", and "mount_path".
+Line 24: #    * bind_dir_path = Container path used in a bind mount
+Line 25: #    * mount_path = Local path on the physical host used for a bind mount
+Line 26: 
+Line 27: #  If extra container configurations are desirable set the
+Line 28: #  "extra_container_config" list to strings containing the options needed.
+Line 29: 
+Line 30: - name: Set default bind mounts (bind var/log)
+Line 31:   set_fact:
+Line 32:     lxc_default_bind_mounts: '{{ lxc_default_bind_mounts | default([{"bind_dir_path": "/var/log", "mount_path": "/openstack/log/{{ inventory_hostname }}"}]) }}'
+Line 33:   when:
+Line 34:     - default_bind_mount_logs | bool
+Line 35:   tags:
+Line 36:     - common-lxc
+Line 37: 
+Line 38: - name: Ensure mount directories exists
+Line 39:   file:
+Line 40:     path: "{{ item['mount_path'] }}"
+Line 41:     state: "directory"
+Line 42:   with_items:
+Line 43:     - "{{ lxc_default_bind_mounts | default([]) }}"
+Line 44:     - "{{ list_of_bind_mounts | default([]) }}"
+Line 45:   delegate_to: "{{ physical_host }}"
+Line 46:   tags:
+Line 47:     - common-lxc
+Line 48: 
+Line 49: - name: Add bind mount configuration to container
+Line 50:   lineinfile:
+Line 51:     dest: "/var/lib/lxc/{{ inventory_hostname }}/config"
+Line 52:     line: "lxc.mount.entry = {{ item['mount_path'] }} {{ item['bind_dir_path'].lstrip('/') }} none bind,create=dir 0 0"
+Line 53:     backup: "true"
+Line 54:   with_items:
+Line 55:     - "{{ lxc_default_bind_mounts | default([]) }}"
+Line 56:     - "{{ list_of_bind_mounts | default([]) }}"
+Line 57:   delegate_to: "{{ physical_host }}"
+Line 58:   register: _mc
+Line 59:   tags:
+Line 60:     - common-lxc
+Line 61: 
+Line 62: - name: Extra lxc config
+Line 63:   lineinfile:
+Line 64:     dest: "/var/lib/lxc/{{ inventory_hostname }}/config"
+Line 65:     line: "{{ item.split('=')[0] }} = {{ item.split('=', 1)[1] }}"
+Line 66:     insertafter: "^{{ item.split('=')[0] }}"
+Line 67:     backup: "true"
+Line 68:   with_items: "{{ extra_container_config | default([]) }}"
+Line 69:   delegate_to: "{{ physical_host }}"
+Line 70:   register: _ec
+Line 71:   tags:
+Line 72:     - common-lxc
+Line 73: 
+Line 74: - name: Extra lxc config no restart
+Line 75:   lineinfile:
+Line 76:     dest: "/var/lib/lxc/{{ inventory_hostname }}/config"
+Line 77:     line: "{{ item.split('=')[0] }} = {{ item.split('=', 1)[1] }}"
+Line 78:     insertafter: "^{{ item.split('=')[0] }}"
+Line 79:     backup: "true"
+Line 80:   with_items: "{{ extra_container_config_no_restart | default(['lxc.start.order=100']) }}"
+Line 81:   delegate_to: "{{ physical_host }}"
+Line 82:   tags:
+Line 83:     - common-lxc
+Line 84: 
+Line 85: - name: Check container state
+Line 86:   command: "lxc-info -n {{ inventory_hostname }} --state"
+Line 87:   changed_when: false
+Line 88:   delegate_to: "{{ physical_host }}"
+Line 89:   register: _lxc_container_state
+Line 90:   until: _lxc_container_state is success
+Line 91:   retries: 3
+Line 92:   delay: 5
+Line 93:   when:
+Line 94:     - (_mc is defined and _mc | changed) or (_ec is defined and _ec | changed)
+Line 95: 
+Line 96: # Due to https://github.com/ansible/ansible-modules-extras/issues/2691
+Line 97: # this uses the LXC CLI tools to ensure that we get logging.
+Line 98: # TODO(odyssey4me): revisit this once the bug is fixed and released
+Line 99: # NOTE(cloudnull): The `lxc-stop` command will have an RC of 2 if the command
+Line 100: #                  fails due to a container already being in a stopped state.
+Line 101: - name: Lxc container restart
+Line 102:   command: >
+Line 103:     lxc-stop --name {{ inventory_hostname }}
+Line 104:     --logfile {{ lxc_container_log_path }}/lxc-{{ inventory_hostname }}.log
+Line 105:     --logpriority {{ (debug | bool) | ternary('DEBUG', 'INFO') }}
+Line 106:   delegate_to: "{{ physical_host }}"
+Line 107:   register: container_stop
+Line 108:   until: container_stop is success
+Line 109:   retries: 3
+Line 110:   failed_when:
+Line 111:     - container_stop.rc not in [0, 2]
+Line 112:   when:
+Line 113:     - lxc_container_allow_restarts | default(True) | bool
+Line 114:     - (_mc is defined and _mc | changed) or (_ec is defined and _ec | changed)
+Line 115:     - _lxc_container_state.stdout.find('RUNNING') != -1
+Line 116:   tags:
+Line 117:     - common-lxc
+Line 118: 
+Line 119: # Due to https://github.com/ansible/ansible-modules-extras/issues/2691
+Line 120: # this uses the LXC CLI tools to ensure that we get logging.
+Line 121: # TODO(odyssey4me): revisit this once the bug is fixed and released
+Line 122: - name: Start Container
+Line 123:   command: >
+Line 124:     lxc-start --daemon --name {{ inventory_hostname }}
+Line 125:     --logfile {{ lxc_container_log_path }}/lxc-{{ inventory_hostname }}.log
+Line 126:     --logpriority {{ (debug | bool) | ternary('DEBUG', 'INFO') }}
+Line 127:   delegate_to: "{{ physical_host }}"
+Line 128:   register: container_start
+Line 129:   until: container_start is success
+Line 130:   retries: 3
+Line 131:   when:
+Line 132:     - (_mc is defined and _mc | changed) or (_ec is defined and _ec | changed)
+Line 133:   tags:
+Line 134:     - common-lxc
+Line 135: 
+Line 136: - name: Wait for container connectivity
+Line 137:   wait_for_connection:
+Line 138:     connect_timeout: "{{ lxc_container_wait_params.connect_timeout | default(omit) }}"
+Line 139:     delay: "{{ lxc_container_wait_params.delay | default(omit) }}"
+Line 140:     sleep: "{{ lxc_container_wait_params.sleep | default(omit) }}"
+Line 141:     timeout: "{{ lxc_container_wait_params.timeout | default(omit) }}"
+Line 142:   when:
+Line 143:     - (_mc is defined and _mc | changed) or (_ec is defined and _ec | changed)
+Line 144:   tags:
+Line 145:     - common-lxc
+Line 146: 
+Line 147: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

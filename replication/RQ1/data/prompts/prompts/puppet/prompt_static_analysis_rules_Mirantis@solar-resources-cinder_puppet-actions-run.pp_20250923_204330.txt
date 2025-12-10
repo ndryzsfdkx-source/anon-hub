@@ -1,0 +1,220 @@
+# CONSTRUCTED PROMPT
+# File: Mirantis@solar-resources-cinder_puppet-actions-run.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.628772
+# Length: 11298 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: Mirantis@solar-resources-cinder_puppet-actions-run.pp (Puppet)**
+
+
+Line 1: $resource = hiera($::resource_name)
+Line 2: 
+Line 3: $ip = $resource['input']['ip']
+Line 4: 
+Line 5: $db_user = $resource['input']['db_user']
+Line 6: $db_password = $resource['input']['db_password']
+Line 7: $db_name = $resource['input']['db_name']
+Line 8: $db_host = $resource['input']['db_host']
+Line 9: $db_port = $resource['input']['db_port']
+Line 10: 
+Line 11: $database_connection          = $resource['input']['database_connection']
+Line 12: $database_idle_timeout        = $resource['input']['database_idle_timeout']
+Line 13: $database_min_pool_size       = $resource['input']['database_min_pool_size']
+Line 14: $database_max_pool_size       = $resource['input']['database_max_pool_size']
+Line 15: $database_max_retries         = $resource['input']['database_max_retries']
+Line 16: $database_retry_interval      = $resource['input']['database_retry_interval']
+Line 17: $database_max_overflow        = $resource['input']['database_max_overflow']
+Line 18: $rpc_backend                  = $resource['input']['rpc_backend']
+Line 19: $control_exchange             = $resource['input']['control_exchange']
+Line 20: $rabbit_host                  = $resource['input']['rabbit_host']
+Line 21: $rabbit_port                  = $resource['input']['rabbit_port']
+Line 22: $rabbit_hosts                 = $resource['input']['rabbit_hosts']
+Line 23: $rabbit_virtual_host          = $resource['input']['rabbit_virtual_host']
+Line 24: $rabbit_userid                = $resource['input']['rabbit_userid']
+Line 25: $rabbit_password              = $resource['input']['rabbit_password']
+Line 26: $rabbit_use_ssl               = $resource['input']['rabbit_use_ssl']
+Line 27: $kombu_ssl_ca_certs           = $resource['input']['kombu_ssl_ca_certs']
+Line 28: $kombu_ssl_certfile           = $resource['input']['kombu_ssl_certfile']
+Line 29: $kombu_ssl_keyfile            = $resource['input']['kombu_ssl_keyfile']
+Line 30: $kombu_ssl_version            = $resource['input']['kombu_ssl_version']
+Line 31: $amqp_durable_queues          = $resource['input']['amqp_durable_queues']
+Line 32: $qpid_hostname                = $resource['input']['qpid_hostname']
+Line 33: $qpid_port                    = $resource['input']['qpid_port']
+Line 34: $qpid_username                = $resource['input']['qpid_username']
+Line 35: $qpid_password                = $resource['input']['qpid_password']
+Line 36: $qpid_sasl_mechanisms         = $resource['input']['qpid_sasl_mechanisms']
+Line 37: $qpid_reconnect               = $resource['input']['qpid_reconnect']
+Line 38: $qpid_reconnect_timeout       = $resource['input']['qpid_reconnect_timeout']
+Line 39: $qpid_reconnect_limit         = $resource['input']['qpid_reconnect_limit']
+Line 40: $qpid_reconnect_interval_min  = $resource['input']['qpid_reconnect_interval_min']
+Line 41: $qpid_reconnect_interval_max  = $resource['input']['qpid_reconnect_interval_max']
+Line 42: $qpid_reconnect_interval      = $resource['input']['qpid_reconnect_interval']
+Line 43: $qpid_heartbeat               = $resource['input']['qpid_heartbeat']
+Line 44: $qpid_protocol                = $resource['input']['qpid_protocol']
+Line 45: $qpid_tcp_nodelay             = $resource['input']['qpid_tcp_nodelay']
+Line 46: $package_ensure               = $resource['input']['package_ensure']
+Line 47: $use_ssl                      = $resource['input']['use_ssl']
+Line 48: $ca_file                      = $resource['input']['ca_file']
+Line 49: $cert_file                    = $resource['input']['cert_file']
+Line 50: $key_file                     = $resource['input']['key_file']
+Line 51: $api_paste_config             = $resource['input']['api_paste_config']
+Line 52: $use_syslog                   = $resource['input']['use_syslog']
+Line 53: $log_facility                 = $resource['input']['log_facility']
+Line 54: $log_dir                      = $resource['input']['log_dir']
+Line 55: $verbose                      = $resource['input']['verbose']
+Line 56: $debug                        = $resource['input']['debug']
+Line 57: $storage_availability_zone    = $resource['input']['storage_availability_zone']
+Line 58: $default_availability_zone    = $resource['input']['default_availability_zone']
+Line 59: $mysql_module                 = $resource['input']['mysql_module']
+Line 60: # Do not apply the legacy stuff
+Line 61: #$sql_connection               = $resource['input']['sql_connection']
+Line 62: $sql_idle_timeout             = $resource['input']['sql_idle_timeout']
+Line 63: 
+Line 64: class {'cinder':
+Line 65:   database_connection          => "mysql://${db_user}:${db_password}@${db_host}:${db_port}/${db_name}",
+Line 66:   database_idle_timeout        => $database_idle_timeout,
+Line 67:   database_min_pool_size       => $database_min_pool_size,
+Line 68:   database_max_pool_size       => $database_max_pool_size,
+Line 69:   database_max_retries         => $database_max_retries,
+Line 70:   database_retry_interval      => $database_retry_interval,
+Line 71:   database_max_overflow        => $database_max_overflow,
+Line 72:   rpc_backend                  => $rpc_backend,
+Line 73:   control_exchange             => $control_exchange,
+Line 74:   rabbit_host                  => $rabbit_host,
+Line 75:   rabbit_port                  => $rabbit_port,
+Line 76:   rabbit_hosts                 => $rabbit_hosts,
+Line 77:   rabbit_virtual_host          => $rabbit_virtual_host,
+Line 78:   rabbit_userid                => $rabbit_userid,
+Line 79:   rabbit_password              => $rabbit_password,
+Line 80:   rabbit_use_ssl               => $rabbit_use_ssl,
+Line 81:   kombu_ssl_ca_certs           => $kombu_ssl_ca_certs,
+Line 82:   kombu_ssl_certfile           => $kombu_ssl_certfile,
+Line 83:   kombu_ssl_keyfile            => $kombu_ssl_keyfile,
+Line 84:   kombu_ssl_version            => $kombu_ssl_version,
+Line 85:   amqp_durable_queues          => $amqp_durable_queues,
+Line 86:   qpid_hostname                => $qpid_hostname,
+Line 87:   qpid_port                    => $qpid_port,
+Line 88:   qpid_username                => $qpid_username,
+Line 89:   qpid_password                => $qpid_password,
+Line 90:   qpid_sasl_mechanisms         => $qpid_sasl_mechanisms,
+Line 91:   qpid_reconnect               => $qpid_reconnect,
+Line 92:   qpid_reconnect_timeout       => $qpid_reconnect_timeout,
+Line 93:   qpid_reconnect_limit         => $qpid_reconnect_limit,
+Line 94:   qpid_reconnect_interval_min  => $qpid_reconnect_interval_min,
+Line 95:   qpid_reconnect_interval_max  => $qpid_reconnect_interval_max,
+Line 96:   qpid_reconnect_interval      => $qpid_reconnect_interval,
+Line 97:   qpid_heartbeat               => $qpid_heartbeat,
+Line 98:   qpid_protocol                => $qpid_protocol,
+Line 99:   qpid_tcp_nodelay             => $qpid_tcp_nodelay,
+Line 100:   package_ensure               => $package_ensure,
+Line 101:   use_ssl                      => $use_ssl,
+Line 102:   ca_file                      => $ca_file,
+Line 103:   cert_file                    => $cert_file,
+Line 104:   key_file                     => $key_file,
+Line 105:   api_paste_config             => $api_paste_config,
+Line 106:   use_syslog                   => $use_syslog,
+Line 107:   log_facility                 => $log_facility,
+Line 108:   log_dir                      => $log_dir,
+Line 109:   verbose                      => $verbose,
+Line 110:   debug                        => $debug,
+Line 111:   storage_availability_zone    => $storage_availability_zone,
+Line 112:   default_availability_zone    => $default_availability_zone,
+Line 113:   mysql_module                 => $mysql_module,
+Line 114:   sql_connection               => $sql_connection,
+Line 115:   sql_idle_timeout             => $sql_idle_timeout,
+Line 116: }
+Line 117: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

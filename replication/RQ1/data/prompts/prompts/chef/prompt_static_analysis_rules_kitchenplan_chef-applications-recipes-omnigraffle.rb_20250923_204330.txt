@@ -1,0 +1,186 @@
+# CONSTRUCTED PROMPT
+# File: kitchenplan_chef-applications-recipes-omnigraffle.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.623530
+# Length: 8349 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: kitchenplan_chef-applications-recipes-omnigraffle.rb (Unknown)**
+
+
+Line 1: case node["platform_family"]
+Line 2:     when 'mac_os_x'
+Line 3:         include_recipe "homebrewalt::default"
+Line 4:         homebrewalt_cask "omnigraffle"
+Line 5: 
+Line 6:         gtemplate = "#{node['etc']['passwd'][node['current_user']]['dir']}/Library/Application Support/OmniGraffle/Templates/Konigi-UX-Template.gtemplate"
+Line 7:         unless File.exists?(gtemplate)
+Line 8:             directory "#{node['etc']['passwd'][node['current_user']]['dir']}/Library/Application Support/OmniGraffle/Templates" do
+Line 9:                 owner node['current_user']
+Line 10:                 mode 0755
+Line 11:                 action :create
+Line 12:                 recursive true
+Line 13:             end
+Line 14: 
+Line 15:             remote_file "#{Chef::Config[:file_cache_path]}/Konigi-UX-Template-2-5-1.gtemplate.zip" do
+Line 16:                 source "http://media.konigi.com/tools/og-ux-template/Konigi-UX-Template-2-5-1.gtemplate.zip"
+Line 17:                 owner node['current_user']
+Line 18:             end
+Line 19: 
+Line 20:             execute "unzip Konigi-UX-Template-2-5-1.gtemplate.zip" do
+Line 21:                 command "unzip #{Chef::Config[:file_cache_path]}/Konigi-UX-Template-2-5-1.gtemplate.zip -d #{Chef::Config[:file_cache_path]}/"
+Line 22:                 user node['current_user']
+Line 23:             end
+Line 24: 
+Line 25:             execute "move Konigi-UX-Template.gtemplate" do
+Line 26:                 command "mv #{Chef::Config[:file_cache_path]}/Konigi-UX-Template.gtemplate #{Regexp.escape(gtemplate)}"
+Line 27:                 user node['current_user']
+Line 28:             end
+Line 29:         end
+Line 30: 
+Line 31:         gdiagramstyle = "#{node['etc']['passwd'][node['current_user']]['dir']}/Library/Application Support/OmniGraffle/Diagram Styles/Konigi.gdiagramstyle"
+Line 32:         unless File.exists?(gdiagramstyle)
+Line 33:             directory "#{node['etc']['passwd'][node['current_user']]['dir']}/Library/Application Support/OmniGraffle/Diagram Styles" do
+Line 34:                 owner node['current_user']
+Line 35:                 mode 0755
+Line 36:                 action :create
+Line 37:                 recursive true
+Line 38:             end
+Line 39: 
+Line 40:             remote_file "#{Chef::Config[:file_cache_path]}/Konigi.gdiagramstyle.zip" do
+Line 41:                 source "http://media.konigi.com/tools/og-ux-template/Konigi.gdiagramstyle.zip"
+Line 42:                 owner node['current_user']
+Line 43:             end
+Line 44: 
+Line 45:             execute "unzip Konigi.gdiagramstyle.zip" do
+Line 46:                 command "unzip #{Chef::Config[:file_cache_path]}/Konigi.gdiagramstyle.zip -d #{Chef::Config[:file_cache_path]}/"
+Line 47:                 user node['current_user']
+Line 48:             end
+Line 49: 
+Line 50:             execute "move Konigi.gdiagramstyle" do
+Line 51:                 command "mv #{Chef::Config[:file_cache_path]}/Konigi.gdiagramstyle #{Regexp.escape(gdiagramstyle)}"
+Line 52:                 user node['current_user']
+Line 53:             end
+Line 54:         end
+Line 55: 
+Line 56:         stencils = "#{node['etc']['passwd'][node['current_user']]['dir']}/Library/Application Support/OmniGraffle/Stencils/Konigi Wireframe Stencils v3"
+Line 57:         unless File.exists?(stencils)
+Line 58:             directory "#{node['etc']['passwd'][node['current_user']]['dir']}/Library/Application Support/OmniGraffle/Stencils" do
+Line 59:                 owner node['current_user']
+Line 60:                 mode 0755
+Line 61:                 action :create
+Line 62:                 recursive true
+Line 63:             end
+Line 64: 
+Line 65:             remote_file "#{Chef::Config[:file_cache_path]}/Konigi-Wireframe-Stencils-v3-02.zip" do
+Line 66:                 source "http://media.konigi.com/tools/og-wireframe-stencil/Konigi-Wireframe-Stencils-v3-02.zip"
+Line 67:                 owner node['current_user']
+Line 68:             end
+Line 69: 
+Line 70:             execute "unzip Konigi-Wireframe-Stencils-v3-02.zip" do
+Line 71:                 command "unzip #{Chef::Config[:file_cache_path]}/Konigi-Wireframe-Stencils-v3-02.zip -d #{Chef::Config[:file_cache_path]}/"
+Line 72:                 user node['current_user']
+Line 73:             end
+Line 74: 
+Line 75:             execute "move Konigi.gdiagramstyle" do
+Line 76:                 command "mv #{Chef::Config[:file_cache_path]}/#{Regexp.escape("Konigi Wireframe Stencils v3")} #{Regexp.escape("#{node['etc']['passwd'][node['current_user']]['dir']}/Library/Application Support/OmniGraffle/Stencils/")}"
+Line 77:                 user node['current_user']
+Line 78:             end
+Line 79:         end
+Line 80:     when 'debian'
+Line 81:         Chef::Log.debug("This recipe is OSX only")
+Line 82: end
+Line 83: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

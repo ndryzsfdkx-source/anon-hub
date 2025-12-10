@@ -1,0 +1,153 @@
+# CONSTRUCTED PROMPT
+# File: voxpupuli@puppet-rundeck-manifests-config-global-framework.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.645268
+# Length: 5923 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: voxpupuli@puppet-rundeck-manifests-config-global-framework.pp (Puppet)**
+
+
+Line 1: # Author::    Liam Bennett (mailto:lbennett@opentable.com)
+Line 2: # Copyright:: Copyright (c) 2013 OpenTable Inc
+Line 3: # License::   MIT
+Line 4: 
+Line 5: # == Class rundeck::config::global::framework
+Line 6: #
+Line 7: # This private class is called from rundeck::config used to manage the framework properties of rundeck
+Line 8: #
+Line 9: class rundeck::config::global::framework {
+Line 10:   $group          = $rundeck::config::group
+Line 11:   $properties_dir = $rundeck::config::properties_dir
+Line 12:   $user           = $rundeck::config::user
+Line 13:   $ssl_enabled    = $rundeck::config::ssl_enabled
+Line 14:   $ssl_port       = $rundeck::config::ssl_port
+Line 15: 
+Line 16:   $_framework_config = merge($rundeck::params::framework_config, $rundeck::framework_config)
+Line 17: 
+Line 18:   # Make sure that we use framework.server.hostname when using non-standard
+Line 19:   # port, rather than hard-coding to fqdn
+Line 20:   $rundeck_hostname = $_framework_config['framework.server.hostname']
+Line 21:   $rundeck_port = $_framework_config['framework.server.port']
+Line 22: 
+Line 23:   if $ssl_enabled {
+Line 24:     $framework_config_port = { 'framework.server.port' => $ssl_port }
+Line 25:     $framework_config_url = { 'framework.server.url' => "https://${rundeck_hostname}:${ssl_port}" }
+Line 26:   } elsif $rundeck_hostname != $rundeck::params::framework_config['framework.server.hostname'] {
+Line 27:     $framework_config_port = undef
+Line 28:     $framework_config_url = { 'framework.server.url' => "http://${rundeck_hostname}:${rundeck_port}" }
+Line 29:   } else {
+Line 30:     $framework_config_port = undef
+Line 31:     $framework_config_url = undef
+Line 32:   }
+Line 33: 
+Line 34:   $properties_file = "${properties_dir}/framework.properties"
+Line 35: 
+Line 36:   ensure_resource('file', $properties_dir, {'ensure' => 'directory', 'owner' => $user, 'group' => $group } )
+Line 37: 
+Line 38:   $framework_config = merge($_framework_config, $framework_config_url, $framework_config_port)
+Line 39: 
+Line 40:   file { $properties_file:
+Line 41:     ensure  => present,
+Line 42:     content => template('rundeck/framework.properties.erb'),
+Line 43:     owner   => $user,
+Line 44:     group   => $group,
+Line 45:     mode    => '0640',
+Line 46:     require => File[$properties_dir],
+Line 47:   }
+Line 48: 
+Line 49: }
+Line 50: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

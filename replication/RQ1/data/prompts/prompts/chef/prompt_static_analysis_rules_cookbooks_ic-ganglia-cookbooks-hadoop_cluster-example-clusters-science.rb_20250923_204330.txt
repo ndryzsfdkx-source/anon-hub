@@ -1,0 +1,230 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-ganglia-cookbooks-hadoop_cluster-example-clusters-science.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.613810
+# Length: 9479 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-ganglia-cookbooks-hadoop_cluster-example-clusters-science.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Science cluster!
+Line 3: #
+Line 4: # This is the hadoop cluster definition we use at infochimps for our science
+Line 5: # cluster. Storing the HDFS on persistent (EBS) volumes means we can stop the
+Line 6: # cluster at the end of the day (leaving the master node running) -- it only
+Line 7: # takes about ten minutes to bring the cluster back online.
+Line 8: #
+Line 9: # Using tasktrackers that are not datanodes means you can blow out the size of
+Line 10: # your cluster and not have to wait later for nodes to decommission. Obviously
+Line 11: # their jobs will run slower-than-optimal, but we'd rather have sub-optimal
+Line 12: # robots than sub-optimal data scientists.
+Line 13: #
+Line 14: # You will need the role definitions from
+Line 15: # [ironfan-homebase](https://github.com/infochimps-labs/ironfan-homebase)
+Line 16: # to use this cluster.
+Line 17: #
+Line 18: # To use this, please update the snapshot_id (and volume size) in the volume
+Line 19: # stanza at the end.
+Line 20: #
+Line 21: Ironfan.cluster 'science' do
+Line 22:   cloud(:ec2) do
+Line 23:     defaults
+Line 24:     availability_zones ['us-east-1d']
+Line 25:     flavor              'm1.xlarge'
+Line 26:     backing             'ebs'
+Line 27:     image_name          'natty'
+Line 28:     bootstrap_distro    'ubuntu10.04-ironfan'
+Line 29:     chef_client_script  'client.rb'
+Line 30:     mount_ephemerals(:tags => { :hadoop_scratch => true })
+Line 31:   end
+Line 32: 
+Line 33:   environment           :prod
+Line 34: 
+Line 35:   role                  :systemwide
+Line 36:   role                  :chef_client
+Line 37:   role                  :ssh
+Line 38:   role                  :nfs_client
+Line 39:   role                  :volumes
+Line 40:   role                  :minidash
+Line 41: 
+Line 42:   role                  :hadoop
+Line 43:   role                  :hadoop_s3_keys
+Line 44:   role                  :tuning
+Line 45:   role                  :jruby
+Line 46:   role                  :pig
+Line 47:   recipe                'hadoop_cluster::config_files', :last
+Line 48: 
+Line 49:   # We don't hold much data on our HDFS -- most of it goes in S3 -- so we can
+Line 50:   # afford to have the namenode and jobtracker on the same machine.  If your
+Line 51:   # cluster is much larger than what's shown here, use a separate jobtracker.
+Line 52:   facet :master do
+Line 53:     instances           1
+Line 54:     role                :hadoop_namenode
+Line 55:     role                :hadoop_secondarynn
+Line 56:     role                :hadoop_jobtracker
+Line 57:     role                :hadoop_datanode
+Line 58:   end
+Line 59: 
+Line 60:   facet :worker do
+Line 61:     instances           6
+Line 62:     role                :hadoop_datanode
+Line 63:     role                :hadoop_tasktracker
+Line 64:   end
+Line 65: 
+Line 66:   # Use for cheap elasticity only: spin these up for CPU-intensive job stages
+Line 67:   # and blow them away at will.
+Line 68:   facet :taskonly do
+Line 69:     instances           10
+Line 70:     role                :hadoop_tasktracker
+Line 71:   end
+Line 72: 
+Line 73:   cluster_role.override_attributes({
+Line 74:       # No cloudera package for natty or oneiric yet: use the maverick one
+Line 75:       :apt    => { :cloudera => { :force_distro => 'maverick',  }, },
+Line 76:       :hadoop                => {
+Line 77:         :java_heap_size_max  => 1400,
+Line 78:         :namenode            => { :java_heap_size_max => 1400, },
+Line 79:         :secondarynn         => { :java_heap_size_max => 1400, },
+Line 80:         :jobtracker          => { :java_heap_size_max => 3072, },
+Line 81:         :datanode            => { :java_heap_size_max => 1400, },
+Line 82:         :tasktracker         => { :java_heap_size_max => 1400, },
+Line 83:         :balancer => { :max_bandwidth => (50 * 1024 * 1024) },
+Line 84:         :compress_mapout_codec => 'org.apache.hadoop.io.compress.SnappyCodec',
+Line 85:       }
+Line 86:     })
+Line 87: 
+Line 88:   # Launch the cluster with all of the below set to 'stop'.
+Line 89:   #
+Line 90:   # After initial bootstrap,
+Line 91:   # * set the run_state to :start in the lines below
+Line 92:   # * run `knife cluster sync bonobo-master` to push those values up to chef
+Line 93:   # * run `knife cluster kick bonobo-master` to re-converge
+Line 94:   #
+Line 95:   # Once you see 'nodes=1' on jobtracker (host:50030) & namenode (host:50070)
+Line 96:   # control panels, you're good to launch the rest of the cluster.
+Line 97:   #
+Line 98:   facet(:master).facet_role.override_attributes({
+Line 99:       :hadoop => {
+Line 100:         :namenode    => { :run_state => :stop, },
+Line 101:         :secondarynn => { :run_state => :stop, },
+Line 102:         :jobtracker  => { :run_state => :stop, },
+Line 103:         :datanode    => { :run_state => :stop, },
+Line 104:         :tasktracker => { :run_state => :stop,  },
+Line 105:       },
+Line 106:     })
+Line 107: 
+Line 108:   #
+Line 109:   # Attach 600GB persistent storage to each node, and use it for all hadoop data_dirs.
+Line 110:   #
+Line 111:   # Modify the snapshot ID and attached volume size to suit
+Line 112:   #
+Line 113:   facet(:worker).volume(:ebs1) do
+Line 114:     defaults
+Line 115:     size                200
+Line 116:     keep                true
+Line 117:     device              '/dev/sdj' # note: will appear as /dev/xvdi on natty
+Line 118:     mount_point         '/data/ebs1'
+Line 119:     attachable          :ebs
+Line 120:     snapshot_id         HADOOP_DATA_VOL_SNAPSHOT_ID # 200gb xfs
+Line 121:     tags( :hadoop_data => true, :persistent => true, :local => false, :bulk => true, :fallback => false )
+Line 122:     create_at_launch    true # if no volume is tagged for that node, it will be created
+Line 123:   end
+Line 124:   # "I'll have what she's having"
+Line 125:   facet(:master).volume(:ebs1, (facet(:worker).volume(:ebs1)))
+Line 126: end
+Line 127: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

@@ -1,0 +1,169 @@
+# CONSTRUCTED PROMPT
+# File: openstack@puppet-neutron-manifests-server-placement.pp
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.393837
+# Length: 7718 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack@puppet-neutron-manifests-server-placement.pp (Puppet)**
+
+
+Line 1: # Licensed under the Apache License, Version 2.0 (the "License"); you may
+Line 2: # not use this file except in compliance with the License. You may obtain
+Line 3: # a copy of the License at
+Line 4: #
+Line 5: #      http://www.apache.org/licenses/LICENSE-2.0
+Line 6: #
+Line 7: # Unless required by applicable law or agreed to in writing, software
+Line 8: # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+Line 9: # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+Line 10: # License for the specific language governing permissions and limitations
+Line 11: # under the License.
+Line 12: #
+Line 13: # == Class: neutron::server::placement
+Line 14: #
+Line 15: # Configure Placement API Options
+Line 16: #
+Line 17: # === Parameters
+Line 18: #
+Line 19: # [*password*]
+Line 20: #   (required) Password for connection to nova in admin context.
+Line 21: #
+Line 22: # [*auth_type*]
+Line 23: #   (optional) An authentication type to use with an OpenStack Identity server.
+Line 24: #   The value should contain auth plugin name
+Line 25: #   Defaults to 'password'
+Line 26: #
+Line 27: # [*username*]
+Line 28: #   (optional) Username for connection to nova in admin context
+Line 29: #   Defaults to 'nova'
+Line 30: #
+Line 31: # [*project_domain_id*]
+Line 32: #   (optional) Nova project's domain ID
+Line 33: #   Defaults to 'default'
+Line 34: #
+Line 35: # [*project_domain_name*]
+Line 36: #   (Optional) Name of domain for $project_name
+Line 37: #   Defaults to 'Default'
+Line 38: #
+Line 39: # [*project_name*]
+Line 40: #   (optional) Nova project's name
+Line 41: #   Defaults to 'services'
+Line 42: #
+Line 43: # [*user_domain_id*]
+Line 44: #   (optional) User's domain ID for connection to nova in admin context
+Line 45: #   Defaults to 'default'
+Line 46: #
+Line 47: # [*user_domain_name*]
+Line 48: #   (Optional) Name of domain for $username
+Line 49: #   Defaults to 'Default'
+Line 50: #
+Line 51: # [*auth_url*]
+Line 52: #   (optional) Authorization URL for connection to nova in admin context.
+Line 53: #   If version independent identity plugin is used available versions will be
+Line 54: #   determined using auth_url
+Line 55: #   Defaults to 'http://127.0.0.1:5000'
+Line 56: #
+Line 57: # [*region_name*]
+Line 58: #   (optional) Name of nova region to use. Useful if keystone manages more than
+Line 59: #   one region.
+Line 60: #   Defaults to $::os_service_default
+Line 61: #
+Line 62: # [*endpoint_type*]
+Line 63: #   (optional) The type of nova endpoint to use when looking up in
+Line 64: #   the keystone catalog.
+Line 65: #   Defaults to $::os_service_default
+Line 66: #
+Line 67: 
+Line 68: class neutron::server::placement (
+Line 69:   $password,
+Line 70:   $auth_type           = 'password',
+Line 71:   $username            = 'nova',
+Line 72:   $project_domain_id   = 'default',
+Line 73:   $project_domain_name = 'Default',
+Line 74:   $project_name        = 'services',
+Line 75:   $user_domain_id      = 'default',
+Line 76:   $user_domain_name    = 'Default',
+Line 77:   $auth_url            = 'http://127.0.0.1:5000',
+Line 78:   $region_name         = $::os_service_default,
+Line 79:   $endpoint_type       = $::os_service_default,
+Line 80: ) {
+Line 81: 
+Line 82:   include ::neutron::deps
+Line 83: 
+Line 84:   neutron_config {
+Line 85:     'placement/auth_url':            value => $auth_url;
+Line 86:     'placement/username':            value => $username;
+Line 87:     'placement/password':            value => $password, secret => true;
+Line 88:     'placement/project_domain_id':   value => $project_domain_id;
+Line 89:     'placement/project_domain_name': value => $project_domain_name;
+Line 90:     'placement/project_name':        value => $project_name;
+Line 91:     'placement/user_domain_id':      value => $user_domain_id;
+Line 92:     'placement/user_domain_name':    value => $user_domain_name;
+Line 93:     'placement/region_name':         value => $region_name;
+Line 94:     'placement/endpoint_type':       value => $endpoint_type;
+Line 95:     'placement/auth_type':           value => $auth_type;
+Line 96:   }
+Line 97: 
+Line 98: }
+Line 99: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

@@ -1,0 +1,4 @@
+Method,Occurrences,TP,FP,FN,Precision,Recall,F1,Overlap,FileAcc
+GLITCH,58,43,15,1,0.741,0.977,0.843,0.729,1.000
+SLAC/SLIC,51,24,27,20,0.471,0.545,0.505,0.338,0.917
+IntelliSA,38,36,2,8,0.947,0.818,0.878,0.783,0.750

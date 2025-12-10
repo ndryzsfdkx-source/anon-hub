@@ -1,0 +1,314 @@
+# CONSTRUCTED PROMPT
+# File: openstack-ansible-tests-roles-bootstrap-host-defaults-main.yml
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.602755
+# Length: 13674 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack-ansible-tests-roles-bootstrap-host-defaults-main.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: # Copyright 2015, Rackspace US, Inc.
+Line 3: #
+Line 4: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 5: # you may not use this file except in compliance with the License.
+Line 6: # You may obtain a copy of the License at
+Line 7: #
+Line 8: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 9: #
+Line 10: # Unless required by applicable law or agreed to in writing, software
+Line 11: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 12: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 13: # See the License for the specific language governing permissions and
+Line 14: # limitations under the License.
+Line 15: 
+Line 16: ## AIO user-space configuration options
+Line 17: # Scenario used to bootstrap the host
+Line 18: bootstrap_host_scenario: "{{ lookup('env','SCENARIO') | default('aio_lxc', true) }}"
+Line 19: #
+Line 20: # Boolean option to implement OpenStack-Ansible configuration for an AIO
+Line 21: # Switch to no for a multi-node configuration
+Line 22: bootstrap_host_aio_config: yes
+Line 23: #
+Line 24: # Path to the location of the bootstrapping configuration files
+Line 25: bootstrap_host_aio_config_path: "{{ playbook_dir }}/../etc/openstack_deploy"
+Line 26: #
+Line 27: # Path to the location of the scripts the bootstrap scripts use
+Line 28: bootstrap_host_aio_script_path: "{{ playbook_dir }}/../scripts"
+Line 29: #
+Line 30: # The user space configuration file names to use
+Line 31: bootstrap_host_user_variables_filename: "user_variables.yml"
+Line 32: bootstrap_host_user_secrets_filename: "user_secrets.yml"
+Line 33: #
+Line 34: # Paths to configuration file targets that should be created by the bootstrap
+Line 35: bootstrap_host_target_config_paths:
+Line 36:   - /etc/openstack_deploy
+Line 37:   - /etc/openstack_deploy/conf.d
+Line 38:   - /etc/openstack_deploy/env.d
+Line 39: 
+Line 40: # The user variables template to use
+Line 41: bootstrap_user_variables_template: user_variables.aio.yml.j2
+Line 42: 
+Line 43: # Extra user variables files can be loaded into /etc/openstack_deploy by
+Line 44: # test scenarios. The dict uses scenario as the key to load a list of extra
+Line 45: # templates if necessary.
+Line 46: bootstrap_user_variables_extra_templates:
+Line 47:   ceph:
+Line 48:     - src: user_variables_ceph.yml.j2
+Line 49:       dest: user_variables_ceph.yml
+Line 50:   congress:
+Line 51:     - src: user_variables_congress.yml.j2
+Line 52:       dest: user_variables_congress.yml
+Line 53:   translations:
+Line 54:     - src: user_variables_translations.yml.j2
+Line 55:       dest: user_variables_translations.yml
+Line 56:   barbican:
+Line 57:     - src: user_variables_barbican.yml.j2
+Line 58:       dest: user_variables_barbican.yml
+Line 59: 
+Line 60: ## Loopback volumes
+Line 61: # Sparse loopback disks are used for the containers if there is no secondary
+Line 62: # disk available to partition for btrfs. They are also used for Ceph, Cinder,
+Line 63: # Swift and Nova (instance storage).
+Line 64: # The size of the loopback volumes can be customized here (in gigabytes).
+Line 65: #
+Line 66: # Boolean option to deploy the loopback disk for Swap
+Line 67: bootstrap_host_loopback_swap: yes
+Line 68: # Size of the Swap loopback disk in gigabytes (GB).
+Line 69: bootstrap_host_loopback_swap_size: 4096
+Line 70: #
+Line 71: # Boolean option to deploy the loopback disk for Cinder
+Line 72: bootstrap_host_loopback_cinder: yes
+Line 73: # Size of the Cinder loopback disk in gigabytes (GB).
+Line 74: bootstrap_host_loopback_cinder_size: 1024
+Line 75: #
+Line 76: # Boolean option to deploy the loopback disk for Swift
+Line 77: bootstrap_host_loopback_swift: yes
+Line 78: # Size of the Swift loopback disk in gigabytes (GB).
+Line 79: bootstrap_host_loopback_swift_size: 1024
+Line 80: #
+Line 81: # Boolean option to deploy the loopback disk for Nova
+Line 82: bootstrap_host_loopback_nova: yes
+Line 83: # Size of the Nova loopback disk in gigabytes (GB).
+Line 84: bootstrap_host_loopback_nova_size: 1024
+Line 85: #
+Line 86: # Boolean option to deploy the loopback disk for machines
+Line 87: bootstrap_host_loopback_machines: yes
+Line 88: # Size of the machines loopback disk in gigabytes (GB).
+Line 89: bootstrap_host_loopback_machines_size: 128
+Line 90: #
+Line 91: # Boolean option to deploy the loopback disk for btrfs
+Line 92: bootstrap_host_loopback_btrfs: yes
+Line 93: # Size of the btrfs loopback disk in gigabytes (GB).
+Line 94: bootstrap_host_loopback_btrfs_size: 1024
+Line 95: #
+Line 96: # Boolean option to deploy the loopback disk for btrfs
+Line 97: bootstrap_host_loopback_zfs: yes
+Line 98: # Size of the btrfs loopback disk in gigabytes (GB).
+Line 99: bootstrap_host_loopback_zfs_size: 1024
+Line 100: #
+Line 101: # Boolean option to deploy the OSD loopback disks and cluster UUID for Ceph
+Line 102: bootstrap_host_ceph: "{{ (bootstrap_host_scenario == 'ceph') | bool }}"
+Line 103: # Size of the Ceph OSD loopbacks
+Line 104: bootstrap_host_loopback_ceph_size: 1024
+Line 105: # Ceph OSDs to create on the AIO host
+Line 106: ceph_osd_images:
+Line 107:   - 'ceph1'
+Line 108:   - 'ceph2'
+Line 109:   - 'ceph3'
+Line 110: 
+Line 111: ## Network configuration
+Line 112: # Default network IP ranges
+Line 113: mgmt_range: "172.29.236"
+Line 114: vxlan_range: "172.29.240"
+Line 115: storage_range: "172.29.244"
+Line 116: vlan_range: "172.29.248"
+Line 117: netmask: "255.255.252.0"
+Line 118: #
+Line 119: # NICs
+Line 120: bootstrap_host_public_interface: "{{ ansible_default_ipv4.interface }}"
+Line 121: #
+Line 122: # Utility paths
+Line 123: bootstrap_host_network_utils:
+Line 124:   apt:
+Line 125:     iptables: /sbin/iptables
+Line 126:     ethtool: /sbin/ethtool
+Line 127:     ip: /sbin/ip
+Line 128:   yum:
+Line 129:     iptables: /usr/sbin/iptables
+Line 130:     ethtool: /usr/sbin/ethtool
+Line 131:     ip: /usr/sbin/ip
+Line 132:   zypper:
+Line 133:     iptables: /usr/sbin/iptables
+Line 134:     ethtool: /sbin/ethtool
+Line 135:     ip: /sbin/ip
+Line 136: #
+Line 137: bootstrap_host_iptables_path: "{{ bootstrap_host_network_utils[ansible_pkg_mgr]['iptables'] }}"
+Line 138: bootstrap_host_ethtool_path: "{{ bootstrap_host_network_utils[ansible_pkg_mgr]['ethtool'] }}"
+Line 139: bootstrap_host_ip_path: "{{ bootstrap_host_network_utils[ansible_pkg_mgr]['ip'] }}"
+Line 140: 
+Line 141: ## Extra storage
+Line 142: # An AIO may optionally be built using a second storage device. If a
+Line 143: # secondary disk device to use is not specified, then the AIO will be
+Line 144: # built on any existing disk partitions.
+Line 145: #
+Line 146: # WARNING: The data on a secondary storage device specified here will
+Line 147: # be destroyed and repartitioned.
+Line 148: #
+Line 149: # Specify the secondary disk device to use. When the data disk is in use, no NOT
+Line 150: # set the full path to the device. IE: "/dev/xvde" should be "xvde".
+Line 151: bootstrap_host_data_disk_device: null
+Line 152: #
+Line 153: # Specify the default filesystem type
+Line 154: bootstrap_host_data_disk_fs_type: ext4
+Line 155: #
+Line 156: # Boolean value to force the repartitioning of the secondary device.
+Line 157: bootstrap_host_data_disk_device_force: no
+Line 158: #
+Line 159: # If the storage capacity on this device is greater than or equal to this
+Line 160: # size (in GB), the bootstrap process will use it.
+Line 161: bootstrap_host_data_disk_min_size: 50
+Line 162: #
+Line 163: # Set the data disk formats table. If the backing store is set to lvm the option
+Line 164: # the partition will not actually be formatted however for parted, ext2 is used.
+Line 165: bootstrap_host_data_disk2_formats:
+Line 166:   machinectl: btrfs
+Line 167:   zfs: zfs
+Line 168:   btrfs: btrfs
+Line 169:   xfs: xfs
+Line 170:   dir: ext4
+Line 171:   lvm: ext2
+Line 172: 
+Line 173: bootstrap_host_format_options:
+Line 174:   machinectl: '--metadata single --data single --mixed'
+Line 175:   btrfs: '--metadata single --data single --mixed'
+Line 176:   xfs: '-K -d agcount=64 -l size=128m'
+Line 177:   ext4: '-O dir_index'
+Line 178: 
+Line 179: #
+Line 180: # Set the data disk mount options.
+Line 181: bootstrap_host_data_mount_options:
+Line 182:   machinectl: "noatime,nodiratime,compress=lzo,commit=120,{{ (ansible_kernel is version_compare('4.5', '>=')) | ternary('space_cache=v2', 'space_cache') }}"
+Line 183:   zfs: "defaults"
+Line 184:   btrfs: "noatime,nodiratime,compress=lzo,commit=120,{{ (ansible_kernel is version_compare('4.5', '>=')) | ternary('space_cache=v2', 'space_cache') }}"
+Line 185:   xfs: "noatime,nodiratime,nobarrier,logbufs=8,logbsize=256k"
+Line 186:   ext4: "noatime,nobh,barrier=0,data=writeback"
+Line 187:   dir: "defaults"
+Line 188:   lvm: "defaults"
+Line 189:   swap: "%%"
+Line 190: 
+Line 191: bootstrap_host_data_disk2_fs: "{{ bootstrap_host_data_disk2_formats[((bootstrap_host_container_tech == 'nspawn') | ternary('btrfs', lxc_container_backing_store))] }}"
+Line 192: bootstrap_host_data_disk2_fs_mount_options: "{{ bootstrap_host_data_mount_options[((bootstrap_host_container_tech == 'nspawn') | ternary('btrfs', lxc_container_backing_store))] }}"
+Line 193: bootstrap_host_data_disk2_path: "{{ (lxc_container_backing_store == 'machinectl' or bootstrap_host_container_tech == 'nspawn') | ternary('/var/lib/machines', '/var/lib/lxc') }}"
+Line 194: 
+Line 195: ### Optional Settings ###
+Line 196: 
+Line 197: # Specify the public IP address for the host.
+Line 198: # By default the address will be set to the ipv4 address of the
+Line 199: # host's network interface that has the default route on it.
+Line 200: #bootstrap_host_public_address: 0.0.0.0
+Line 201: 
+Line 202: # Set the install method for the deployment. Options are ['source', 'distro']
+Line 203: bootstrap_host_install_method: "{{ lookup('env', 'INSTALL_METHOD') | default('source', true)  }}"
+Line 204: 
+Line 205: # Set the container technology in service. Options are nspawn and lxc.
+Line 206: bootstrap_host_container_tech: "{{ (bootstrap_host_scenario is search('nspawn')) | ternary('nspawn', 'lxc') }}"
+Line 207: 
+Line 208: # Set the lxc backing store for the job
+Line 209: lxc_container_backing_store: dir
+Line 210: 
+Line 211: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

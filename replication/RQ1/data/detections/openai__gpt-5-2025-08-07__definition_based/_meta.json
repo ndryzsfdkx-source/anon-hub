@@ -1,0 +1,8 @@
+{
+  "source": "llm",
+  "method_key": "openai::gpt-5-2025-08-07::definition_based",
+  "display_name": "gpt-5-2025-08-07-definition-based",
+  "provider": "openai",
+  "model": "gpt-5-2025-08-07",
+  "style": "definition_based"
+}

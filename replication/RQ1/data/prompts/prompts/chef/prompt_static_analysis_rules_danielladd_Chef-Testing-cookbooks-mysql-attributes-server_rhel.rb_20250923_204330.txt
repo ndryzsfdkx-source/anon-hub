@@ -1,0 +1,149 @@
+# CONSTRUCTED PROMPT
+# File: danielladd_Chef-Testing-cookbooks-mysql-attributes-server_rhel.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.618816
+# Length: 6127 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: danielladd_Chef-Testing-cookbooks-mysql-attributes-server_rhel.rb (Unknown)**
+
+
+Line 1: case node['platform_family']
+Line 2: when 'rhel'
+Line 3: 
+Line 4:   # Probably driven from wrapper cookbooks, environments, or roles.
+Line 5:   # Keep in this namespace for backwards compat
+Line 6:   default['mysql']['data_dir'] = '/var/lib/mysql'
+Line 7: 
+Line 8:   # switching logic to account for differences in platform native
+Line 9:   # package versions
+Line 10:   case node['platform_version'].to_i
+Line 11:   when 5
+Line 12:     default['mysql']['server']['packages'] = ['mysql-server']
+Line 13:     default['mysql']['server']['log_slow_queries']     = '/var/log/mysql/slow.log'
+Line 14:   when 6
+Line 15:     default['mysql']['server']['packages'] = ['mysql-server']
+Line 16:     default['mysql']['server']['slow_query_log']       = 1
+Line 17:     default['mysql']['server']['slow_query_log_file']  = '/var/log/mysql/slow.log'
+Line 18:   when 2013 # amazon linux
+Line 19:     default['mysql']['server']['packages'] = ['mysql-server']
+Line 20:     default['mysql']['server']['slow_query_log']       = 1
+Line 21:     default['mysql']['server']['slow_query_log_file']  = '/var/log/mysql/slow.log'
+Line 22:   end
+Line 23: 
+Line 24:   # Platformisms.. filesystem locations and such.
+Line 25:   default['mysql']['server']['basedir'] = '/usr'
+Line 26:   default['mysql']['server']['tmpdir'] = ['/tmp']
+Line 27: 
+Line 28:   default['mysql']['server']['directories']['run_dir']              = '/var/run/mysqld'
+Line 29:   default['mysql']['server']['directories']['log_dir']              = '/var/lib/mysql'
+Line 30:   default['mysql']['server']['directories']['slow_log_dir']         = '/var/log/mysql'
+Line 31:   default['mysql']['server']['directories']['confd_dir']            = '/etc/mysql/conf.d'
+Line 32: 
+Line 33:   default['mysql']['server']['mysqladmin_bin']       = '/usr/bin/mysqladmin'
+Line 34:   default['mysql']['server']['mysql_bin']            = '/usr/bin/mysql'
+Line 35: 
+Line 36:   default['mysql']['server']['pid_file']             = '/var/run/mysqld/mysqld.pid'
+Line 37:   default['mysql']['server']['socket']               = '/var/lib/mysql/mysql.sock'
+Line 38:   default['mysql']['server']['grants_path']          = '/etc/mysql_grants.sql'
+Line 39:   default['mysql']['server']['old_passwords']        = 1
+Line 40:   default['mysql']['server']['service_name']        = 'mysqld'
+Line 41: 
+Line 42:   # RHEL/CentOS mysql package does not support this option.
+Line 43:   default['mysql']['tunable']['innodb_adaptive_flushing'] = false
+Line 44:   default['mysql']['server']['skip_federated'] = false
+Line 45: end
+Line 46: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

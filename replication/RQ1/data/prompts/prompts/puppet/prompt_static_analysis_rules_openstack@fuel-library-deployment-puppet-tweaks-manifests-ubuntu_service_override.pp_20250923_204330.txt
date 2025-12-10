@@ -1,0 +1,181 @@
+# CONSTRUCTED PROMPT
+# File: openstack@fuel-library-deployment-puppet-tweaks-manifests-ubuntu_service_override.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.638617
+# Length: 6921 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack@fuel-library-deployment-puppet-tweaks-manifests-ubuntu_service_override.pp (Puppet)**
+
+
+Line 1: # == Type: tweaks::ubuntu_service_override
+Line 2: #
+Line 3: #  Disable services from starting when the package is installed on Ubuntu OS
+Line 4: #
+Line 5: # == Parameters
+Line 6: #
+Line 7: # [*service_name*]
+Line 8: #  The name of the service that is associated with the package being installed.
+Line 9: #  Defaults to $name
+Line 10: #
+Line 11: # [*package_name*]
+Line 12: #  The name of the package that is being installed that has a service to be
+Line 13: #  prevented from being started as part of the installation process.
+Line 14: #  Defaults to $name
+Line 15: #
+Line 16: # [*mask_service*]
+Line 17: #  Boolean variable to mask service.
+Line 18: #  Defaults to false
+Line 19: #
+Line 20: define tweaks::ubuntu_service_override (
+Line 21:   $service_name = $name,
+Line 22:   $package_name = $name,
+Line 23:   $mask_service = false,
+Line 24: ) {
+Line 25:   if $::operatingsystem == 'Ubuntu' {
+Line 26:     if ! is_pkg_installed($package_name) {
+Line 27:       # https://people.debian.org/~hmh/invokerc.d-policyrc.d-specification.txt
+Line 28:       # use policy-rc.d to really ensure services don't get started on
+Line 29:       # installation as service override files are only used if a job
+Line 30:       # configuration file exists (see man 5 init)
+Line 31:       $systemd_unit = "/etc/systemd/system/${service_name}.service"
+Line 32: 
+Line 33:       if $::service_provider != 'systemd' {
+Line 34:         ensure_resource('file', $systemd_unit, {
+Line 35:           ensure  => 'absent',
+Line 36:         })
+Line 37:       } elsif $mask_service {
+Line 38:         ensure_resource('file', $systemd_unit, {
+Line 39:           ensure => 'symlink',
+Line 40:           target => '/dev/null'
+Line 41:         })
+Line 42:       }
+Line 43: 
+Line 44:       Service <| title == $service_name |> ->
+Line 45:       File <| title == $systemd_unit |>
+Line 46: 
+Line 47:       $policyrc_file = '/usr/sbin/policy-rc.d'
+Line 48:       # use ensure resource as we only want a single instance of the
+Line 49:       # policy-rc.d file in the catalog
+Line 50:       ensure_resource('file', 'create-policy-rc.d', {
+Line 51:         ensure  => present,
+Line 52:         path    => $policyrc_file,
+Line 53:         content => "#!/bin/bash\nexit 101",
+Line 54:         mode    => '0755',
+Line 55:         owner   => 'root',
+Line 56:         group   => 'root'
+Line 57:       })
+Line 58:       # use ensure resource as we only want a single remove exec in the catalog
+Line 59:       ensure_resource('exec', 'remove-policy-rc.d', {
+Line 60:         path    => [ '/sbin', '/bin', '/usr/bin', '/usr/sbin' ],
+Line 61:         command => "rm -f ${policyrc_file}",
+Line 62:         onlyif  => "test -f ${policyrc_file}",
+Line 63:       })
+Line 64: 
+Line 65:       File['create-policy-rc.d'] ->
+Line 66:         Package <| name == $package_name |> { provider =>  'apt_fuel' } ->
+Line 67:           Exec['remove-policy-rc.d']
+Line 68:       File['create-policy-rc.d'] ->
+Line 69:         Package <| title == $package_name |> { provider => 'apt_fuel' } ->
+Line 70:           Exec['remove-policy-rc.d']
+Line 71:       Exec['remove-policy-rc.d'] ->
+Line 72:         Service <| name == $service_name |>
+Line 73:       Exec['remove-policy-rc.d'] ->
+Line 74:         Service <| title == $service_name |>
+Line 75:     }
+Line 76:   }
+Line 77: }
+Line 78: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

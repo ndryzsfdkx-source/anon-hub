@@ -1,0 +1,170 @@
+# CONSTRUCTED PROMPT
+# File: wikimedia@mediawiki-vagrant-puppet-modules-ocg-manifests-init.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.645864
+# Length: 5983 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: wikimedia@mediawiki-vagrant-puppet-modules-ocg-manifests-init.pp (Puppet)**
+
+
+Line 1: # == Class: ocg
+Line 2: # Sets up the OCG[https://www.mediawiki.org/wiki/Offline_content_generator] service
+Line 3: # for rendering PDF books from groups of wiki articles.
+Line 4: # See wikitech[https://wikitech.wikimedia.org/wiki/OCG] for technical documentation.
+Line 5: #
+Line 6: # === Parameters
+Line 7: #
+Line 8: # [*port*]
+Line 9: #   Port to listen on
+Line 10: #
+Line 11: class ocg(
+Line 12:     $port,
+Line 13: ) {
+Line 14:     include role::restbase
+Line 15: 
+Line 16:     require_package([
+Line 17:         'texlive-xetex',
+Line 18:         'texlive-latex-recommended',
+Line 19:         'texlive-latex-extra',
+Line 20:         'texlive-generic-extra',
+Line 21:         'texlive-fonts-recommended',
+Line 22:         'texlive-fonts-extra',
+Line 23:         'fonts-hosny-amiri',
+Line 24:         'fonts-farsiweb',
+Line 25:         'fonts-nafees',
+Line 26:         'fonts-arphic-uming',
+Line 27:         'fonts-arphic-ukai',
+Line 28:         'fonts-droid-fallback',
+Line 29:         'fonts-baekmuk',
+Line 30:         'lmodern',
+Line 31:         'texlive-lang-all',
+Line 32:         'latex-xcolor',
+Line 33:         'poppler-utils',
+Line 34:         'imagemagick',
+Line 35:         'librsvg2-bin',
+Line 36:         'libjpeg-progs',
+Line 37:         'djvulibre-bin',
+Line 38:         'unzip',
+Line 39:     ])
+Line 40: 
+Line 41:     $remote_suffix_hash = {
+Line 42:         mw-ocg-service => '',
+Line 43:         mw-ocg-bundler => '/bundler',
+Line 44:         mw-ocg-latexer => '/latex_renderer',
+Line 45:         mw-ocg-texter  => '/text_renderer',
+Line 46:     }
+Line 47:     $keys = keys($remote_suffix_hash)
+Line 48:     ocg::service{ $keys: hash => $remote_suffix_hash }
+Line 49: 
+Line 50:     $parsoid_port = $::parsoid::port
+Line 51:     $dir = "${::service::root_dir}/mw-ocg-service"
+Line 52:     $config = "${::service::root_dir}/mw-ocg-service/localsettings.js"
+Line 53:     $log_dir = $::service::log_dir
+Line 54: 
+Line 55:     file { $config:
+Line 56:         content => template('ocg/localsettings.js.erb'),
+Line 57:         require => Git::Clone['mw-ocg-service'],
+Line 58:     }
+Line 59: 
+Line 60:     systemd::service { 'mw-ocg-service':
+Line 61:         service_params => {
+Line 62:             subscribe => [ Npm::Install[$dir], File[$config] ],
+Line 63:         },
+Line 64:         require        => Ocg::Service[keys($remote_suffix_hash)],
+Line 65:     }
+Line 66: }
+Line 67: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

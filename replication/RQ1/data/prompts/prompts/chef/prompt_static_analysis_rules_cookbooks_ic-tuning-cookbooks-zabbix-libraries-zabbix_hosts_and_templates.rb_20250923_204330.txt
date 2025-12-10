@@ -1,0 +1,146 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-tuning-cookbooks-zabbix-libraries-zabbix_hosts_and_templates.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.616621
+# Length: 5392 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-tuning-cookbooks-zabbix-libraries-zabbix_hosts_and_templates.rb (Unknown)**
+
+
+Line 1: class Chef
+Line 2: 
+Line 3:   class Recipe
+Line 4: 
+Line 5:     def node_zabbix_host_groups(the_node=nil)
+Line 6:       the_node ||= node
+Line 7:       Set.new.tap do |hgs|
+Line 8:         hgs << the_node[:cluster_name] if the_node[:cluster_name]
+Line 9:         hgs << "#{the_node[:cluster_name]}-#{the_node[:facet_name]}" if the_node[:cluster_name] && the_node[:facet_name]
+Line 10:         if the_node[:zabbix] && the_node[:zabbix][:host_groups]
+Line 11:           case
+Line 12:           when the_node[:zabbix][:host_groups].respond_to?(:each_pair)
+Line 13:             the_node[:zabbix][:host_groups].each_pair do |service, groups|
+Line 14:               groups.each { |g| hgs << g }
+Line 15:             end
+Line 16:           # Supports deprecated usage
+Line 17:           when the_node[:zabbix][:host_groups].respond_to?(:each)
+Line 18:             the_node[:zabbix][:host_groups].each { |g| hgs << g }
+Line 19:           end
+Line 20:         end
+Line 21:       end.to_a
+Line 22:     end
+Line 23: 
+Line 24:     def node_zabbix_templates(the_node=nil)
+Line 25:       the_node ||= node
+Line 26:       Set.new.tap do |ts|
+Line 27:         if the_node[:zabbix] && the_node[:zabbix][:templates]
+Line 28:           case
+Line 29:           when the_node[:zabbix][:templates].respond_to?(:each_pair)
+Line 30:             the_node[:zabbix][:templates].each_pair do |service, templates|
+Line 31:               (templates ||{}).each{ |t| ts << t }
+Line 32:             end
+Line 33:           # Supports deprecated usage
+Line 34:           when the_node[:zabbix][:templates].respond_to?(:each)
+Line 35:             the_node[:zabbix][:templates].each { |t| ts << t }
+Line 36:           end
+Line 37:         end
+Line 38:       end.to_a
+Line 39:     end
+Line 40: 
+Line 41:   end
+Line 42: end
+Line 43: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

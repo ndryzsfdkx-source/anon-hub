@@ -1,0 +1,296 @@
+# CONSTRUCTED PROMPT
+# File: purpleidea@puppet-gluster-manifests-simple.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.643258
+# Length: 13356 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: purpleidea@puppet-gluster-manifests-simple.pp (Puppet)**
+
+
+Line 1: # GlusterFS module by James
+Line 2: # Copyright (C) 2010-2013+ James Shubin
+Line 3: # Written by James Shubin <james@shubin.ca>
+Line 4: #
+Line 5: # This program is free software: you can redistribute it and/or modify
+Line 6: # it under the terms of the GNU Affero General Public License as published by
+Line 7: # the Free Software Foundation, either version 3 of the License, or
+Line 8: # (at your option) any later version.
+Line 9: #
+Line 10: # This program is distributed in the hope that it will be useful,
+Line 11: # but WITHOUT ANY WARRANTY; without even the implied warranty of
+Line 12: # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+Line 13: # GNU Affero General Public License for more details.
+Line 14: #
+Line 15: # You should have received a copy of the GNU Affero General Public License
+Line 16: # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+Line 17: 
+Line 18: class gluster::simple(
+Line 19: 	$path = '',
+Line 20: 	$volume = 'puppet',	# NOTE: this can be a list...
+Line 21: 	$replica = 1,
+Line 22: 	$stripe = 1,		# TODO: not fully implemented in puppet-gluster
+Line 23: 	$layout = '',		# brick layout to use (default, chained, etc...)
+Line 24: 	$vip = '',		# strongly recommended
+Line 25: 	$vrrp = false,
+Line 26: 	$password = '',	# global vrrp password to use
+Line 27: 	$version = '',
+Line 28: 	$repo = true,
+Line 29: 	$count = 0,	# 0 means build 1 brick, unless $brick_params exists...
+Line 30: 	$brick_params = {},	# this sets the brick count when $count is 0...
+Line 31: 	$brick_param_defaults = {},	# these always get used to build bricks
+Line 32: 	$brick_params_defaults = [],	# array of hashes to use as brick count
+Line 33: 	$setgroup = '',		# pick a volume property group to set, eg: virt
+Line 34: 	$ping = true,	# use fping or not?
+Line 35: 	$again = true,	# do we want to use Exec['again'] ?
+Line 36: 	$baseport = '',	# specify base port option as used in glusterd.vol file
+Line 37: 	$rpcauthallowinsecure = false,	# needed in some setups in glusterd.vol
+Line 38: 	$shorewall = true
+Line 39: ) {
+Line 40: 	include gluster::vardir
+Line 41: 	include gluster::volume::property::group::data	# make the groups early
+Line 42: 
+Line 43: 	#$vardir = $::gluster::vardir::module_vardir	# with trailing slash
+Line 44: 	$vardir = regsubst($::gluster::vardir::module_vardir, '\/$', '')
+Line 45: 
+Line 46: 	# NOTE: this is done in brick.pp now
+Line 47: 	#if "${path}" == '' {
+Line 48: 	#	file { "${vardir}/data/":
+Line 49: 	#		ensure => directory,	# make sure this is a directory
+Line 50: 	#		recurse => false,	# don't recurse into directory
+Line 51: 	#		purge => false,		# don't purge unmanaged files
+Line 52: 	#		force => false,		# don't purge subdirs and links
+Line 53: 	#		require => File["${vardir}/"],
+Line 54: 	#	}
+Line 55: 	#}
+Line 56: 
+Line 57: 	$chosen_path = "${path}" ? {
+Line 58: 		'' => "${vardir}/data/",
+Line 59: 		default => "${path}",
+Line 60: 	}
+Line 61: 
+Line 62: 	$valid_path = sprintf("%s/", regsubst($chosen_path, '\/$', ''))
+Line 63: 
+Line 64: 	# Stdlib 4.6.0 deprecates 'type' in favor of 'type3x'.
+Line 65: 	# Ensure $valid_volumes is always an array.
+Line 66: 	$valid_volumes = type3x($volume) ? {
+Line 67: 		'array' => $volume,
+Line 68: 		default => ["${volume}"],
+Line 69: 	}
+Line 70: 
+Line 71: 	# if this is a hash, then it's used as the defaults for all the bricks!
+Line 72: 	validate_hash($brick_param_defaults)
+Line 73: 	# if someone explicitly added this value, then don't overwrite it...
+Line 74: 	$areyousure = {'areyousure' => true}
+Line 75: 	$againhash = {'again' => $again}	# pass through the $again value
+Line 76: 	$valid_brick_param_defaults = merge($areyousure, $againhash, $brick_param_defaults)
+Line 77: 
+Line 78: 	# if this is an array, then each element is the default for each brick!
+Line 79: 	# if this is an array, then the number of elements is the brick count!!
+Line 80: 	validate_array($brick_params_defaults)
+Line 81: 	# TODO: check that each element of array is a valid hash!
+Line 82: 	$valid_brick_params_defaults = $brick_params_defaults
+Line 83: 
+Line 84: 	notify { 'gluster::simple':
+Line 85: 		message => 'You are using gluster::simple !',
+Line 86: 	}
+Line 87: 
+Line 88: 	if "${vip}" == '' {
+Line 89: 		# If you don't use a VIP, things will be racy, but could mostly
+Line 90: 		# work. If you run puppet manually, then a vip isn't necessary.
+Line 91: 		# see: http://ttboj.wordpress.com/2012/08/23/how-to-avoid-cluster-race-conditions-or-how-to-implement-a-distributed-lock-manager-in-puppet/
+Line 92: 		warning('It is highly recommended to use a VIP.')
+Line 93: 	}
+Line 94: 
+Line 95: 	class { '::gluster::server':
+Line 96: 		vip => "${vip}",
+Line 97: 		vrrp => $vrrp,
+Line 98: 		password => "${password}",
+Line 99: 		version => "${version}",
+Line 100: 		repo => $repo,
+Line 101: 		baseport => $baseport,
+Line 102: 		rpcauthallowinsecure => $rpcauthallowinsecure,
+Line 103: 		#zone => 'net',	# defaults to net
+Line 104: 		shorewall => $shorewall,
+Line 105: 	}
+Line 106: 
+Line 107: 	if "${::fqdn}" == '' {
+Line 108: 		fail('Your $fqdn is empty. Please check your DNS settings.')
+Line 109: 	}
+Line 110: 
+Line 111: 	@@gluster::host { "${::fqdn}":
+Line 112: 	}
+Line 113: 	Gluster::Host <<||>>
+Line 114: 
+Line 115: 	# the idea here is to build a list of bricks from a list of parameters,
+Line 116: 	# with each element in the list, corresponding to a hash of key=>values
+Line 117: 	# each element in the list is a different brick. the key for the master
+Line 118: 	# hash is the fqdn of the host that those bricks correspond to. you can
+Line 119: 	# also specify a list of defaults for when you have common brick values
+Line 120: 	# such as $xfs_inode64=>true, or raid_* if your cluster is symmetrical!
+Line 121: 	# if you set the $count variable, then that brick count will be forced.
+Line 122: 	validate_re("${count}", '^\d+$')	# ensure this is a positive int
+Line 123: 
+Line 124: 	# here some wizardry happens...
+Line 125: 	if has_key($brick_params, "${::fqdn}") {
+Line 126: 		$brick_params_list = $brick_params["${::fqdn}"]
+Line 127: 	} else {
+Line 128: 		$brick_params_list = []
+Line 129: 	}
+Line 130: 
+Line 131: 	$brick_params_list_length = inline_template('<%= @brick_params_list.length %>')
+Line 132: 	$brick_params_defaults_length = inline_template('<%= @valid_brick_params_defaults.length %>')
+Line 133: 	$valid_count = "${count}" ? {
+Line 134: 		'0' => "${brick_params_list_length}" ? {
+Line 135: 			'0' => "${brick_params_defaults_length}" ? {
+Line 136: 				'0' => 1,	# 0 means undefined, so use the default
+Line 137: 				default => "${brick_params_defaults_length}",
+Line 138: 			},
+Line 139: 			default => "${brick_params_list_length}",
+Line 140: 		},
+Line 141: 		default => $count,
+Line 142: 	}
+Line 143: 
+Line 144: 	$brick_params_names = "${valid_count}" ? {
+Line 145: 		# TODO: should we use the same pattern for 1 or many ?
+Line 146: 		'1' => ["${::fqdn}:${valid_path}"],
+Line 147: 		default => split(inline_template("<%= (1..@valid_count.to_i).collect{|i| '${::fqdn}:${valid_path}brick' + i.to_s.rjust(7, '0') + '/' }.join(',') %>"), ','),
+Line 148: 	}
+Line 149: 
+Line 150: 	validate_array($brick_params_list)
+Line 151: 
+Line 152: 	# NOTE: I've kept this template split as two comment chunks for
+Line 153: 	# readability. Puppet needs to fix this issue somehow! Creating
+Line 154: 	# a separate template removes the logic from the code, but as a
+Line 155: 	# large inline template it's very hard to read/write the logic!
+Line 156: 	#DEFAULTS = (((i < @valid_brick_params_defaults.length) and @valid_brick_params_defaults[i].is_a?(Hash)) ? @valid_brick_params_defaults[i] : {})
+Line 157: 	#$yaml = inline_template("<%= (0..@valid_count.to_i-1).inject(Hash.new) { |h,i| {@brick_params_names[i] => DEFAULTS.merge((i < @brick_params_list.length) ? @brick_params_list[i] : {})}.merge(h) }.to_yaml %>")
+Line 158: 	$yaml = inline_template("<%= (0..@valid_count.to_i-1).inject(Hash.new) { |h,i| {@brick_params_names[i] => (((i < @valid_brick_params_defaults.length) and @valid_brick_params_defaults[i].is_a?(Hash)) ? @valid_brick_params_defaults[i] : {}).merge((i < @brick_params_list.length) ? @brick_params_list[i] : {})}.merge(h) }.to_yaml %>")
+Line 159: 	$hash = parseyaml($yaml)
+Line 160: 	create_resources('@@gluster::brick', $hash, $valid_brick_param_defaults)
+Line 161: 	#@@gluster::brick { "${::fqdn}:${valid_path}":
+Line 162: 	#	areyousure => true,
+Line 163: 	#}
+Line 164: 	Gluster::Brick <<||>>
+Line 165: 
+Line 166: 	gluster::volume { $valid_volumes:
+Line 167: 		replica => $replica,
+Line 168: 		stripe => $stripe,
+Line 169: 		layout => "${layout}",
+Line 170: 		# NOTE: with this method you do not choose the order of course!
+Line 171: 		# the gluster_fqdns fact is alphabetical, but not complete till
+Line 172: 		# at least a puppet run of each node has occured. watch out for
+Line 173: 		# partial clusters missing some of the nodes with bad ordering!
+Line 174: 		#bricks => split(inline_template("<%= @gluster_fqdns.split(',').collect {|x| x+':${valid_path}' }.join(',') %>"), ','),
+Line 175: 		# the only semi-safe way is the new built in automatic collect:
+Line 176: 		bricks => true,			# automatic brick collection...
+Line 177: 		ping => $ping,
+Line 178: 		start => true,
+Line 179: 		again => $again,
+Line 180: 	}
+Line 181: 	Gluster::Volume <<||>>
+Line 182: 
+Line 183: 	# set a group of volume properties
+Line 184: 	if "${setgroup}" != '' {
+Line 185: 		$setgroup_yaml = inline_template("<%= @valid_volumes.inject(Hash.new) { |h,i| {i+'#'+@setgroup => {}}.merge(h) }.to_yaml %>")
+Line 186: 		$setgroup_hash = parseyaml($setgroup_yaml)
+Line 187: 		$setgroup_defaults = {'vip' => "${vip}"}
+Line 188: 		create_resources('gluster::volume::property::group', $setgroup_hash, $setgroup_defaults)
+Line 189: 	}
+Line 190: }
+Line 191: 
+Line 192: # vim: ts=8
+Line 193: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

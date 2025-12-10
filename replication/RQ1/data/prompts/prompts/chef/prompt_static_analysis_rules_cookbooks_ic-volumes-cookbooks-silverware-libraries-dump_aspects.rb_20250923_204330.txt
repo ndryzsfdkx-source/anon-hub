@@ -1,0 +1,195 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-volumes-cookbooks-silverware-libraries-dump_aspects.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.616964
+# Length: 7500 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-volumes-cookbooks-silverware-libraries-dump_aspects.rb (Unknown)**
+
+
+Line 1: module Ironfan
+Line 2:   module Discovery
+Line 3:     module_function
+Line 4: 
+Line 5:     def dump_aspects(run_context)
+Line 6:       [
+Line 7:         [:apache,         :server],
+Line 8:         [:cassandra,      :server],
+Line 9:         [:chef,           :client],
+Line 10:         [:chef,           :server],
+Line 11:         [:cron,           :daemon],
+Line 12:         [:elasticsearch,  :server],
+Line 13:         [:flume,          :agent],
+Line 14:         [:flume,          :master],
+Line 15:         [:ganglia,        :master],
+Line 16:         [:ganglia,        :monitor],
+Line 17:         [:graphite,       :carbon],
+Line 18:         [:graphite,       :dashboard],
+Line 19:         [:graphite,       :whisper],
+Line 20:         #
+Line 21:         [:hadoop,         :datanode],
+Line 22:         [:hadoop,         :hdfs_fuse],
+Line 23:         [:hadoop,         :jobtracker],
+Line 24:         [:hadoop,         :namenode],
+Line 25:         [:hadoop,         :secondarynn],
+Line 26:         [:hadoop,         :tasktracker],
+Line 27:         #
+Line 28:         [:hbase,          :master],
+Line 29:         [:hbase,          :regionserver],
+Line 30:         [:hbase,          :thrift],
+Line 31:         [:hbase,          :stargate],
+Line 32:         #
+Line 33:         [:jenkins,        :server],
+Line 34:         [:jenkins,        :worker],
+Line 35:         [:minidash,       :dashboard],
+Line 36:         [:mongodb,        :server],
+Line 37:         [:mysql,          :server],
+Line 38:         [:nfs,            :server],
+Line 39:         [:nginx,          :server],
+Line 40:         [:ntp,            :server],
+Line 41:         [:redis,          :server],
+Line 42:         [:resque,         :redis],
+Line 43:         [:resque,         :dashboard],
+Line 44:         [:ssh,            :daemon],
+Line 45:         [:statsd,         :server],
+Line 46:         [:zabbix,         :agent],
+Line 47:         [:zabbix,         :master],
+Line 48:         [:zookeeper,      :server],
+Line 49: 
+Line 50:         # [:goliath,        :app],
+Line 51:         # [:unicorn,        :app],
+Line 52:         # [:apt,            :cacher],
+Line 53:         # [:bluepill,       :monitor],
+Line 54:         # [:resque,         :worker],
+Line 55: 
+Line 56:       ].each do |sys, subsys|
+Line 57:         components = discover_all(sys, subsys)
+Line 58:         pad = ([""]*20)
+Line 59:         components.each do |component|
+Line 60:           dump_line = dump(component) || []
+Line 61:           puts( "%-15s\t%-15s\t%-23s\t| %-51s\t| %-12s\t#{"%-7s\t"*12}" % [sys, subsys, dump_line, pad].flatten )
+Line 62:         end
+Line 63:       end
+Line 64: 
+Line 65:       run_context.resource_collection.select{|r| r.resource_name.to_s == 'service' }.each{|r| p [r.name, r.action] }
+Line 66:     end
+Line 67: 
+Line 68: 
+Line 69:     def dump(component)
+Line 70:       return if component.empty?
+Line 71:       vals = [
+Line 72:         component.daemon    .map{|asp|  asp.name                }.join(",")[0..20],
+Line 73:         component.port      .map{|asp| "#{asp.flavor}=#{asp.port_num}" }.join(","),
+Line 74:         component.dashboard .map{|asp|  asp.name                }.join(","),
+Line 75:         component.log       .map{|asp|  asp.name                }.join(","),
+Line 76:         DirectoryAspect::ALLOWED_FLAVORS.map do |flavor|
+Line 77:           asp = component[:directory ].detect{|asp| asp[:flavor] == flavor }
+Line 78:           # asp ? "#{asp.flavor}=#{asp.path}" : ""
+Line 79:           asp ? asp.name : ""
+Line 80:         end,
+Line 81:         ExportedAspect::ALLOWED_FLAVORS.map do |flavor|
+Line 82:           asp = component[:exported ].detect{|asp| asp[:flavor] == flavor }
+Line 83:           # asp ? "#{asp.flavor}=#{asp.files.join(",")}" : ""
+Line 84:           asp ? asp.name : ""
+Line 85:         end,
+Line 86:       ]
+Line 87:       vals
+Line 88:     end
+Line 89: 
+Line 90:   end
+Line 91: end
+Line 92: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

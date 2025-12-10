@@ -1,0 +1,156 @@
+# CONSTRUCTED PROMPT
+# File: guymatz_chef-cookbooks-mysql-attributes-client.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.619814
+# Length: 6510 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: guymatz_chef-cookbooks-mysql-attributes-client.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Cookbook Name:: mysql
+Line 3: # Attributes:: client
+Line 4: #
+Line 5: # Copyright 2008-2013, Opscode, Inc.
+Line 6: #
+Line 7: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 8: # you may not use this file except in compliance with the License.
+Line 9: # You may obtain a copy of the License at
+Line 10: #
+Line 11: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 12: #
+Line 13: # Unless required by applicable law or agreed to in writing, software
+Line 14: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 15: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 16: # See the License for the specific language governing permissions and
+Line 17: # limitations under the License.
+Line 18: #
+Line 19: 
+Line 20: # Include Opscode helper in Node class to get access
+Line 21: # to debian_before_squeeze? and ubuntu_before_lucid?
+Line 22: ::Chef::Node.send(:include, Opscode::Mysql::Helpers)
+Line 23: 
+Line 24: case node['platform_family']
+Line 25: when 'rhel', 'fedora'
+Line 26:   default['mysql']['client']['packages'] = %w[MySQL-client MySQL-devel MySQL-shared-compat]
+Line 27: when 'suse'
+Line 28:   default['mysql']['client']['packages'] = %w[mysql-community-server-client libmysqlclient-devel]
+Line 29: when 'debian'
+Line 30:   if debian_before_squeeze? || ubuntu_before_lucid?
+Line 31:     default['mysql']['client']['packages'] = %w[mysql-client libmysqlclient15-dev]
+Line 32:   else
+Line 33:     default['mysql']['client']['packages'] = %w[mysql-client libmysqlclient-dev]
+Line 34:   end
+Line 35: when 'freebsd'
+Line 36:   default['mysql']['client']['packages'] = %w[mysql55-client]
+Line 37: when 'windows'
+Line 38:   default['mysql']['client']['version']      = '6.0.2'
+Line 39:   default['mysql']['client']['arch']         = 'win32' # force 32 bit to work with mysql gem
+Line 40:   default['mysql']['client']['package_file'] = "mysql-connector-c-#{mysql['client']['version']}-#{mysql['client']['arch']}.msi"
+Line 41:   default['mysql']['client']['url']          = "http://www.mysql.com/get/Downloads/Connector-C/#{mysql['client']['package_file']}/from/http://mysql.mirrors.pair.com/"
+Line 42:   default['mysql']['client']['packages']     = ["MySQL Connector C #{mysql['client']['version']}"]
+Line 43: 
+Line 44:   default['mysql']['client']['basedir']      = "#{ENV['SYSTEMDRIVE']}\\Program Files (x86)\\MySQL\\#{mysql['client']['packages'].first}"
+Line 45:   default['mysql']['client']['lib_dir']      = "#{mysql['client']['basedir']}\\lib/opt"
+Line 46:   default['mysql']['client']['bin_dir']      = "#{mysql['client']['basedir']}\\bin"
+Line 47:   default['mysql']['client']['ruby_dir']     = RbConfig::CONFIG['bindir']
+Line 48: when 'mac_os_x'
+Line 49:   default['mysql']['client']['packages'] = %w[mysql-connector-c]
+Line 50: else
+Line 51:   default['mysql']['client']['packages'] = %w[mysql-client libmysqlclient-dev]
+Line 52: end
+Line 53: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

@@ -1,0 +1,52 @@
+PATH,LINE,CATEGORY
+ansible-role-systemd_mount-tasks-systemd_mounts.yml,44,Hard-coded secret
+ansible-role-tripleo-modify-image-tasks-modify_image.yml,35,Suspicious comment
+bifrost-playbooks-roles-bifrost-ironic-install-defaults-required_defaults_Fedora_26.yml,8,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-client-config-defaults-main.yml,2,Use of HTTP without SSL/TLS
+bifrost-playbooks-roles-bifrost-keystone-client-config-defaults-main.yml,3,Use of HTTP without SSL/TLS
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,15,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,16,Empty password
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,22,Use of HTTP without SSL/TLS
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,23,Use of HTTP without SSL/TLS
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,47,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,48,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,50,Use of HTTP without SSL/TLS
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,51,Use of HTTP without SSL/TLS
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,52,Use of HTTP without SSL/TLS
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,55,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-required_defaults_Debian_jessie.yml,5,Hard-coded secret
+browbeat-ansible-browbeat-roles-gnocchi-config-tasks-main.yml,11,Suspicious comment
+browbeat-ansible-install-roles-epel-defaults-main.yml,2,No integrity check
+browbeat-ansible-install-roles-epel-defaults-main.yml,3,Hard-coded secret
+browbeat-ansible-install-roles-fluentd-tasks-main.yml,17,Hard-coded secret
+browbeat-ansible-install-roles-fluentd-tasks-main.yml,189,Use of HTTP without SSL/TLS
+openstack-ansible-ops-elk_metrics_6x-roles-elastic_filebeat-tasks-main.yml,46,No integrity check
+openstack-ansible-ops-elk_metrics_6x-roles-elastic_filebeat-tasks-main.yml,60,Hard-coded secret
+openstack-ansible-ops-elk_metrics_6x-roles-elasticsearch-meta-main.yml,38,Hard-coded secret
+openstack-ansible-ops-leap-upgrades-upgrade-utilities-mitaka-playbooks-deploy-config-changes-mitaka.yml,20,Hard-coded secret
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,18,Unrestricted IP Address
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,24,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,28,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,32,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,53,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,54,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,57,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,60,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,68,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,69,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,83,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,84,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,96,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,97,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,98,Use of HTTP without SSL/TLS
+openstack-ansible-ops-pxelinux-provisioning-playbooks-deploy-dhcp.yml,49,Hard-coded secret
+openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml,96,Suspicious comment
+openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml,98,Suspicious comment
+openstack-ansible-playbooks-lxc-containers-destroy.yml,22,Hard-coded secret
+openstack-ansible-playbooks-lxc-containers-destroy.yml,33,Hard-coded secret
+openstack-ansible-playbooks-os-designate-install.yml,22,Hard-coded secret
+openstack-ansible-playbooks-os-tempest-install.yml,19,Hard-coded secret
+openstack-ansible-playbooks-utility-install.yml,18,Hard-coded secret
+openstack-ansible-playbooks-utility-install.yml,70,Hard-coded secret
+openstack-ansible-playbooks-utility-install.yml,72,Hard-coded secret
+tripleo-quickstart-roles-libvirt-setup-overcloud-tasks-vars-libvirt_nodepool_vars.yml,16,Hard-coded secret

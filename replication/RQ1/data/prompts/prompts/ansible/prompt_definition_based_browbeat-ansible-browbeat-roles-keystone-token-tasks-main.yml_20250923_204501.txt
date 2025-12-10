@@ -1,0 +1,188 @@
+# CONSTRUCTED PROMPT
+# File: browbeat-ansible-browbeat-roles-keystone-token-tasks-main.yml
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.335822
+# Length: 8092 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: browbeat-ansible-browbeat-roles-keystone-token-tasks-main.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: #
+Line 3: # Keystone tasks to change token type
+Line 4: #
+Line 5: 
+Line 6: - name: Determine if keystone is deployed in eventlet
+Line 7:   shell: ps afx | grep "[Kk]eystone-all" -c
+Line 8:   register: deployed
+Line 9:   when: keystone_deployment is undefined
+Line 10:   ignore_errors: true
+Line 11:   changed_when: false
+Line 12: 
+Line 13: - name: Set keystone_deployment variable/fact to httpd
+Line 14:   set_fact: keystone_deployment='httpd'
+Line 15:   when: keystone_deployment is undefined and deployed.stdout|int == 0
+Line 16: 
+Line 17: - name: Set keystone_deployment variable/fact to eventlet
+Line 18:   set_fact: keystone_deployment='eventlet'
+Line 19:   when: keystone_deployment is undefined
+Line 20: 
+Line 21: #
+Line 22: # Get Token type
+Line 23: #
+Line 24: 
+Line 25: - name: Check Keystone Token Provider
+Line 26:   become: true
+Line 27:   command: crudini --get /etc/keystone/keystone.conf token provider
+Line 28:   register: keystone_token_provider
+Line 29:   changed_when: false
+Line 30:   ignore_errors: True
+Line 31: 
+Line 32: - name: Set current_token_provider variable/fact to uuid
+Line 33:   set_fact: current_token_provider='uuid'
+Line 34:   when: "'uuid' in '{{ keystone_token_provider.stdout }}'"
+Line 35: 
+Line 36: - name: Set current_token_provider variable/fact to fernet
+Line 37:   set_fact: current_token_provider='fernet'
+Line 38:   when: "'fernet' in '{{ keystone_token_provider.stdout }}'"
+Line 39: 
+Line 40: - name: Set current_token_provider variable/fact to pkiz
+Line 41:   set_fact: current_token_provider='pkiz'
+Line 42:   when: "'pkiz' in '{{ keystone_token_provider.stdout }}'"
+Line 43: 
+Line 44: #
+Line 45: # Tasks to change token provider if necessary:
+Line 46: #
+Line 47: 
+Line 48: - name: Change token provider
+Line 49:   become: true
+Line 50:   command: crudini --set /etc/keystone/keystone.conf token provider "keystone.token.providers.{{ token_provider }}.Provider"
+Line 51:   when: "'{{ current_token_provider }}' != '{{ token_provider }}'"
+Line 52:   notify:
+Line 53:     - pacemaker default unmanaged
+Line 54:     - stop keystone service
+Line 55:     - restart httpd service
+Line 56:     - restart keystone service
+Line 57:     - pacemaker default managed
+Line 58:     - pacemaker cleanup keystone
+Line 59: 
+Line 60: #
+Line 61: # fernet token setup:
+Line 62: #
+Line 63: 
+Line 64: - name: Create fernet keys directory
+Line 65:   become: true
+Line 66:   file:
+Line 67:     path=/etc/keystone/fernet-keys
+Line 68:     state=directory
+Line 69:     owner=keystone
+Line 70:     group=keystone
+Line 71:     mode=0700
+Line 72:   when: "'{{ token_provider }}' == 'fernet'"
+Line 73: 
+Line 74: - name: Setup fernet keys
+Line 75:   become: true
+Line 76:   command: keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+Line 77:   when: ('{{ token_provider }}' == 'fernet') and (inventory_hostname == groups['controller'][0])
+Line 78: 
+Line 79: - name: Get fernet keys
+Line 80:   become: true
+Line 81:   fetch: src=/etc/keystone/fernet-keys/{{ item }} dest=roles/keystone-token/files/{{ item }} flat=yes
+Line 82:   with_items:
+Line 83:     - 0
+Line 84:     - 1
+Line 85:   when: ('{{ token_provider }}' == 'fernet') and (inventory_hostname == groups['controller'][0])
+Line 86:   changed_when: false
+Line 87: 
+Line 88: - name: Copy fernet keys
+Line 89:   become: true
+Line 90:   copy: src={{ item }} dest=/etc/keystone/fernet-keys/{{ item }}
+Line 91:   with_items:
+Line 92:     - "0"
+Line 93:     - "1"
+Line 94:   when: ('{{ token_provider }}' == 'fernet') and (inventory_hostname != groups['controller'][0])
+Line 95: 
+Line 96: - name: Copy keystone type enforcement file
+Line 97:   become: true
+Line 98:   copy:
+Line 99:     src: my-keystone.te
+Line 100:     dest: /root/my-keystone.te
+Line 101:   when: "'{{ token_provider }}' == 'fernet'"
+Line 102: 
+Line 103: - name: Create keystone.mod file
+Line 104:   become: true
+Line 105:   command: checkmodule -M -m -o /root/my-keystone.mod /root/my-keystone.te
+Line 106:   when: "'{{ token_provider }}' == 'fernet'"
+Line 107: 
+Line 108: - name: Create keystone.pp file
+Line 109:   become: true
+Line 110:   command: semodule_package -o /root/my-keystone.pp -m /root/my-keystone.mod
+Line 111:   when: "'{{ token_provider }}' == 'fernet'"
+Line 112: 
+Line 113: - name: Install keystone selinux policy
+Line 114:   become: true
+Line 115:   command: semodule -i /root/my-keystone.pp
+Line 116:   when: "'{{ token_provider }}' == 'fernet'"
+Line 117: 
+Line 118: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

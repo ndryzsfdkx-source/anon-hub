@@ -1,0 +1,169 @@
+# CONSTRUCTED PROMPT
+# File: SecGen@SecGen-modules-services-unix-database-mysql-manifests-backup-xtrabackup.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.628984
+# Length: 5929 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: SecGen@SecGen-modules-services-unix-database-mysql-manifests-backup-xtrabackup.pp (Puppet)**
+
+
+Line 1: # See README.me for usage.
+Line 2: class mysql::backup::xtrabackup (
+Line 3:   $backupuser         = '',
+Line 4:   $backuppassword     = '',
+Line 5:   $backupdir          = '',
+Line 6:   $backupmethod       = 'mysqldump',
+Line 7:   $backupdirmode      = '0700',
+Line 8:   $backupdirowner     = 'root',
+Line 9:   $backupdirgroup     = $mysql::params::root_group,
+Line 10:   $backupcompress     = true,
+Line 11:   $backuprotate       = 30,
+Line 12:   $ignore_events      = true,
+Line 13:   $delete_before_dump = false,
+Line 14:   $backupdatabases    = [],
+Line 15:   $file_per_database  = false,
+Line 16:   $include_triggers   = true,
+Line 17:   $include_routines   = false,
+Line 18:   $ensure             = 'present',
+Line 19:   $time               = ['23', '5'],
+Line 20:   $prescript          = false,
+Line 21:   $postscript         = false,
+Line 22:   $execpath           = '/usr/bin:/usr/sbin:/bin:/sbin',
+Line 23: ) {
+Line 24: 
+Line 25:   package{ 'percona-xtrabackup':
+Line 26:     ensure  => $ensure,
+Line 27:   }
+Line 28: 
+Line 29:   cron { 'xtrabackup-weekly':
+Line 30:     ensure  => $ensure,
+Line 31:     command => "/usr/local/sbin/xtrabackup.sh ${backupdir}",
+Line 32:     user    => 'root',
+Line 33:     hour    => $time[0],
+Line 34:     minute  => $time[1],
+Line 35:     weekday => '0',
+Line 36:     require => Package['percona-xtrabackup'],
+Line 37:   }
+Line 38: 
+Line 39:   cron { 'xtrabackup-daily':
+Line 40:     ensure  => $ensure,
+Line 41:     command => "/usr/local/sbin/xtrabackup.sh --incremental ${backupdir}",
+Line 42:     user    => 'root',
+Line 43:     hour    => $time[0],
+Line 44:     minute  => $time[1],
+Line 45:     weekday => '1-6',
+Line 46:     require => Package['percona-xtrabackup'],
+Line 47:   }
+Line 48: 
+Line 49:   file { 'mysqlbackupdir':
+Line 50:     ensure => 'directory',
+Line 51:     path   => $backupdir,
+Line 52:     mode   => $backupdirmode,
+Line 53:     owner  => $backupdirowner,
+Line 54:     group  => $backupdirgroup,
+Line 55:   }
+Line 56: 
+Line 57:   file { 'xtrabackup.sh':
+Line 58:     ensure  => $ensure,
+Line 59:     path    => '/usr/local/sbin/xtrabackup.sh',
+Line 60:     mode    => '0700',
+Line 61:     owner   => 'root',
+Line 62:     group   => $mysql::params::root_group,
+Line 63:     content => template('mysql/xtrabackup.sh.erb'),
+Line 64:   }
+Line 65: }
+Line 66: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

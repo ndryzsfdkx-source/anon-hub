@@ -1,0 +1,194 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-jenkins-cookbooks-zabbix-recipes-agent.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.614921
+# Length: 6962 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-jenkins-cookbooks-zabbix-recipes-agent.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Cookbook Name::       zabbix
+Line 3: # Description::         Installs and launches Zabbix agent.
+Line 4: # Recipe::              agent
+Line 5: # Author::              Dhruv Bansal (<dhruv@infochimps.com>)
+Line 6: #
+Line 7: # Copyright 2012, Infochimps
+Line 8: #
+Line 9: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 10: # you may not use this file except in compliance with the License.
+Line 11: # You may obtain a copy of the License at
+Line 12: #
+Line 13: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 14: #
+Line 15: # Unless required by applicable law or agreed to in writing, software
+Line 16: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 17: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 18: # See the License for the specific language governing permissions and
+Line 19: # limitations under the License.
+Line 20: #
+Line 21: 
+Line 22: directory node.zabbix.agent.log_dir do
+Line 23:   owner 'zabbix'
+Line 24:   group 'zabbix'
+Line 25:   mode '0755'
+Line 26: end
+Line 27: 
+Line 28: server_ips = all_zabbix_server_ips()
+Line 29: # Install configuration
+Line 30: template "/etc/zabbix/zabbix_agentd.conf" do
+Line 31:   source "zabbix_agentd.conf.erb"
+Line 32:   owner "root"
+Line 33:   group "root"
+Line 34:   mode "644"
+Line 35:   notifies :restart, "service[zabbix_agentd]", :delayed
+Line 36:   variables :server_ips => server_ips
+Line 37: end
+Line 38: 
+Line 39: # Install Init script
+Line 40: template "/etc/init.d/zabbix_agentd" do
+Line 41:   source "zabbix_agentd.init.erb"
+Line 42:   owner "root"
+Line 43:   group "root"
+Line 44:   mode "754"
+Line 45: end
+Line 46: 
+Line 47: include_recipe "zabbix::agent_#{node.zabbix.agent.install_method}"
+Line 48: 
+Line 49: # We can create a host in Zabbix corresponding to this agent.
+Line 50: if node.zabbix.agent.create_host
+Line 51:   zabbix_server_ip = default_zabbix_server_ip
+Line 52:   node_host_groups = node_zabbix_host_groups
+Line 53:   node_templates   = node_zabbix_templates
+Line 54:   zabbix_host node[:node_name] do
+Line 55:     server      zabbix_server_ip
+Line 56:     host_groups node_host_groups
+Line 57:     templates   node_templates
+Line 58:     monitored   true
+Line 59:   end
+Line 60: end
+Line 61: 
+Line 62: if node.zabbix.agent.unmonitor_on_shutdown
+Line 63:   template "/etc/zabbix/externalscripts/unmonitor_zabbix_host.rb" do
+Line 64:     source    "unmonitor_zabbix_host.rb.erb"
+Line 65:     mode      '0776'
+Line 66:     variables :ip => zabbix_server_ip
+Line 67:     action    :create
+Line 68:   end
+Line 69:   
+Line 70:   template "/etc/init/unmonitor_zabbix_host.conf" do
+Line 71:     source 'unmonitor_zabbix_host.conf.erb'
+Line 72:     action :create
+Line 73:   end
+Line 74: end
+Line 75: 
+Line 76: link "/usr/local/bin/zabbix_sender" do
+Line 77:   to "/opt/zabbix/bin/zabbix_sender"
+Line 78: end
+Line 79: 
+Line 80: announce(:zabbix, :agent,
+Line 81:          # register in the same realm, for discovery purposes
+Line 82:          :realm => discovery_realm(:zabbix, :server), 
+Line 83:          :logs  => { :agent => node.zabbix.agent.log_dir },
+Line 84:          :ports => { :agent => {
+Line 85:              :port    => 10051,
+Line 86:              :monitor => false
+Line 87:            }
+Line 88:          },
+Line 89:          :daemons => { :agent => 'zabbix_agentd' }
+Line 90:          )
+Line 91: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

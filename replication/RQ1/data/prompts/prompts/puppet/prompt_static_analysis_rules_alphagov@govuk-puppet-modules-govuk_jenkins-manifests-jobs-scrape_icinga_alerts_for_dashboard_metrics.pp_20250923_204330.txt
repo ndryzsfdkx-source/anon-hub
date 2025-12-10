@@ -1,0 +1,165 @@
+# CONSTRUCTED PROMPT
+# File: alphagov@govuk-puppet-modules-govuk_jenkins-manifests-jobs-scrape_icinga_alerts_for_dashboard_metrics.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.631378
+# Length: 6020 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: alphagov@govuk-puppet-modules-govuk_jenkins-manifests-jobs-scrape_icinga_alerts_for_dashboard_metrics.pp (Puppet)**
+
+
+Line 1: # == Class: govuk_jenkins::jobs::scrape_icinga_alerts_for_dashboard_metrics
+Line 2: #
+Line 3: #This is run monthly to call a script that scrapes hard alerts from Icinga, and stored in a Google sheet.
+Line 4: #The data is used by the Platform Health dashboard to display metrics about our apps.
+Line 5: #
+Line 6: # === Parameters
+Line 7: #
+Line 8: # [*private_key_id*]
+Line 9: #   Specific to access the Google API.
+Line 10: #
+Line 11: # [*private_key*]
+Line 12: #   Specific to access the Google API.
+Line 13: #
+Line 14: # [*client_email*]
+Line 15: #   Specific to access the Google API.
+Line 16: #
+Line 17: # [*client_id*]
+Line 18: #   Specific to access the Google API.
+Line 19: #
+Line 20: # [*client_x509_cert_url*]
+Line 21: #   Specific to access the Google API.
+Line 22: #
+Line 23: # [*run_monthly*]
+Line 24: #   Set to true if the job should run by itself every month.
+Line 25: #
+Line 26: class govuk_jenkins::jobs::scrape_icinga_alerts_for_dashboard_metrics (
+Line 27:   $project_id = 'gam-project-v3f-sr7-n9p',
+Line 28:   $private_key_id = undef,
+Line 29:   $private_key = undef,
+Line 30:   $client_email = undef,
+Line 31:   $client_id = undef,
+Line 32:   $client_x509_cert_url = undef,
+Line 33:   $enable_slack_notifications = true,
+Line 34:   $slack_auth_token = undef,
+Line 35:   $run_monthly = false,
+Line 36:   $app_domain = hiera('app_domain'),
+Line 37: ) {
+Line 38: 
+Line 39:   $slack_team_domain = 'gds'
+Line 40:   $slack_room = 'platform-health'
+Line 41:   $slack_build_server_url = "https://deploy.${app_domain}/"
+Line 42: 
+Line 43:   file { '/var/lib/jenkins/workspace/scrape_icinga_alerts_for_dashboard_metrics/':
+Line 44:     ensure => directory,
+Line 45:     owner  => 'jenkins',
+Line 46:     group  => 'jenkins',
+Line 47:   }
+Line 48: 
+Line 49:   file { '/var/lib/jenkins/workspace/scrape_icinga_alerts_for_dashboard_metrics/credentials.json':
+Line 50:     ensure  => present,
+Line 51:     content => template('govuk_jenkins/google_api/credentials.json.erb'),
+Line 52:     owner   => 'jenkins',
+Line 53:     group   => 'jenkins',
+Line 54:   }
+Line 55: 
+Line 56:   file { '/etc/jenkins_jobs/jobs/scrape_icinga_alerts_for_dashboard_metrics.yaml':
+Line 57:     ensure  => present,
+Line 58:     content => template('govuk_jenkins/jobs/scrape_icinga_alerts_for_dashboard_metrics.yaml.erb'),
+Line 59:     notify  => Exec['jenkins_jobs_update'],
+Line 60:   }
+Line 61: }
+Line 62: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

@@ -1,0 +1,310 @@
+# CONSTRUCTED PROMPT
+# File: browbeat-ansible-install-roles-fluentd-tasks-main.yml
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.593497
+# Length: 12388 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: browbeat-ansible-install-roles-fluentd-tasks-main.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: #
+Line 3: # Install/run fluentd for browbeat
+Line 4: #
+Line 5: 
+Line 6: - name: Copy fluentd yum repo file
+Line 7:   copy:
+Line 8:     src=fluentd.repo
+Line 9:     dest=/etc/yum.repos.d/fluentd.repo
+Line 10:     owner=root
+Line 11:     group=root
+Line 12:     mode=0644
+Line 13:   become: true
+Line 14: 
+Line 15: - name: Import fluentd GPG Key
+Line 16:   rpm_key:
+Line 17:     key=https://packages.treasuredata.com/GPG-KEY-td-agent
+Line 18:     state=present
+Line 19: 
+Line 20: - name: Install fluentd
+Line 21:   yum: name={{ item }} state=present
+Line 22:   become: true
+Line 23:   with_items:
+Line 24:     - td-agent
+Line 25: 
+Line 26: - name: Setup fluentd configuration files
+Line 27:   template:
+Line 28:     src=td-agent.conf.j2
+Line 29:     dest=/etc/td-agent/td-agent.conf
+Line 30:     owner=root
+Line 31:     group=root
+Line 32:     mode=0644
+Line 33:   become: true
+Line 34:   register: fluentd_needs_restart
+Line 35: 
+Line 36: ### begin firewall settings here ###
+Line 37: # we need TCP/42185 and TCP/9919 open
+Line 38: # determine firewall status and take action
+Line 39: # 1) use firewall-cmd if firewalld is utilized
+Line 40: # 2) insert iptables rule if iptables is used
+Line 41: 
+Line 42: # Firewalld
+Line 43: - name: Determine if firewalld is in use
+Line 44:   shell: systemctl is-enabled firewalld.service | egrep -qv 'masked|disabled'
+Line 45:   ignore_errors: true
+Line 46:   register: firewalld_in_use
+Line 47:   no_log: true
+Line 48:   tags:
+Line 49:     # Skip ANSIBLE0012 Commands should not change things if nothing needs doing
+Line 50:     # Actually need to determine if firewalld is in use.
+Line 51:     - skip_ansible_lint
+Line 52: 
+Line 53: - name: Determine if firewalld is active
+Line 54:   shell: systemctl is-active firewalld.service | grep -vq inactive
+Line 55:   ignore_errors: true
+Line 56:   register: firewalld_is_active
+Line 57:   no_log: true
+Line 58:   tags:
+Line 59:     # Skip ANSIBLE0012 Commands should not change things if nothing needs doing
+Line 60:     # Need to know if firewalld is active.
+Line 61:     - skip_ansible_lint
+Line 62: 
+Line 63: - name: Determine if TCP/{{fluentd_syslog_port}} is already active
+Line 64:   shell: firewall-cmd --list-ports | egrep -q "^{{fluentd_syslog_port}}/tcp"
+Line 65:   ignore_errors: true
+Line 66:   register: firewalld_fluentd_syslog_port_exists
+Line 67:   no_log: true
+Line 68:   tags:
+Line 69:     # Skip ANSIBLE0012 Commands should not change things if nothing needs doing
+Line 70:     # Need to determine is port already in use.
+Line 71:     - skip_ansible_lint
+Line 72: 
+Line 73: # add firewall rule via firewall-cmd
+Line 74: - name: Add firewall rule for TCP/{{fluentd_syslog_port}} (firewalld)
+Line 75:   command: "{{ item }}"
+Line 76:   with_items:
+Line 77:     - firewall-cmd --zone=public --add-port={{fluentd_syslog_port}}/tcp --permanent
+Line 78:     - firewall-cmd --reload
+Line 79:   ignore_errors: true
+Line 80:   become: true
+Line 81:   when: firewalld_in_use.rc == 0 and firewalld_is_active.rc == 0 and firewalld_fluentd_syslog_port_exists.rc != 0
+Line 82: 
+Line 83: # iptables-services
+Line 84: - name: check firewall rules for TCP/{{fluentd_syslog_port}} (iptables-services)
+Line 85:   shell: grep "dport {{fluentd_syslog_port}} \-j ACCEPT" /etc/sysconfig/iptables | wc -l
+Line 86:   ignore_errors: true
+Line 87:   register: iptables_fluentd_syslog_port_exists
+Line 88:   failed_when: iptables_fluentd_syslog_port_exists == 127
+Line 89:   no_log: true
+Line 90:   tags:
+Line 91:     # Skip ANSIBLE0012 Commands should not change things if nothing needs doing
+Line 92:     # Need to check firewall rules.
+Line 93:     - skip_ansible_lint
+Line 94: 
+Line 95: - name: Add firewall rule for TCP/{{fluentd_syslog_port}} (iptables-services)
+Line 96:   lineinfile:
+Line 97:     dest: /etc/sysconfig/iptables
+Line 98:     line: '-A INPUT -p tcp -m tcp --dport {{fluentd_syslog_port}} -j ACCEPT'
+Line 99:     regexp: '^INPUT -i lo -j ACCEPT'
+Line 100:     insertbefore: '-A INPUT -i lo -j ACCEPT'
+Line 101:     backup: yes
+Line 102:   when: firewalld_in_use.rc != 0 and firewalld_is_active.rc != 0 and iptables_fluentd_syslog_port_exists.stdout|int == 0
+Line 103:   register: iptables_needs_restart
+Line 104: 
+Line 105: - name: Restart iptables-services for TCP/{{fluentd_syslog_port}} (iptables-services)
+Line 106:   shell: systemctl restart iptables.service
+Line 107:   ignore_errors: true
+Line 108:   when: iptables_needs_restart != 0 and firewalld_in_use.rc != 0 and firewalld_is_active.rc != 0
+Line 109:   tags:
+Line 110:     # Skip ANSIBLE0013 Use shell only when shell functionality is required
+Line 111:     # No systemctl module available in current stable release (Ansible 2.1)
+Line 112:     - skip_ansible_lint
+Line 113: 
+Line 114: - name: Determine if TCP/{{fluentd_http_port}} is already active
+Line 115:   shell: firewall-cmd --list-ports | egrep -q "^{{fluentd_http_port}}/tcp"
+Line 116:   ignore_errors: true
+Line 117:   register: firewalld_fluentd_http_port_exists
+Line 118:   no_log: true
+Line 119:   tags:
+Line 120:     # Skip ANSIBLE0012 Commands should not change things if nothing needs doing
+Line 121:     # Need to check if port is already active
+Line 122:     - skip_ansible_lint
+Line 123: 
+Line 124: # add firewall rule via firewall-cmd
+Line 125: - name: Add firewall rule for TCP/{{fluentd_http_port}} (firewalld)
+Line 126:   command: "{{ item }}"
+Line 127:   with_items:
+Line 128:     - firewall-cmd --zone=public --add-port={{fluentd_http_port}}/tcp --permanent
+Line 129:     - firewall-cmd --reload
+Line 130:   ignore_errors: true
+Line 131:   become: true
+Line 132:   when: firewalld_in_use.rc == 0 and firewalld_is_active.rc == 0 and firewalld_fluentd_http_port_exists.rc != 0
+Line 133: 
+Line 134: # iptables-services
+Line 135: - name: check firewall rules for TCP/{{fluentd_http_port}} (iptables-services)
+Line 136:   shell: grep "dport {{fluentd_http_port}} \-j ACCEPT" /etc/sysconfig/iptables | wc -l
+Line 137:   ignore_errors: true
+Line 138:   register: iptables_fluentd_http_port_exists
+Line 139:   failed_when: iptables_fluentd_http_port_exists == 127
+Line 140:   no_log: true
+Line 141:   tags:
+Line 142:     # Skip ANSIBLE0012 Commands should not change things if nothing needs doing
+Line 143:     # Need to check if port is already active
+Line 144:     - skip_ansible_lint
+Line 145: 
+Line 146: - name: Add firewall rule for TCP/{{fluentd_http_port}} (iptables-services)
+Line 147:   lineinfile:
+Line 148:     dest: /etc/sysconfig/iptables
+Line 149:     line: '-A INPUT -p tcp -m tcp --dport {{fluentd_http_port}} -j ACCEPT'
+Line 150:     regexp: '^INPUT -i lo -j ACCEPT'
+Line 151:     insertbefore: '-A INPUT -i lo -j ACCEPT'
+Line 152:     backup: yes
+Line 153:   when: firewalld_in_use.rc != 0 and firewalld_is_active.rc != 0 and iptables_fluentd_http_port_exists.stdout|int == 0
+Line 154:   register: iptables_needs_restart
+Line 155: 
+Line 156: - name: Restart iptables-services for TCP/{{fluentd_http_port}} (iptables-services)
+Line 157:   shell: systemctl restart iptables.service
+Line 158:   ignore_errors: true
+Line 159:   when: iptables_needs_restart != 0 and firewalld_in_use.rc != 0 and firewalld_is_active.rc != 0
+Line 160:   tags:
+Line 161:     # Skip ANSIBLE0013 Use shell only when shell functionality is required
+Line 162:     # No systemctl module available in current stable release (Ansible 2.1)
+Line 163:     - skip_ansible_lint
+Line 164: 
+Line 165: ### end firewall settings ###
+Line 166: 
+Line 167: - name: Install fluentd elasticsearch plugin
+Line 168:   gem:
+Line 169:     name=fluent-plugin-elasticsearch
+Line 170:     state=present
+Line 171:     include_dependencies=yes
+Line 172:     user_install=no
+Line 173:     executable=/usr/sbin/td-agent-gem
+Line 174:   become: true
+Line 175:   ignore_errors: false
+Line 176: 
+Line 177: - name: Install fluentd beats plugin
+Line 178:   gem:
+Line 179:     name=fluent-plugin-beats
+Line 180:     state=present
+Line 181:     include_dependencies=yes
+Line 182:     user_install=no
+Line 183:     executable=/usr/sbin/td-agent-gem
+Line 184:   become: true
+Line 185:   ignore_errors: false
+Line 186: 
+Line 187: - name: Load filebeat JSON index template
+Line 188:   uri:
+Line 189:     url: http://localhost:9200/_template/filebeat?pretty
+Line 190:     method: POST
+Line 191:     body: "{{ lookup('file', 'filebeat-index-template.json') }}"
+Line 192:     body_format: json
+Line 193:   ignore_errors: true
+Line 194:   become: true
+Line 195: 
+Line 196: - name: Start fluentd service
+Line 197:   systemd:
+Line 198:     name: td-agent.service
+Line 199:     state: started
+Line 200:   ignore_errors: true
+Line 201:   when: fluentd_needs_restart != 0
+Line 202: 
+Line 203: - name: Setup fluentd service
+Line 204:   service: name=td-agent state=started enabled=true
+Line 205:   become: true
+Line 206: 
+Line 207: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

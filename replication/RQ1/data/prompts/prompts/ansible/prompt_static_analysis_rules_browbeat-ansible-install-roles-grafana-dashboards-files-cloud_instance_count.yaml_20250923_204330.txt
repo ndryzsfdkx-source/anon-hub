@@ -1,0 +1,160 @@
+# CONSTRUCTED PROMPT
+# File: browbeat-ansible-install-roles-grafana-dashboards-files-cloud_instance_count.yaml
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.593784
+# Length: 5633 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: browbeat-ansible-install-roles-grafana-dashboards-files-cloud_instance_count.yaml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: dashboard:
+Line 3:   title: Cloud Instance Count
+Line 4:   templating:
+Line 5:     - name: Cloud
+Line 6:       query: "*"
+Line 7:       refresh: true
+Line 8:       type: query
+Line 9:   time:
+Line 10:     from: now-1h
+Line 11:     to: now
+Line 12:   rows:
+Line 13:     - title: description row
+Line 14:       height: 50px
+Line 15:       panels:
+Line 16:         - title: Browbeat provided Dashboard
+Line 17:           content: "**This dashboard is provided by Browbeat and managed via Grafyaml**"
+Line 18:           type: text
+Line 19:     - title: Instance Count
+Line 20:       height: 250px
+Line 21:       showTitle: true
+Line 22:       panels:
+Line 23:         - title: Total Instances Hosted on Computes for $Cloud
+Line 24:           type: graph
+Line 25:           fill: 0
+Line 26:           legend:
+Line 27:             alignAsTable: true
+Line 28:             avg: true
+Line 29:             current: true
+Line 30:             max: true
+Line 31:             min: true
+Line 32:             rightSide: true
+Line 33:             show: true
+Line 34:             total: false
+Line 35:             values: true
+Line 36:           nullPointMode: 'null'
+Line 37:           targets:
+Line 38:             - target: alias(sumSeries(keepLastValue($Cloud.*.processes-qemu-kvm.ps_count.processes, 100)), 'Sum qemu-kvm processes')
+Line 39:         - title: Instances Hosted on Each Compute for $Cloud
+Line 40:           type: graph
+Line 41:           fill: 0
+Line 42:           legend:
+Line 43:             alignAsTable: true
+Line 44:             avg: true
+Line 45:             current: true
+Line 46:             max: true
+Line 47:             min: true
+Line 48:             rightSide: true
+Line 49:             show: true
+Line 50:             total: false
+Line 51:             values: true
+Line 52:           nullPointMode: 'null'
+Line 53:           stack: true
+Line 54:           targets:
+Line 55:             - target: aliasByNode(keepLastValue($Cloud.*.processes-qemu-kvm.ps_count.processes, 100), 1)
+Line 56: 
+Line 57: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

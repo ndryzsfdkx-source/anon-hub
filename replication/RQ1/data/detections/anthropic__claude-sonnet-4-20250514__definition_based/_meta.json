@@ -1,0 +1,8 @@
+{
+  "source": "llm",
+  "method_key": "anthropic::claude-sonnet-4-20250514::definition_based",
+  "display_name": "claude-sonnet-4.0-definition-based",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-20250514",
+  "style": "definition_based"
+}

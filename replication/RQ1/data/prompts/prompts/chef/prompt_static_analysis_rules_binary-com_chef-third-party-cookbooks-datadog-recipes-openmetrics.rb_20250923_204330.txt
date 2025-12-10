@@ -1,0 +1,289 @@
+# CONSTRUCTED PROMPT
+# File: binary-com_chef-third-party-cookbooks-datadog-recipes-openmetrics.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.611714
+# Length: 12378 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: binary-com_chef-third-party-cookbooks-datadog-recipes-openmetrics.rb (Unknown)**
+
+
+Line 1: include_recipe '::dd-agent'
+Line 2: 
+Line 3: # Monitor OpenMetrics
+Line 4: #
+Line 5: # Here is the description of acceptable attributes:
+Line 6: # node.datadog.openmetrics = {
+Line 7: #   # init_config - required: false
+Line 8: #   "init_config" => {
+Line 9: #     # proxy - required: false  - object
+Line 10: #     "proxy" => {
+Line 11: #       "http" => "http://<PROXY_SERVER_FOR_HTTP>:<PORT>",
+Line 12: #       "https" => "https://<PROXY_SERVER_FOR_HTTPS>:<PORT>",
+Line 13: #       "no_proxy" => [
+Line 14: #         "<HOSTNAME_1>",
+Line 15: #         "<HOSTNAME_2>",
+Line 16: #       ],
+Line 17: #     },
+Line 18: #     # skip_proxy - required: false  - boolean
+Line 19: #     "skip_proxy" => false,
+Line 20: #     # timeout - required: false  - number
+Line 21: #     "timeout" => 10,
+Line 22: #     # service - required: false  - string
+Line 23: #     "service" => nil,
+Line 24: #   },
+Line 25: #   # instances - required: false
+Line 26: #   "instances" => [
+Line 27: #     {
+Line 28: #       # prometheus_url - required: true  - string
+Line 29: #       "prometheus_url" => nil,
+Line 30: #       # namespace - required: true  - string
+Line 31: #       "namespace" => "service",
+Line 32: #       # metrics - required: true  - array of string
+Line 33: #       "metrics" => [
+Line 34: #         "processor:cpu",
+Line 35: #         "memory:mem",
+Line 36: #         "io",
+Line 37: #       ],
+Line 38: #       # prometheus_metrics_prefix - required: false  - string
+Line 39: #       "prometheus_metrics_prefix" => "<PREFIX>_",
+Line 40: #       # health_service_check - required: false  - boolean
+Line 41: #       "health_service_check" => true,
+Line 42: #       # label_to_hostname - required: false  - string
+Line 43: #       "label_to_hostname" => "<LABEL>",
+Line 44: #       # label_joins - required: false  - object
+Line 45: #       "label_joins" => {
+Line 46: #         "target_metric" => {
+Line 47: #           "label_to_match" => "<MATCHED_LABEL>",
+Line 48: #           "labels_to_get" => [
+Line 49: #             "<EXTRA_LABEL_1>",
+Line 50: #             "<EXTRA_LABEL_2>",
+Line 51: #           ],
+Line 52: #         },
+Line 53: #       },
+Line 54: #       # labels_mapper - required: false  - object
+Line 55: #       "labels_mapper" => {
+Line 56: #         "flavor" => "origin",
+Line 57: #       },
+Line 58: #       # type_overrides - required: false  - object
+Line 59: #       "type_overrides" => {
+Line 60: #         "<METRIC_NAME>" => "<METRIC_TYPE>",
+Line 61: #       },
+Line 62: #       # send_histograms_buckets - required: false  - boolean
+Line 63: #       "send_histograms_buckets" => true,
+Line 64: #       # send_distribution_buckets - required: false  - boolean
+Line 65: #       "send_distribution_buckets" => false,
+Line 66: #       # send_monotonic_counter - required: false  - boolean
+Line 67: #       "send_monotonic_counter" => true,
+Line 68: #       # send_monotonic_with_gauge - required: false  - boolean
+Line 69: #       "send_monotonic_with_gauge" => false,
+Line 70: #       # send_distribution_counts_as_monotonic - required: false  - boolean
+Line 71: #       "send_distribution_counts_as_monotonic" => false,
+Line 72: #       # send_distribution_sums_as_monotonic - required: false  - boolean
+Line 73: #       "send_distribution_sums_as_monotonic" => false,
+Line 74: #       # exclude_labels - required: false  - array of string
+Line 75: #       "exclude_labels" => [
+Line 76: #         "timestamp",
+Line 77: #       ],
+Line 78: #       # bearer_token_auth - required: false  - boolean
+Line 79: #       "bearer_token_auth" => false,
+Line 80: #       # bearer_token_path - required: false  - string
+Line 81: #       "bearer_token_path" => "<TOKEN_PATH>",
+Line 82: #       # ignore_metrics - required: false  - array of string
+Line 83: #       "ignore_metrics" => [
+Line 84: #         "<IGNORED_METRIC_NAME>",
+Line 85: #         "<PREFIX_*>",
+Line 86: #         "<*_SUFFIX>",
+Line 87: #         "<PREFIX_*_SUFFIX>",
+Line 88: #         "<*_SUBSTRING_*>",
+Line 89: #       ],
+Line 90: #       # proxy - required: false  - object
+Line 91: #       "proxy" => {
+Line 92: #         "http" => "http://<PROXY_SERVER_FOR_HTTP>:<PORT>",
+Line 93: #         "https" => "https://<PROXY_SERVER_FOR_HTTPS>:<PORT>",
+Line 94: #         "no_proxy" => [
+Line 95: #           "<HOSTNAME_1>",
+Line 96: #           "<HOSTNAME_2>",
+Line 97: #         ],
+Line 98: #       },
+Line 99: #       # skip_proxy - required: false  - boolean
+Line 100: #       "skip_proxy" => false,
+Line 101: #       # auth_type - required: false  - string
+Line 102: #       "auth_type" => "basic",
+Line 103: #       # use_legacy_auth_encoding - required: false  - boolean
+Line 104: #       "use_legacy_auth_encoding" => true,
+Line 105: #       # username - required: false  - string
+Line 106: #       "username" => nil,
+Line 107: #       # password - required: false  - string
+Line 108: #       "password" => nil,
+Line 109: #       # ntlm_domain - required: false  - string
+Line 110: #       "ntlm_domain" => "<NTLM_DOMAIN>\\<USERNAME>",
+Line 111: #       # kerberos_auth - required: false  - string
+Line 112: #       "kerberos_auth" => "disabled",
+Line 113: #       # kerberos_cache - required: false  - string
+Line 114: #       "kerberos_cache" => nil,
+Line 115: #       # kerberos_delegate - required: false  - boolean
+Line 116: #       "kerberos_delegate" => false,
+Line 117: #       # kerberos_force_initiate - required: false  - boolean
+Line 118: #       "kerberos_force_initiate" => false,
+Line 119: #       # kerberos_hostname - required: false  - string
+Line 120: #       "kerberos_hostname" => nil,
+Line 121: #       # kerberos_principal - required: false  - string
+Line 122: #       "kerberos_principal" => nil,
+Line 123: #       # kerberos_keytab - required: false  - string
+Line 124: #       "kerberos_keytab" => "<KEYTAB_FILE_PATH>",
+Line 125: #       # aws_region - required: false  - string
+Line 126: #       "aws_region" => nil,
+Line 127: #       # aws_host - required: false  - string
+Line 128: #       "aws_host" => nil,
+Line 129: #       # aws_service - required: false  - string
+Line 130: #       "aws_service" => nil,
+Line 131: #       # tls_verify - required: false  - boolean
+Line 132: #       "tls_verify" => true,
+Line 133: #       # tls_use_host_header - required: false  - boolean
+Line 134: #       "tls_use_host_header" => false,
+Line 135: #       # tls_ignore_warning - required: false  - boolean
+Line 136: #       "tls_ignore_warning" => false,
+Line 137: #       # tls_cert - required: false  - string
+Line 138: #       "tls_cert" => "<CERT_PATH>",
+Line 139: #       # tls_private_key - required: false  - string
+Line 140: #       "tls_private_key" => "<PRIVATE_KEY_PATH>",
+Line 141: #       # tls_ca_cert - required: false  - string
+Line 142: #       "tls_ca_cert" => "<CA_CERT_PATH>",
+Line 143: #       # headers - required: false  - object
+Line 144: #       "headers" => {
+Line 145: #         "Host" => "<ALTERNATIVE_HOSTNAME>",
+Line 146: #         "X-Auth-Token" => "<AUTH_TOKEN>",
+Line 147: #       },
+Line 148: #       # extra_headers - required: false  - object
+Line 149: #       "extra_headers" => {
+Line 150: #         "Host" => "<ALTERNATIVE_HOSTNAME>",
+Line 151: #         "X-Auth-Token" => "<AUTH_TOKEN>",
+Line 152: #       },
+Line 153: #       # timeout - required: false  - number
+Line 154: #       "timeout" => 10,
+Line 155: #       # connect_timeout - required: false  - number
+Line 156: #       "connect_timeout" => nil,
+Line 157: #       # read_timeout - required: false  - number
+Line 158: #       "read_timeout" => nil,
+Line 159: #       # log_requests - required: false  - boolean
+Line 160: #       "log_requests" => false,
+Line 161: #       # persist_connections - required: false  - boolean
+Line 162: #       "persist_connections" => false,
+Line 163: #       # tags - required: false  - array of string
+Line 164: #       "tags" => [
+Line 165: #         "<KEY_1>:<VALUE_1>",
+Line 166: #         "<KEY_2>:<VALUE_2>",
+Line 167: #       ],
+Line 168: #       # service - required: false  - string
+Line 169: #       "service" => nil,
+Line 170: #       # min_collection_interval - required: false  - number
+Line 171: #       "min_collection_interval" => 15,
+Line 172: #       # empty_default_hostname - required: false  - boolean
+Line 173: #       "empty_default_hostname" => false,
+Line 174: #     },
+Line 175: #   ],
+Line 176: # }
+Line 177: 
+Line 178: datadog_monitor 'openmetrics' do
+Line 179:   init_config node['datadog']['openmetrics']['init_config']
+Line 180:   instances node['datadog']['openmetrics']['instances']
+Line 181:   logs node['datadog']['openmetrics']['logs']
+Line 182:   use_integration_template true
+Line 183:   action :add
+Line 184:   notifies :restart, 'service[datadog-agent]' if node['datadog']['agent_start']
+Line 185: end
+Line 186: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

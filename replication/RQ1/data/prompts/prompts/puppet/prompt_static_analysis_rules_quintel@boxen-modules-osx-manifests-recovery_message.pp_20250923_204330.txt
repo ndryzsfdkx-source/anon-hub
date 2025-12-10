@@ -1,0 +1,174 @@
+# CONSTRUCTED PROMPT
+# File: quintel@boxen-modules-osx-manifests-recovery_message.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.643699
+# Length: 6463 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: quintel@boxen-modules-osx-manifests-recovery_message.pp (Puppet)**
+
+
+Line 1: # Public: Add a recovery message to the OS X Lock Screen
+Line 2: #
+Line 3: # Examples
+Line 4: #
+Line 5: #   osx::recovery_message { 'If this Mac is found, please call 123-123-1234': }
+Line 6: define osx::recovery_message(
+Line 7:   $ensure = 'present',
+Line 8:   $value  = $name,
+Line 9: ) {
+Line 10:   $kextdir     = '/System/Library/Extensions'
+Line 11:   $eficachedir = '/System/Library/Caches/com.apple.corestorage/EFILoginLocalizations'
+Line 12: 
+Line 13:   # The CoreStorage kext cache needs to be updated so the recovery message
+Line 14:   # is displayed on the FDE pre-boot screen.
+Line 15:   #
+Line 16:   # The CS cache can be updated directly by touching $eficachedir, if it exists.
+Line 17:   # Otherwise you will need to touch $kextdir to generate it.
+Line 18:   exec { 'Refresh system kext cache':
+Line 19:       command     => "/usr/bin/touch ${kextdir}",
+Line 20:       creates     => $eficachedir,
+Line 21:       refreshonly => true,
+Line 22:       user        => root
+Line 23:   }
+Line 24: 
+Line 25:   exec { 'Refresh CoreStorage EFI Cache':
+Line 26:       command     => "/usr/bin/touch ${eficachedir}",
+Line 27:       onlyif      => "test -d ${eficachedir}",
+Line 28:       refreshonly => true,
+Line 29:       user        => root
+Line 30:   }
+Line 31: 
+Line 32:   if $ensure == 'present' {
+Line 33:     if $value != undef {
+Line 34:       property_list_key { 'Set OS X Recovery Message':
+Line 35:         ensure => present,
+Line 36:         path   => '/Library/Preferences/com.apple.loginwindow.plist',
+Line 37:         key    => 'LoginwindowText',
+Line 38:         value  => $value,
+Line 39:         notify => [
+Line 40:           Exec['Refresh system kext cache'],
+Line 41:           Exec['Refresh CoreStorage EFI Cache']
+Line 42:         ]
+Line 43:       }
+Line 44: 
+Line 45:       exec { 'Set OS X Recovery Message NVRAM Variable':
+Line 46:         command => "nvram good-samaritan-message='${value}'",
+Line 47:         unless  => "nvram good-samaritan-message | awk -F'\t' '{ print \$2 }' | grep '^${value}$'",
+Line 48:         user    => root
+Line 49:       }
+Line 50:     } else {
+Line 51:       fail('Cannot set an OS X recovery message without a value')
+Line 52:     }
+Line 53:   } else {
+Line 54:     property_list_key { 'Remove OS X Recovery Message':
+Line 55:       ensure => absent,
+Line 56:       path   => '/Library/Preferences/com.apple.loginwindow.plist',
+Line 57:       key    => 'LoginwindowText',
+Line 58:       notify => [
+Line 59:         Exec['Refresh system kext cache'],
+Line 60:         Exec['Refresh CoreStorage EFI Cache']
+Line 61:       ]
+Line 62:     }
+Line 63: 
+Line 64:     exec { 'Remove OS X Recovery Message NVRAM Variable':
+Line 65:       command => 'nvram -d good-samaritan-message',
+Line 66:       onlyif  => 'nvram -p | grep good-samaritan-message',
+Line 67:       user    => root
+Line 68:     }
+Line 69:   }
+Line 70: }
+Line 71: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

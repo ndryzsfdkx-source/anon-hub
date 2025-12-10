@@ -1,0 +1,36 @@
+PATH,LINE,CATEGORY
+ansible-role-systemd_mount-ansible-role-requirements.yaml,2,No integrity check
+ansible-role-tripleo-modify-image-tasks-modify_image.yml,35,Suspicious comment
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,15,Admin by default
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,15,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,16,Empty password
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,47,Admin by default
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,47,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,48,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,56,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,62,Hard-coded secret
+browbeat-ansible-browbeat-roles-gnocchi-config-tasks-main.yml,11,Suspicious comment
+openstack-ansible-inventory-group_vars-ceilometer_all.yml,20,Use of HTTP without SSL/TLS
+openstack-ansible-ops-elk_metrics_6x-roles-elastic_filebeat-tasks-main.yml,46,No integrity check
+openstack-ansible-ops-leap-upgrades-upgrade-utilities-mitaka-playbooks-deploy-config-changes-mitaka.yml,20,Admin by default
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,18,Unrestricted IP Address
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,32,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,53,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,54,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,68,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,69,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,83,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,84,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,96,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,97,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,98,Use of HTTP without SSL/TLS
+openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml,98,Suspicious comment
+openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml,121,Suspicious comment
+openstack-ansible-playbooks-healthcheck-hosts.yml,20,Suspicious comment
+openstack-ansible-playbooks-healthcheck-hosts.yml,23,Suspicious comment
+openstack-ansible-playbooks-healthcheck-hosts.yml,54,No integrity check
+openstack-ansible-playbooks-lxc-containers-destroy.yml,33,Admin by default
+openstack-ansible-playbooks-os-designate-install.yml,22,Admin by default
+openstack-ansible-playbooks-os-tempest-install.yml,19,Admin by default
+openstack-ansible-playbooks-utility-install.yml,18,Admin by default
+openstack-ansible-playbooks-utility-install.yml,82,No integrity check

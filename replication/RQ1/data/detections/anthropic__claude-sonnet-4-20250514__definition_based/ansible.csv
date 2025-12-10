@@ -1,0 +1,60 @@
+PATH,LINE,CATEGORY
+ansible-role-systemd_mount-ansible-role-requirements.yaml,2,Use of HTTP without SSL/TLS
+ansible-role-systemd_mount-vars-main.yml,8,Use of HTTP without SSL/TLS
+ansible-role-systemd_networkd-zuul.d-project.yaml,7,Use of HTTP without SSL/TLS
+ansible-role-tripleo-modify-image-tasks-modify_image.yml,35,Suspicious comment
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,16,Empty password
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,47,Admin by default
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,48,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,56,Hard-coded secret
+bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml,62,Hard-coded secret
+browbeat-ansible-install-roles-epel-defaults-main.yml,2,Use of HTTP without SSL/TLS
+browbeat-ansible-install-roles-epel-defaults-main.yml,3,Use of HTTP without SSL/TLS
+browbeat-ansible-install-roles-fluentd-tasks-main.yml,17,Use of HTTP without SSL/TLS
+browbeat-ansible-install-roles-fluentd-tasks-main.yml,189,Use of HTTP without SSL/TLS
+openstack-ansible-inventory-group_vars-ceilometer_all.yml,20,Use of HTTP without SSL/TLS
+openstack-ansible-ops-elk_metrics_6x-roles-elastic_filebeat-tasks-main.yml,46,No integrity check
+openstack-ansible-ops-elk_metrics_6x-tests-ansible-role-requirements.yml,4,Use of HTTP without SSL/TLS
+openstack-ansible-ops-elk_metrics_6x-tests-ansible-role-requirements.yml,8,Use of HTTP without SSL/TLS
+openstack-ansible-ops-elk_metrics_6x-tests-ansible-role-requirements.yml,12,Use of HTTP without SSL/TLS
+openstack-ansible-ops-elk_metrics_6x-tests-ansible-role-requirements.yml,16,Use of HTTP without SSL/TLS
+openstack-ansible-ops-elk_metrics_6x-tests-ansible-role-requirements.yml,20,Use of HTTP without SSL/TLS
+openstack-ansible-ops-elk_metrics_6x-tests-ansible-role-requirements.yml,24,Use of HTTP without SSL/TLS
+openstack-ansible-ops-elk_metrics_6x-tests-ansible-role-requirements.yml,28,Use of HTTP without SSL/TLS
+openstack-ansible-ops-elk_metrics_6x-tests-ansible-role-requirements.yml,32,Use of HTTP without SSL/TLS
+openstack-ansible-ops-leap-upgrades-upgrade-utilities-mitaka-playbooks-deploy-config-changes-mitaka.yml,20,Admin by default
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,18,Unrestricted IP Address
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,24,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,28,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,32,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,53,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,54,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,57,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,60,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,68,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,69,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,72,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,75,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,83,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,84,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,87,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,90,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,96,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,97,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,98,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,102,Use of HTTP without SSL/TLS
+openstack-ansible-ops-multi-node-aio-playbooks-group_vars-all.yml,105,Use of HTTP without SSL/TLS
+openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml,98,Suspicious comment
+openstack-ansible-playbooks-common-tasks-os-lxc-container-setup.yml,121,Suspicious comment
+openstack-ansible-playbooks-healthcheck-hosts.yml,20,Suspicious comment
+openstack-ansible-playbooks-healthcheck-hosts.yml,23,Suspicious comment
+openstack-ansible-playbooks-lxc-containers-destroy.yml,33,Admin by default
+openstack-ansible-playbooks-os-designate-install.yml,8,Use of HTTP without SSL/TLS
+openstack-ansible-playbooks-os-designate-install.yml,22,Admin by default
+openstack-ansible-playbooks-os-tempest-install.yml,19,Admin by default
+openstack-ansible-playbooks-utility-install.yml,18,Admin by default
+openstack-ansible-playbooks-utility-install.yml,70,Admin by default
+openstack-ansible-playbooks-utility-install.yml,72,Admin by default
+openstack-ansible-tests-roles-bootstrap-host-defaults-main.yml,200,Unrestricted IP Address
+puppet-openstack-integration-playbooks-prepare-node-unit.yaml,27,Use of HTTP without SSL/TLS
+tripleo-quickstart-roles-libvirt-setup-overcloud-tasks-vars-libvirt_nodepool_vars.yml,21,Use of HTTP without SSL/TLS

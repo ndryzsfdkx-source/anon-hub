@@ -1,0 +1,198 @@
+# CONSTRUCTED PROMPT
+# File: openstack-ansible-playbooks-utility-install.yml
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.347628
+# Length: 9319 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack-ansible-playbooks-utility-install.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: # Copyright 2014, Rackspace US, Inc.
+Line 3: #
+Line 4: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 5: # you may not use this file except in compliance with the License.
+Line 6: # You may obtain a copy of the License at
+Line 7: #
+Line 8: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 9: #
+Line 10: # Unless required by applicable law or agreed to in writing, software
+Line 11: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 12: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 13: # See the License for the specific language governing permissions and
+Line 14: # limitations under the License.
+Line 15: 
+Line 16: - name: Setup the utility location(s)
+Line 17:   hosts: utility_all
+Line 18:   user: root
+Line 19:   gather_facts: "{{ osa_gather_facts | default(True) }}"
+Line 20:   environment: "{{ deployment_environment_variables | default({}) }}"
+Line 21:   vars_files:
+Line 22:     - "defaults/{{ install_method }}_install.yml"
+Line 23:   tags:
+Line 24:     - utility
+Line 25:   pre_tasks:
+Line 26:     - include: "common-tasks/os-{{ container_tech | default('lxc') }}-container-setup.yml"
+Line 27:       static: no
+Line 28:       when: not is_metal
+Line 29: 
+Line 30:     - include: common-tasks/os-log-dir-setup.yml
+Line 31:       vars:
+Line 32:         log_dirs:
+Line 33:           - src: "/openstack/log/{{ inventory_hostname }}-utility"
+Line 34:             dest: "/var/log/utility"
+Line 35: 
+Line 36:     - include: common-tasks/unbound-clients.yml
+Line 37:       static: no
+Line 38:       when:
+Line 39:         - hostvars['localhost']['resolvconf_enabled'] | bool
+Line 40: 
+Line 41:     - name: Create log directory (not is_metal)
+Line 42:       file:
+Line 43:         dest: "/var/log/utility"
+Line 44:         state: "directory"
+Line 45:         force: "yes"
+Line 46:       when: not is_metal | bool
+Line 47: 
+Line 48:   roles:
+Line 49:     - role: "galera_client"
+Line 50:     - role: "openstack_openrc"
+Line 51:       tags:
+Line 52:         - openrc
+Line 53: 
+Line 54:   post_tasks:
+Line 55:     - name: Add OpenStack client to distro packages
+Line 56:       set_fact:
+Line 57:         utility_distro_packages: "{{ (utility_distro_packages | default([])) + utility_distro_openstack_clients_packages }}"
+Line 58:       when: install_method == "distro"
+Line 59: 
+Line 60:     - name: Install distro packages
+Line 61:       package:
+Line 62:         name: "{{ utility_distro_packages | default([]) }}"
+Line 63:         state: "{{ utility_package_state }}"
+Line 64:         update_cache: "{{ (ansible_pkg_mgr in ['apt', 'zypper']) | ternary('yes', omit) }}"
+Line 65:         cache_valid_time: "{{ (ansible_pkg_mgr == 'apt') | ternary(cache_timeout, omit) }}"
+Line 66: 
+Line 67:     - name: Distribute private ssh key
+Line 68:       copy:
+Line 69:         content: "{{ utility_ssh_private_key }}"
+Line 70:         dest: /root/.ssh/id_rsa
+Line 71:         mode: 0600
+Line 72:         owner: root
+Line 73:         group: root
+Line 74:       when: utility_ssh_private_key is defined
+Line 75: 
+Line 76:     - name: Install openstack clients (source-based install)
+Line 77:       when:
+Line 78:         - install_method == "source"
+Line 79:       block:
+Line 80:         - name: Get list of repo packages
+Line 81:           uri:
+Line 82:             url: "{{ repo_release_path }}/requirements_absolute_requirements.txt"
+Line 83:             return_content: yes
+Line 84:           register: _abs_reqs
+Line 85:           run_once: true
+Line 86:           tags:
+Line 87:             - always
+Line 88: 
+Line 89:         - name: Derive the list of openstack clients
+Line 90:           set_fact:
+Line 91:             _openstack_client_list: >-
+Line 92:               {%- set package_list = [] %}
+Line 93:               {%- for l in _abs_reqs.content.split('\n') %}
+Line 94:               {%-   if (l is match('^python_.*client==.*$')) or (l is match('^(aodh|gnocchi)client==.*$')) %}
+Line 95:               {%-     set _ = package_list.append(l | regex_replace('==.*$', '')) %}
+Line 96:               {%-   endif %}
+Line 97:               {%- endfor %}
+Line 98:               {{- package_list }}
+Line 99:           run_once: true
+Line 100:           tags:
+Line 101:             - always
+Line 102: 
+Line 103:         - name: Install the python venv
+Line 104:           include_role:
+Line 105:             name: "python_venv_build"
+Line 106:             private: yes
+Line 107:           vars:
+Line 108:             venv_install_destination_path: "{{ utility_venv_bin | dirname }}"
+Line 109:             venv_pip_install_args: >-
+Line 110:               {{ (pip_install_upper_constraints is defined) | ternary('--constraint ' + pip_install_upper_constraints | default(''),'') }}
+Line 111:               {{ pip_install_options | default('') }}
+Line 112:             venv_pip_packages: "{{ _openstack_client_list | union(utility_pip_packages) }}"
+Line 113: 
+Line 114:         - name: Create symlinks for openstack clients
+Line 115:           shell: |
+Line 116:             {% set _bin_name = item | regex_replace('^(?:python_)?(\w*)(?:client)$', '\\1') %}
+Line 117:             if [[ -e "{{ utility_venv_bin }}/{{ _bin_name }}" ]]; then
+Line 118:               ln -sfn {{ utility_venv_bin }}/{{ _bin_name }} /usr/local/bin/{{ _bin_name }}
+Line 119:             fi
+Line 120:           args:
+Line 121:             executable: /bin/bash
+Line 122:           with_items: "{{ _openstack_client_list }}"
+Line 123: 
+Line 124:         - name: Create openstack client bash_completion script
+Line 125:           shell: |
+Line 126:              openstack complete > /etc/bash_completion.d/openstack_client
+Line 127: 
+Line 128: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

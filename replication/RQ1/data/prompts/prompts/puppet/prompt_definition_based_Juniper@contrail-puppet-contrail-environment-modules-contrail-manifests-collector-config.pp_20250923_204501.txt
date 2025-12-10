@@ -1,0 +1,261 @@
+# CONSTRUCTED PROMPT
+# File: Juniper@contrail-puppet-contrail-environment-modules-contrail-manifests-collector-config.pp
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.374544
+# Length: 15183 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: Juniper@contrail-puppet-contrail-environment-modules-contrail-manifests-collector-config.pp (Puppet)**
+
+
+Line 1: class contrail::collector::config (
+Line 2:     $host_control_ip = $::contrail::params::host_ip,
+Line 3:     $database_ip_list = $::contrail::params::database_ip_list,
+Line 4:     $database_ip_port = $::contrail::params::database_ip_port,
+Line 5:     $collector_ip_list = $::contrail::params::collector_ip_list,
+Line 6:     $collector_ip_port_list = $::contrail::params::collector_ip_port_list,
+Line 7:     $analytics_data_ttl = $::contrail::params::analytics_data_ttl,
+Line 8:     $analytics_config_audit_ttl = $::contrail::params::analytics_config_audit_ttl,
+Line 9:     $analytics_statistics_ttl = $::contrail::params::analytics_statistics_ttl,
+Line 10:     $analytics_flow_ttl = $::contrail::params::analytics_flow_ttl,
+Line 11:     $snmp_scan_frequency = $::contrail::params::snmp_scan_frequency,
+Line 12:     $snmp_fast_scan_frequency = $::contrail::params::snmp_fast_scan_frequency,
+Line 13:     $topology_scan_frequency = $::contrail::params::topology_scan_frequency,
+Line 14:     $zookeeper_ip_list = $::contrail::params::zk_ip_list_to_use,
+Line 15:     $zk_ip_port = $::contrail::params::zk_ip_port,
+Line 16:     $analytics_syslog_port = $::contrail::params::analytics_syslog_port,
+Line 17:     $redis_password = $::contrail::params::redis_password,
+Line 18:     $config_ip_list = $::contrail::params::config_ip_list,
+Line 19:     $config_ip_to_use = $::contrail::params::config_ip_to_use,
+Line 20:     $contrail_logoutput = $::contrail::params::contrail_logoutput,
+Line 21:     $contrail_rabbit_servers= $::contrail::params::contrail_rabbit_servers,
+Line 22:     $rabbit_use_ssl     = $::contrail::params::rabbit_ssl_support,
+Line 23:     $kombu_ssl_ca_certs = $::contrail::params::kombu_ssl_ca_certs,
+Line 24:     $kombu_ssl_certfile = $::contrail::params::kombu_ssl_certfile,
+Line 25:     $kombu_ssl_keyfile  = $::contrail::params::kombu_ssl_keyfile,
+Line 26:     $redis_config_file = $::contrail::params::redis_config_file,
+Line 27:     $host_roles = $::contrail::params::host_roles,
+Line 28: ) {
+Line 29: 
+Line 30:     $rest_api_port_to_use = $::contrail::params::rest_api_port_to_use
+Line 31:      ## Cassandra Port for Cql has been changed to 9042.
+Line 32:     $database_ip_port_list = suffix($database_ip_list, ":9042")
+Line 33:     $cassandra_server_list = join($database_ip_port_list, ' ' )
+Line 34: 
+Line 35:     $redis_ip_port_list = suffix($collector_ip_list, ":6379")
+Line 36:     $redis_server_list = join($redis_ip_port_list, ' ')
+Line 37: 
+Line 38:     $kafka_broker_port_list = suffix($database_ip_list, ':9092')
+Line 39:     $kafka_broker_list =  join($kafka_broker_port_list, ' ')
+Line 40: 
+Line 41:     $zookeeper_ip_port_list = suffix($zookeeper_ip_list, ":$zk_ip_port")
+Line 42:     $zk_ip_list = join($zookeeper_ip_port_list, ',')
+Line 43: 
+Line 44:     $api_server_ip_port_list = suffix($config_ip_list, ":8082")
+Line 45:     $api_server_list = join($api_server_ip_port_list, ' ')
+Line 46: 
+Line 47:     $analytics_api_server_to_use = "${config_ip_to_use}:8082"
+Line 48: 
+Line 49:     $redis_augeas_lens_to_use = 'spacevars.lns'
+Line 50: 
+Line 51:     if ($redis_password != "" ) {
+Line 52:         $redis_config = { 'redis_conf' => { 'requirepass' => $redis_password,},}
+Line 53:         contrail_analytics_api_config { 'REDIS/redis_password' : value => $redis_password; } ->
+Line 54:         contrail_collector_config { 'REDIS/password': value => $redis_password; } ->
+Line 55:         contrail_query_engine_config { 'REDIS/password': value => $redis_password; } ->
+Line 56:         contrail::lib::augeas_conf_set { 'redis_conf_keys':
+Line 57:              config_file => $redis_config_file,
+Line 58:              settings_hash => $redis_config['redis_conf'],
+Line 59:              lens_to_use => $redis_augeas_lens_to_use,
+Line 60:         } ->
+Line 61:         Contrail::Lib::Augeas_conf_rm["remove_bind"]
+Line 62:     } else {
+Line 63:         contrail_analytics_api_config { 'REDIS/redis_password' : ensure => absent; } ->
+Line 64:         contrail_collector_config { 'REDIS/password': ensure => absent; } ->
+Line 65:         contrail_query_engine_config { 'REDIS/password': ensure => absent; } ->
+Line 66:         Contrail::Lib::Augeas_conf_rm["remove_bind"]
+Line 67:     }
+Line 68: 
+Line 69:     contrail_analytics_api_config {
+Line 70:       'DEFAULTS/host_ip'          : value => $host_control_ip;
+Line 71:       'DEFAULTS/cassandra_server_list': value => "$cassandra_server_list";
+Line 72:       'DEFAULTS/rest_api_port'    : value => $rest_api_port_to_use;
+Line 73:       'DEFAULTS/http_server_port' : value => '8090';
+Line 74:       'DEFAULTS/rest_api_ip'      : value => '0.0.0.0';
+Line 75:       'DEFAULTS/log_local'        : value => '1';
+Line 76:       'DEFAULTS/log_level'        : value => 'SYS_NOTICE';
+Line 77:       'DEFAULTS/log_file'         : value => '/var/log/contrail/contrail-analytics-api.log';
+Line 78:       'DEFAULTS/analytics_data_ttl' : value => $analytics_data_ttl;
+Line 79:       'DEFAULTS/analytics_config_audit_ttl' : value => $analytics_config_audit_ttl;
+Line 80:       'DEFAULTS/analytics_statistics_ttl'   : value => $analytics_statistics_ttl;
+Line 81:       'DEFAULTS/analytics_flow_ttl' : value => $analytics_flow_ttl;
+Line 82:       'DEFAULTS/aaa_mode' : value => 'rbac';
+Line 83:       'DEFAULTS/api_server' : value => $analytics_api_server_to_use;
+Line 84:       'DEFAULTS/zk_list'           : value => $zk_ip_list;
+Line 85:       'DEFAULTS/collectors'        : value => $collector_ip_port_list;
+Line 86:       'REDIS/redis_query_port'     : value => '6379';
+Line 87:       'REDIS/redis_uve_list'       : value => $redis_server_list;
+Line 88:     } ->
+Line 89: 
+Line 90:     contrail_query_engine_config {
+Line 91:       'DEFAULT/hostip'          : value => $host_control_ip;
+Line 92:       'DEFAULT/cassandra_server_list'       : value => "$cassandra_server_list";
+Line 93:       'DEFAULT/log_local'        : value => '1';
+Line 94:       'DEFAULT/log_level'        : value => 'SYS_NOTICE';
+Line 95:       'DEFAULT/log_file'         : value => '/var/log/contrail/contrail-query-engine.log';
+Line 96:       'DEFAULT/collectors'       : value => $collector_ip_port_list;
+Line 97:       'REDIS/port'               : value => '6379';
+Line 98:       'REDIS/server'             : value => '127.0.0.1';
+Line 99:     } ->
+Line 100: 
+Line 101:     contrail_collector_config {
+Line 102:       'DEFAULT/hostip'          : value => $host_control_ip;
+Line 103:       'DEFAULT/cassandra_server_list'       : value => "$cassandra_server_list";
+Line 104:       'DEFAULT/zookeeper_server_list'       : value => "$zk_ip_list";
+Line 105:       'DEFAULT/kafka_broker_list': value => "$kafka_broker_list";
+Line 106:       'DEFAULT/syslog_port'      : value => $analytics_syslog_port;
+Line 107:       'DEFAULT/http_server_port' : value => '8089';
+Line 108:       'DEFAULT/log_local'        : value => '1';
+Line 109:       'DEFAULT/log_level'        : value => 'SYS_NOTICE';
+Line 110:       'DEFAULT/log_file'         : value => '/var/log/contrail/contrail-collector.log';
+Line 111:       'DEFAULT/analytics_data_ttl' : value => $analytics_data_ttl;
+Line 112:       'DEFAULT/analytics_config_audit_ttl' : value => $analytics_config_audit_ttl;
+Line 113:       'DEFAULT/analytics_statistics_ttl'   : value => $analytics_statistics_ttl;
+Line 114:       'DEFAULT/analytics_flow_ttl' : value => $analytics_flow_ttl;
+Line 115:       'COLLECTOR/port'           : value => '8086';
+Line 116:       'API_SERVER/api_server_list'  : value => $api_server_list;
+Line 117:       'REDIS/port'               : value => '6379';
+Line 118:       'REDIS/server'             : value => '127.0.0.1';
+Line 119:     } ->
+Line 120: 
+Line 121:     contrail_snmp_collector_config {
+Line 122:       'DEFAULTS/zookeeper'          : value => "$zk_ip_list";
+Line 123:       'DEFAULTS/log_local'          : value => '1';
+Line 124:       'DEFAULTS/log_level'          : value => 'SYS_NOTICE';
+Line 125:       'DEFAULTS/log_file'           : value => '/var/log/contrail/contrail-snmp-collector.log';
+Line 126:       'DEFAULTS/scan_frequency'     : value => $snmp_scan_frequency;
+Line 127:       'DEFAULTS/fast_scan_frequency': value => $snmp_fast_scan_frequency;
+Line 128:       'DEFAULTS/http_server_port'   : value => '5920';
+Line 129:       'DEFAULTS/collectors'         : value => $collector_ip_port_list;
+Line 130:       'API_SERVER/api_server_list'  : value => $api_server_list;
+Line 131:     } ->
+Line 132: 
+Line 133:     contrail_analytics_nodemgr_config {
+Line 134:       'COLLECTOR/server_list': value => $collector_ip_port_list;
+Line 135:     } ->
+Line 136: 
+Line 137:     contrail_alarm_gen_config {
+Line 138:       'DEFAULTS/host_ip'            : value => $host_control_ip;
+Line 139:       'DEFAULTS/zk_list'            : value => "$zk_ip_list";
+Line 140:       'DEFAULTS/kafka_broker_list'  : value => "$kafka_broker_list";
+Line 141:       'DEFAULTS/rabbitmq_server_list' : value => "$contrail_rabbit_servers";
+Line 142:       'DEFAULTS/rabbitmq_use_ssl'     : value => $rabbit_use_ssl;
+Line 143:       'DEFAULTS/kombu_ssl_ca_certs' : value => $kombu_ssl_ca_certs;
+Line 144:       'DEFAULTS/kombu_ssl_certfile' : value => $kombu_ssl_certfile;
+Line 145:       'DEFAULTS/kombu_ssl_keyfile'  : value => $kombu_ssl_keyfile;
+Line 146:       'DEFAULTS/http_server_port'   : value => '5995';
+Line 147:       'DEFAULTS/log_local'          : value => '1';
+Line 148:       'DEFAULTS/log_level'          : value => 'SYS_NOTICE';
+Line 149:       'DEFAULTS/log_file'           : value => '/var/log/contrail/contrail-alarm-gen.log';
+Line 150:       'DEFAULTS/collectors'         : value => $collector_ip_port_list;
+Line 151:       'REDIS/redis_uve_list'        : value => $redis_server_list;
+Line 152:       'API_SERVER/api_server_list'  : value => $api_server_list;
+Line 153:     } ->
+Line 154: 
+Line 155:     contrail_topology_config {
+Line 156:       'DEFAULTS/zookeeper'          : value => "$zk_ip_list";
+Line 157:       'DEFAULTS/log_local'          : value => '1';
+Line 158:       'DEFAULTS/log_level'          : value => 'SYS_NOTICE';
+Line 159:       'DEFAULTS/log_file'           : value => '/var/log/contrail/contrail-topology.log';
+Line 160:       'DEFAULTS/scan_frequency'     : value => $topology_scan_frequency;
+Line 161:       'DEFAULTS/collectors'         : value => $collector_ip_port_list;
+Line 162:       'API_SERVER/api_server_list'  : value => $api_server_list;
+Line 163:     } ->
+Line 164: 
+Line 165:     contrail::lib::augeas_conf_rm { "remove_bind":
+Line 166:                 key => 'bind',
+Line 167:                 config_file => $redis_config_file,
+Line 168:                 lens_to_use => $redis_augeas_lens_to_use,
+Line 169:     } ->
+Line 170:     contrail::lib::augeas_conf_rm { "remove_save":
+Line 171:                 key => 'save',
+Line 172:                 config_file => $redis_config_file,
+Line 173:                 lens_to_use => $redis_augeas_lens_to_use,
+Line 174:     } ->
+Line 175:     contrail::lib::augeas_conf_rm { "remove_dbfilename":
+Line 176:                 key => 'dbfilename',
+Line 177:                 config_file => $redis_config_file,
+Line 178:                 lens_to_use => $redis_augeas_lens_to_use,
+Line 179:     } ->
+Line 180: 
+Line 181:     file { '/etc/snmp':
+Line 182:        ensure  => directory,
+Line 183:     } ->
+Line 184:     file { '/etc/snmp/snmp.conf':
+Line 185:       content => 'mibs +ALL'
+Line 186:     }
+Line 187:     if (!('config' in $host_roles)) {
+Line 188:         contain ::contrail::keystone
+Line 189:     }
+Line 190: }
+Line 191: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

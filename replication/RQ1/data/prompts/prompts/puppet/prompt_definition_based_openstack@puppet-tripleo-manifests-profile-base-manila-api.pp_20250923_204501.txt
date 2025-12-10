@@ -1,0 +1,206 @@
+# CONSTRUCTED PROMPT
+# File: openstack@puppet-tripleo-manifests-profile-base-manila-api.pp
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.395210
+# Length: 9982 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: openstack@puppet-tripleo-manifests-profile-base-manila-api.pp (Puppet)**
+
+
+Line 1: # Copyright 2016 Red Hat, Inc.
+Line 2: #
+Line 3: # Licensed under the Apache License, Version 2.0 (the "License"); you may
+Line 4: # not use this file except in compliance with the License. You may obtain
+Line 5: # a copy of the License at
+Line 6: #
+Line 7: #      http://www.apache.org/licenses/LICENSE-2.0
+Line 8: #
+Line 9: # Unless required by applicable law or agreed to in writing, software
+Line 10: # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+Line 11: # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+Line 12: # License for the specific language governing permissions and limitations
+Line 13: # under the License.
+Line 14: #
+Line 15: # == Class: tripleo::profile::base::manila::api
+Line 16: #
+Line 17: # Manila API profile for tripleo
+Line 18: #
+Line 19: # === Parameters
+Line 20: #
+Line 21: # [*backend_generic_enabled*]
+Line 22: #   (Optional) Whether or not the generic backend is enabled
+Line 23: #   Defaults to hiera('manila_backend_generic_enabled', false)
+Line 24: #
+Line 25: # [*backend_netapp_enabled*]
+Line 26: #   (Optional) Whether or not the netapp backend is enabled
+Line 27: #   Defaults to hiera('manila_backend_netapp_enabled', false)
+Line 28: #
+Line 29: # [*backend_vmax_enabled*]
+Line 30: #   (Optional) Whether or not the vmax backend is enabled
+Line 31: #   Defaults to hiera('manila_backend_vmax_enabled', false)
+Line 32: #
+Line 33: # [*backend_isilon_enabled*]
+Line 34: #   (Optional) Whether or not the isilon backend is enabled
+Line 35: #   Defaults to hiera('manila_backend_isilon_enabled', false)
+Line 36: #
+Line 37: # [*backend_unity_enabled*]
+Line 38: #   (Optional) Whether or not the unity backend is enabled
+Line 39: #   Defaults to hiera('manila_backend_unity_enabled', false)
+Line 40: #
+Line 41: # [*backend_vnx_enabled*]
+Line 42: #   (Optional) Whether or not the vnx backend is enabled
+Line 43: #   Defaults to hiera('manila_backend_vnx_enabled', false)
+Line 44: #
+Line 45: # [*backend_cephfs_enabled*]
+Line 46: #   (Optional) Whether or not the cephfs backend is enabled
+Line 47: #   Defaults to hiera('manila_backend_cephfs_enabled', false)
+Line 48: #
+Line 49: # [*bootstrap_node*]
+Line 50: #   (Optional) The hostname of the node responsible for bootstrapping tasks
+Line 51: #   Defaults to hiera('manila_api_short_bootstrap_node_name')
+Line 52: #
+Line 53: # [*certificates_specs*]
+Line 54: #   (Optional) The specifications to give to certmonger for the certificate(s)
+Line 55: #   it will create.
+Line 56: #   Example with hiera:
+Line 57: #     apache_certificates_specs:
+Line 58: #       httpd-internal_api:
+Line 59: #         hostname: <overcloud controller fqdn>
+Line 60: #         service_certificate: <service certificate path>
+Line 61: #         service_key: <service key path>
+Line 62: #         principal: "haproxy/<overcloud controller fqdn>"
+Line 63: #   Defaults to hiera('apache_certificate_specs', {}).
+Line 64: #
+Line 65: # [*manila_api_network*]
+Line 66: #   (Optional) The network name where the manila API endpoint is listening on.
+Line 67: #   This is set by t-h-t.
+Line 68: #   Defaults to hiera('manila_api_network', undef)
+Line 69: #
+Line 70: # [*enable_internal_tls*]
+Line 71: #   (Optional) Whether TLS in the internal network is enabled or not.
+Line 72: #   Defaults to hiera('enable_internal_tls', false)
+Line 73: #
+Line 74: # [*step*]
+Line 75: #   (Optional) The current step in deployment. See tripleo-heat-templates
+Line 76: #   for more details.
+Line 77: #   Defaults to hiera('step')
+Line 78: 
+Line 79: class tripleo::profile::base::manila::api (
+Line 80:   $backend_generic_enabled = hiera('manila_backend_generic_enabled', false),
+Line 81:   $backend_netapp_enabled  = hiera('manila_backend_netapp_enabled', false),
+Line 82:   $backend_vmax_enabled    = hiera('manila_backend_vmax_enabled', false),
+Line 83:   $backend_isilon_enabled  = hiera('manila_backend_isilon_enabled', false),
+Line 84:   $backend_unity_enabled   = hiera('manila_backend_unity_enabled', false),
+Line 85:   $backend_vnx_enabled     = hiera('manila_backend_vnx_enabled', false),
+Line 86:   $backend_cephfs_enabled  = hiera('manila_backend_cephfs_enabled', false),
+Line 87:   $bootstrap_node          = hiera('manila_api_short_bootstrap_node_name', undef),
+Line 88:   $certificates_specs      = hiera('apache_certificates_specs', {}),
+Line 89:   $manila_api_network      = hiera('manila_api_network', undef),
+Line 90:   $enable_internal_tls     = hiera('enable_internal_tls', false),
+Line 91:   $step                    = Integer(hiera('step')),
+Line 92: ) {
+Line 93:   if $::hostname == downcase($bootstrap_node) {
+Line 94:     $sync_db = true
+Line 95:   } else {
+Line 96:     $sync_db = false
+Line 97:   }
+Line 98: 
+Line 99:   include ::tripleo::profile::base::manila
+Line 100: 
+Line 101:   if $enable_internal_tls {
+Line 102:     if !$manila_api_network {
+Line 103:       fail('manila_api_network is not set in the hieradata.')
+Line 104:     }
+Line 105:     $tls_certfile = $certificates_specs["httpd-${manila_api_network}"]['service_certificate']
+Line 106:     $tls_keyfile = $certificates_specs["httpd-${manila_api_network}"]['service_key']
+Line 107:   } else {
+Line 108:     $tls_certfile = undef
+Line 109:     $tls_keyfile = undef
+Line 110:   }
+Line 111: 
+Line 112:   if $step >= 4 or ($step >= 3 and $sync_db) {
+Line 113:     include ::tripleo::profile::base::apache
+Line 114:     if $backend_generic_enabled or $backend_netapp_enabled or $backend_vmax_enabled or
+Line 115:       $backend_isilon_enabled or $backend_unity_enabled or $backend_vnx_enabled {
+Line 116:         $nfs_protocol = 'NFS'
+Line 117:         $cifs_protocol = 'CIFS'
+Line 118:     } else {
+Line 119:       $nfs_protocol = undef
+Line 120:       $cifs_protocol = undef
+Line 121:     }
+Line 122:     if $backend_cephfs_enabled {
+Line 123:       $cephfs_protocol = hiera('manila::backend::cephfs::cephfs_protocol_helper_type', 'CEPHFS')
+Line 124:     } else {
+Line 125:       $cephfs_protocol = undef
+Line 126:     }
+Line 127:     class { '::manila::api' :
+Line 128:       enabled_share_protocols => join(delete_undef_values([$nfs_protocol,$cifs_protocol,$cephfs_protocol]), ',')
+Line 129:     }
+Line 130:     class { '::manila::wsgi::apache':
+Line 131:       ssl_cert => $tls_certfile,
+Line 132:       ssl_key  => $tls_keyfile,
+Line 133:     }
+Line 134:   }
+Line 135: }
+Line 136: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

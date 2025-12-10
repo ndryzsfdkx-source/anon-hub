@@ -1,0 +1,216 @@
+# CONSTRUCTED PROMPT
+# File: alphagov@govuk-puppet-modules-govuk_mysql-manifests-server.pp
+# Style: definition_based
+# Timestamp: 2025-09-23T20:45:01.378575
+# Length: 9704 characters
+# ============================================================
+
+You are an expert in Infrastructure-as-Code (IaC) security analysis.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the definitions and patterns described below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DEFINITIONS
+
+1. **Admin by default**: This smell is the recurring pattern of specifying default users as administrative users. The smell can violate the "principle of least privilege" property. We can consider this smell every time more privileges are being given than it should be necessary.
+
+2. **Empty password**: This smell is the recurring pattern of using a string of length zero for a password. An empty password is indicative of a weak password.
+
+3. **Hard-coded secret**: This smell is the recurring pattern of revealing sensitive information, such as user name and passwords in IaC scripts. We consider three types of hard-coded secrets: hard-coded passwords, hard-coded user names, and hard-coded private cryptography keys.
+
+4. **Missing Default in Case Statement**: This smell is the recurring pattern of not handling all input combinations when implementing a case conditional logic.
+
+5. **No integrity check**: This smell is the recurring pattern of downloading content from the Internet and not checking the downloaded content using checksums or gpg signatures. Simply referencing or defining a URL does not count unless an actual download is performed without validation.
+
+6. **Suspicious comment**: This smell is the recurring pattern of putting information in comments about the presence of defects, missing functionality, or weakness of the system. Examples of such comments include putting keywords such as "TODO," "FIXME," and "HACK" in comments.
+
+7. **Unrestricted IP Address**: This smell is the recurring pattern of assigning the address 0.0.0.0 for a database server or a cloud service/instance. Binding to the address 0.0.0.0 may cause security concerns as this address can allow connections from every possible network.
+
+8. **Use of HTTP without SSL/TLS**: This smell is the recurring pattern of using HTTP without the Transport Layer Security (TLS) or Secure Sockets Layer (SSL). Such use makes the communication between two entities less secure, as without SSL/TLS, use of HTTP is susceptible to man-in-the-middle attacks. Do not flag http:// URLs that use local addresses like localhost, 127.0.0.1, or ::1, as these are not security risks.
+
+9. **Use of weak cryptography algorithms**: This smell is the recurring pattern of using weak cryptography algorithms, namely, MD5 and SHA-1, for encryption purposes.
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the definitions above
+   - The problematic code pattern
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: alphagov@govuk-puppet-modules-govuk_mysql-manifests-server.pp (Puppet)**
+
+
+Line 1: # == Class: govuk_mysql::server
+Line 2: #
+Line 3: # This is an abstraction for puppetlabs/mysql to enforce a set of sensible
+Line 4: # defaults and setup associated monitoring.
+Line 5: #
+Line 6: # === Parameters
+Line 7: #
+Line 8: # [*root_password*]
+Line 9: #   Set the MySQL root password.
+Line 10: #
+Line 11: # [*tmp_table_size*]
+Line 12: #   The maximum size of internal in-memory temporary tables.
+Line 13: #
+Line 14: # [*max_heap_table_size*]
+Line 15: #   This variable sets the maximum size to which user-created MEMORY tables
+Line 16: #   are permitted to grow.
+Line 17: #
+Line 18: # [*innodb_file_per_table*]
+Line 19: #   When innodb_file_per_table is enabled (the default), InnoDB stores the data
+Line 20: #   and indexes for each newly created table in a separate .ibd file instead
+Line 21: #   of the system tablespace.
+Line 22: #
+Line 23: # [*key_buffer_size*]
+Line 24: #   MyISAM variable which determines the size of the index buffers held in
+Line 25: #   memory, which affects the speed of index reads.
+Line 26: #
+Line 27: # [*query_cache_limit*]
+Line 28: #   The maximum size of an individual query that can be cached.
+Line 29: #
+Line 30: # [*query_cache_size*]
+Line 31: #   The size of the query cache.
+Line 32: #
+Line 33: # [*expire_log_days*]
+Line 34: #   The number of days for automatic binary log file removal.
+Line 35: #
+Line 36: # [*innodb_flush_log_at_trx_commit*]
+Line 37: #   Controls if the filesystem flushes after every transaction commit.
+Line 38: #   Do not set this to anything other than 1 (default) or 2, except in CI
+Line 39: #   otherwise you risk losing data.
+Line 40: #
+Line 41: # [*slow_query_log*]
+Line 42: #   Set to enable the slow query log.
+Line 43: #
+Line 44: # [*innodb_buffer_pool_size_proportion*]
+Line 45: #   The proportion of machine memory used by the innodb buffer.
+Line 46: #
+Line 47: class govuk_mysql::server (
+Line 48:   $root_password=undef,
+Line 49:   $tmp_table_size='128M',
+Line 50:   $max_heap_table_size='128M',
+Line 51:   $innodb_file_per_table=true,
+Line 52:   $key_buffer_size='16M',
+Line 53:   $query_cache_limit='1M',
+Line 54:   $query_cache_size='128M',
+Line 55:   $expire_log_days=3,
+Line 56:   $innodb_flush_log_at_trx_commit=1,
+Line 57:   $slow_query_log=false,
+Line 58:   $innodb_buffer_pool_size_proportion='0.25',
+Line 59:   ){
+Line 60: 
+Line 61:   $mysql_error_log = '/var/log/mysql/error.log'
+Line 62: 
+Line 63:   # The proportion of memory used by innodb_buffer_pool_size is configurable using hiera
+Line 64:   $innodb_buffer_pool_size = floor($::memorysize_mb * $innodb_buffer_pool_size_proportion * 1024 * 1024)
+Line 65: 
+Line 66:   # This preserves "default" behaviour and prevents us from needing to
+Line 67:   # restart mysqld. But relying on hostname isn't such a good thing.
+Line 68:   $pidfile = "/var/lib/mysql/${::hostname}.pid"
+Line 69: 
+Line 70:   $slow_query_log_value = $slow_query_log ? {
+Line 71:     true  => 'ON',
+Line 72:     false => 'OFF',
+Line 73:   }
+Line 74: 
+Line 75:   $slow_query_log_file = '/var/log/mysql/mysql-slow.log'
+Line 76:   $slow_query_logstream_file = $slow_query_log ? {
+Line 77:     true  => $slow_query_log_file,
+Line 78:     false => false,
+Line 79:   }
+Line 80: 
+Line 81:   $mysql_config = {
+Line 82:     'mysqld'                           => {
+Line 83:       'pid-file'                       => $pidfile,
+Line 84:       'bind-address'                   => '0.0.0.0',
+Line 85:       'server_id'                      => $::govuk_mysql_server_id,
+Line 86:       'innodb_file_per_table'          => $innodb_file_per_table,
+Line 87:       'innodb_buffer_pool_size'        => $innodb_buffer_pool_size,
+Line 88:       'key_buffer_size'                => $key_buffer_size,
+Line 89:       'max_connections'                => '400',
+Line 90:       'max_heap_table_size'            => $max_heap_table_size,
+Line 91:       'myisam_sort_buffer_size'        => '16M',
+Line 92:       'table_cache'                    => '4096',
+Line 93:       'thread_stack'                   => '192K',
+Line 94:       'tmp_table_size'                 => $tmp_table_size,
+Line 95:       'query_cache_size'               => $query_cache_size,
+Line 96:       'query_cache_limit'              => $query_cache_limit,
+Line 97:       'expire_logs_days'               => $expire_log_days,
+Line 98:       'innodb_flush_log_at_trx_commit' => $innodb_flush_log_at_trx_commit,
+Line 99:       'log-queries-not-using-indexes'  => true,
+Line 100:       'log_error'                      => $mysql_error_log,
+Line 101:       'slow_query_log'                 => $slow_query_log_value,
+Line 102:       'slow_query_log_file'            => $slow_query_log_file,
+Line 103:       'long_query_time'                => '1',
+Line 104:       'max_binlog_size'                => '100M',
+Line 105:       'sync_binlog'                    => '1',
+Line 106:     },
+Line 107:   }
+Line 108: 
+Line 109:   anchor { 'govuk_mysql::server::begin':
+Line 110:     notify => Class['mysql::server'];
+Line 111:   }
+Line 112: 
+Line 113:   class { 'mysql::server':
+Line 114:     root_password    => $root_password,
+Line 115:     override_options => $mysql_config,
+Line 116:     purge_conf_dir   => true,
+Line 117:     restart          => false,
+Line 118:   }
+Line 119: 
+Line 120:   class { 'mysql::server::account_security': }
+Line 121: 
+Line 122:   class { 'govuk_mysql::server::logging':
+Line 123:     error_log      => $mysql_error_log,
+Line 124:     slow_query_log => $slow_query_logstream_file,
+Line 125:   }
+Line 126: 
+Line 127:   class { 'govuk_mysql::server::debian_sys_maint': }
+Line 128: 
+Line 129:   class { 'govuk_mysql::server::pentester': }
+Line 130: 
+Line 131:   class { 'govuk_mysql::server::firewall':
+Line 132:     require => Class['mysql::server'],
+Line 133:   }
+Line 134: 
+Line 135:   class { 'govuk_mysql::server::monitoring': }
+Line 136: 
+Line 137:   # Don't need to wait for monitoring class
+Line 138:   anchor { 'govuk_mysql::server::end':
+Line 139:     require => Class[
+Line 140:       'govuk_mysql::server::firewall',
+Line 141:       'mysql::server'
+Line 142:     ],
+Line 143:   }
+Line 144: 
+Line 145: }
+Line 146: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the definitions above
+- Focus on identifying actual security vulnerabilities, not potential issues
+- Be precise with line number identification

@@ -1,0 +1,291 @@
+# CONSTRUCTED PROMPT
+# File: desirit_chef-bach-cookbooks-bcpc-hadoop-recipes-oozie.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.619191
+# Length: 10950 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: desirit_chef-bach-cookbooks-bcpc-hadoop-recipes-oozie.rb (Unknown)**
+
+
+Line 1: include_recipe 'dpkg_autostart'
+Line 2: include_recipe 'bcpc-hadoop::oozie_config'
+Line 3: 
+Line 4: dpkg_autostart "oozie" do
+Line 5:   allow false
+Line 6: end
+Line 7: 
+Line 8: %w{zip unzip extjs hadoop-lzo oozie oozie-client}.each do |pkg|
+Line 9:   package pkg do
+Line 10:     action :upgrade
+Line 11:   end
+Line 12: end
+Line 13: 
+Line 14: template "/etc/init.d/oozie" do
+Line 15:   source "hdp_oozie-initd.erb"
+Line 16:   mode 0655
+Line 17: end
+Line 18: 
+Line 19: OOZIE_LIB_PATH='/usr/hdp/current/oozie'
+Line 20: OOZIE_CLIENT_PATH='/usr/hdp/current/oozie-client'
+Line 21: OOZIE_SERVER_PATH='/usr/hdp/current/oozie-server/oozie-server'
+Line 22: OOZIE_SHARELIB_TARBALL_PATH='/usr/hdp/2.2.0.0-2041/oozie/oozie-sharelib.tar.gz'
+Line 23: HDFS_URL=node[:bcpc][:hadoop][:hdfs_url]
+Line 24: 
+Line 25: directory "#{OOZIE_LIB_PATH}/libext" do
+Line 26:   owner "oozie"
+Line 27:   group "oozie"
+Line 28:   mode 00755
+Line 29:   action :create
+Line 30:   recursive true
+Line 31: end
+Line 32: 
+Line 33: directory "/var/run/oozie" do
+Line 34:   owner "oozie"
+Line 35:   group "oozie"
+Line 36:   mode 00755
+Line 37:   action :create
+Line 38:   recursive true
+Line 39: end
+Line 40: 
+Line 41: %w{/usr/share/HDP-oozie/ext-2.2.zip
+Line 42:    /usr/share/java/mysql-connector-java.jar
+Line 43:    /usr/lib/hadoop/lib/hadoop-lzo-0.6.0.jar}.each do |path|
+Line 44:   link "#{OOZIE_CLIENT_PATH}/libext/#{File.basename(path)}" do
+Line 45:     to path
+Line 46:   end
+Line 47: end
+Line 48: 
+Line 49: bash "copy" do
+Line 50:   code "cp -r /usr/hdp/2.2.0.0-2041/oozie/tomcat-deployment/conf/ssl /usr/hdp/current/oozie-server/conf/"
+Line 51: end
+Line 52: 
+Line 53: service "stop-oozie-for-war-setup" do
+Line 54:   action :stop
+Line 55:   supports :status => true, :restart => true, :reload => false
+Line 56:   service_name "oozie"
+Line 57:   supports :status => true, :restart => true, :reload => false
+Line 58:   only_if {
+Line 59:     not File.exists?("#{OOZIE_SERVER_PATH}/webapps/oozie.war") or
+Line 60:     File.mtime("#{OOZIE_CLIENT_PATH}/libext/") >
+Line 61:       File.mtime("#{OOZIE_SERVER_PATH}/webapps/oozie.war")
+Line 62:   }
+Line 63: end
+Line 64: 
+Line 65: bash "oozie_setup_war" do
+Line 66:   code "#{OOZIE_CLIENT_PATH}/bin/oozie-setup.sh prepare-war"
+Line 67:   returns [0]
+Line 68:   only_if {
+Line 69:     not File.exists?("#{OOZIE_SERVER_PATH}/webapps/oozie.war") or
+Line 70:     File.mtime("#{OOZIE_CLIENT_PATH}/libext/") >
+Line 71:       File.mtime("#{OOZIE_SERVER_PATH}/webapps/oozie.war")
+Line 72:   }
+Line 73: end
+Line 74: 
+Line 75: directory "/etc/oozie/conf.#{node.chef_environment}/action-conf" do
+Line 76:   owner "root"
+Line 77:   group "root"
+Line 78:   mode 00755
+Line 79:   action :create
+Line 80:   recursive true
+Line 81: end
+Line 82: 
+Line 83: directory "/etc/oozie/conf.#{node.chef_environment}/hadoop-conf" do
+Line 84:   owner "root"
+Line 85:   group "root"
+Line 86:   mode 00755
+Line 87:   action :create
+Line 88:   recursive true
+Line 89: end
+Line 90: 
+Line 91: bash "make_oozie_user_dir" do
+Line 92:   code <<-EOH
+Line 93:     hdfs dfs -mkdir -p #{HDFS_URL}/user/oozie && \
+Line 94:     hdfs dfs -chown -R oozie #{HDFS_URL}/user/oozie
+Line 95:   EOH
+Line 96:   user "hdfs"
+Line 97:   not_if "hdfs dfs -test -d #{HDFS_URL}/user/oozie", :user => "hdfs"
+Line 98: end
+Line 99: 
+Line 100: bash "oozie_create_shared_libs" do
+Line 101:   code "#{OOZIE_CLIENT_PATH}/bin/oozie-setup.sh sharelib create -fs #{HDFS_URL} -locallib #{OOZIE_SHARELIB_TARBALL_PATH}"
+Line 102:   user "oozie"
+Line 103:   not_if {
+Line 104:     require 'digest'
+Line 105:     chksum = node[:bcpc][:hadoop][:oozie][:sharelib_checksum]
+Line 106:     not chksum.nil? and Digest::MD5.hexdigest(File.read(OOZIE_SHARELIB_TARBALL_PATH)) == chksum
+Line 107:   } 
+Line 108:   only_if "echo 'test'| hdfs dfs -copyFromLocal - /tmp/oozie-test && hdfs dfs -rm -skipTrash /tmp/oozie-test", :user => "hdfs"
+Line 109:   notifies :run, "ruby_block[update_sharelib_checksum]", :immediately
+Line 110: end
+Line 111: 
+Line 112: ruby_block "update_sharelib_checksum" do
+Line 113:   block do
+Line 114:     require 'digest'
+Line 115:     node.set[:bcpc][:hadoop][:oozie][:sharelib_checksum] = 
+Line 116:       Digest::MD5.hexdigest(File.read(OOZIE_SHARELIB_TARBALL_PATH))
+Line 117:   end
+Line 118:   action :nothing
+Line 119:   notifies :run, "ruby_block[notify_sharelib_update]", :immediately
+Line 120: end
+Line 121: 
+Line 122: ruby_block "notify_sharelib_update" do
+Line 123:   block do
+Line 124:     node[:bcpc][:hadoop][:oozie_hosts].each do |oozie_host|
+Line 125:       update_oozie_sharelib(float_host(oozie_host[:hostname]))
+Line 126:     end
+Line 127:   end
+Line 128:   action :nothing
+Line 129: end
+Line 130: 
+Line 131: template "/etc/oozie/conf.#{node.chef_environment}/action-conf/hive.xml" do
+Line 132:   mode 0644
+Line 133:   source "ooz_action_hive.xml.erb"
+Line 134: end
+Line 135: 
+Line 136: file "#{OOZIE_CLIENT_PATH}/oozie.sql" do
+Line 137:   owner "oozie"
+Line 138:   group "oozie"
+Line 139: end
+Line 140: 
+Line 141: ruby_block "oozie-database-creation" do
+Line 142:   cmd = "mysql -uroot -p#{get_config!('password','mysql-root','os')} -e"
+Line 143:   privs = "CREATE,INDEX,SELECT,INSERT,UPDATE,DELETE,LOCK TABLES,EXECUTE"
+Line 144:   block do
+Line 145:     if not system " #{cmd} 'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \"oozie\"' | grep oozie" then
+Line 146:       code = <<-EOF
+Line 147:         CREATE DATABASE oozie;
+Line 148:         GRANT #{privs} ON oozie.* TO 'oozie'@'%' IDENTIFIED BY '#{get_config('mysql-oozie-password')}';
+Line 149:         GRANT #{privs} ON oozie.* TO 'oozie'@'localhost' IDENTIFIED BY '#{get_config('mysql-oozie-password')}';
+Line 150:         FLUSH PRIVILEGES;
+Line 151:       EOF
+Line 152:       IO.popen("mysql -uroot -p#{get_config!('password','mysql-root','os')}", "r+") do |db|
+Line 153:         db.write code
+Line 154:       end
+Line 155:       system "sudo -u oozie /usr/hdp/current/oozie-server/bin/ooziedb.sh create -sqlfile /usr/hdp/current/oozie-server/oozie.sql -run Validate DB Connection"
+Line 156:       self.resolve_notification_references
+Line 157:     end
+Line 158:   end
+Line 159: end
+Line 160: 
+Line 161: service "generally run oozie" do
+Line 162:   action [:enable, :start]
+Line 163:   service_name "oozie"
+Line 164:   supports :status => true, :restart => true, :reload => false
+Line 165:   subscribes :restart, "template[/etc/oozie/conf/oozie-site.xml]", :delayed
+Line 166:   subscribes :restart, "template[/etc/oozie/conf/oozie-env.sh]", :delayed
+Line 167:   subscribes :restart, "template[/etc/hadoop/conf/hdfs-site.xml]", :delayed
+Line 168:   subscribes :restart, "template[/etc/hadoop/conf/core-site.xml]", :delayed
+Line 169:   subscribes :restart, "template[/etc/hadoop/conf/hadoop-env.sh]", :delayed
+Line 170: end
+Line 171: 
+Line 172: ruby_block "Oozie Down" do
+Line 173:   i = 0
+Line 174:   block do
+Line 175:     while not oozie_running?(float_host(node[:fqdn])) 
+Line 176:       if i < 10
+Line 177:         sleep(0.5)
+Line 178:         i += 1
+Line 179:         Chef::Log.debug("Oozie is down")
+Line 180:       else
+Line 181:         raise Chef::Application.fatal! "Oozie is reported as down for more than 5 seconds"
+Line 182:       end
+Line 183:     end
+Line 184:     Chef::Log.debug("Oozie is up")
+Line 185:   end
+Line 186:   not_if { oozie_running?(float_host(node[:fqdn])) }
+Line 187: end
+Line 188: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

@@ -1,0 +1,101 @@
+PATH,LINE,CATEGORY
+EEDARIT_opsworks-cookbooks-iis-resources-root.rb,27,Hard-coded secret
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,2,Hard-coded secret
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,8,Missing Default in Case Statement
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,14,Use of HTTP without SSL/TLS
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,16,Use of HTTP without SSL/TLS
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,18,Use of HTTP without SSL/TLS
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,20,Use of HTTP without SSL/TLS
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,26,Use of HTTP without SSL/TLS
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,28,Use of HTTP without SSL/TLS
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,30,Use of HTTP without SSL/TLS
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,33,Use of HTTP without SSL/TLS
+Nikhil424_chef-repo-cookbooks-yum-mysql-community-attributes-mysql57-community.rb,36,Use of HTTP without SSL/TLS
+TaxiOS_zabbix-recipes-server_source.rb,14,Missing Default in Case Statement
+TaxiOS_zabbix-recipes-server_source.rb,57,Missing Default in Case Statement
+TaxiOS_zabbix-recipes-server_source.rb,100,Hard-coded secret
+aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb,57,No integrity check
+aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb,93,Suspicious comment
+aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb,109,Hard-coded secret
+aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb,112,Suspicious comment
+aws_aws-parallelcluster-cookbook-cookbooks-aws-parallelcluster-slurm-recipes-install_slurm.rb,117,Missing Default in Case Statement
+chef-boneyard_qa-chef-server-cluster-attributes-default.rb,3,Hard-coded secret
+chef-boneyard_qa-chef-server-cluster-attributes-default.rb,4,Hard-coded secret
+chef-boneyard_qa-chef-server-cluster-attributes-default.rb,14,Hard-coded secret
+chef_mixlib-install-acceptance-windows-server-2012r2-fips-.acceptance-acceptance-cookbook-recipes-verify.rb,12,Hard-coded secret
+cookbooks_ic-cloud_utils-cookbooks-hadoop_cluster-recipes-default.rb,127,Hard-coded secret
+cookbooks_ic-cloud_utils-cookbooks-hadoop_cluster-recipes-default.rb,130,Hard-coded secret
+cookbooks_ic-ganglia-cookbooks-hadoop_cluster-example-clusters-science.rb,10,Suspicious comment
+cookbooks_ic-hadoop_cluster-cookbooks-zabbix-recipes-database_mysql.rb,25,Hard-coded secret
+cookbooks_ic-hadoop_cluster-cookbooks-zabbix-recipes-database_mysql.rb,26,Hard-coded secret
+cookbooks_ic-hadoop_cluster-cookbooks-zabbix-recipes-database_mysql.rb,126,Hard-coded secret
+cookbooks_ic-jenkins-cookbooks-zabbix-recipes-database_mysql.rb,25,Hard-coded secret
+cookbooks_ic-jenkins-cookbooks-zabbix-recipes-database_mysql.rb,26,Hard-coded secret
+cookbooks_ic-jenkins-cookbooks-zabbix-recipes-database_mysql.rb,126,Hard-coded secret
+cookbooks_ic-nodejs-cookbooks-hbase-recipes-config_files.rb,49,Suspicious comment
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,35,Hard-coded secret
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,37,Hard-coded secret
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,51,Hard-coded secret
+cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb,52,Hard-coded secret
+cookbooks_ic-volumes-cookbooks-strongswan-recipes-routing.rb,22,Suspicious comment
+cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb,6,Hard-coded secret
+cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb,19,Unrestricted IP Address
+cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb,20,Unrestricted IP Address
+cookbooks_ic-volumes_ebs-cookbooks-graphite-attributes-default.rb,21,Unrestricted IP Address
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,22,Hard-coded secret
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,25,Hard-coded secret
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,29,Unrestricted IP Address
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,34,Hard-coded secret
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,35,Hard-coded secret
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,96,Hard-coded secret
+cookbooks_ic-volumes_ebs-cookbooks-mongodb-attributes-mongodb.rb,104,Hard-coded secret
+cookbooks_ic-volumes_ebs-cookbooks-resque-attributes-default.rb,9,Hard-coded secret
+cookbooks_ic-volumes_ebs-cookbooks-resque-attributes-default.rb,24,Unrestricted IP Address
+cookbooks_ic-volumes_ebs-cookbooks-zabbix-resources-user.rb,15,Hard-coded secret
+cookbooks_ic-zabbix-cookbooks-zabbix-providers-host.rb,28,Unrestricted IP Address
+cookbooks_ic-zabbix-cookbooks-zabbix-providers-host.rb,50,Unrestricted IP Address
+cookbooks_ic-zabbix-cookbooks-zabbix-providers-host.rb,146,Hard-coded secret
+danielladd_Chef-Testing-cookbooks-mysql-attributes-server_rhel.rb,33,Admin by default
+danielladd_Chef-Testing-cookbooks-mysql-attributes-server_rhel.rb,36,Hard-coded secret
+danielladd_Chef-Testing-cookbooks-mysql-attributes-server_rhel.rb,39,Hard-coded secret
+desirit_chef-bach-cookbooks-bcpc-hadoop-recipes-oozie.rb,50,Hard-coded secret
+desirit_chef-bach-cookbooks-bcpc-hadoop-recipes-oozie.rb,155,Hard-coded secret
+guymatz_chef-cookbooks-hive-attributes-default.rb,3,Missing Default in Case Statement
+guymatz_chef-cookbooks-hive-attributes-default.rb,9,No integrity check
+guymatz_chef-cookbooks-hive-attributes-default.rb,11,Use of HTTP without SSL/TLS
+guymatz_chef-cookbooks-mysql-attributes-client.rb,41,No integrity check
+guymatz_chef-cookbooks-psql-resources-user.rb,19,Hard-coded secret
+guymatz_chef-cookbooks-psql-resources-user.rb,20,Hard-coded secret
+guymatz_chef-cookbooks-psql-resources-user.rb,22,Hard-coded secret
+guymatz_chef-cookbooks-psql-resources-user.rb,23,Hard-coded secret
+guymatz_chef-cookbooks-python-attributes-default.rb,36,No integrity check
+guymatz_chef-cookbooks-python-attributes-default.rb,36,Use of HTTP without SSL/TLS
+gwalbran_chef-cookbooks-imos_backup-attributes-restore.rb,10,Hard-coded secret
+gwalbran_chef-cookbooks-imos_webapps-definitions-ncwms.rb,66,Hard-coded secret
+havk64_chef-zero-playground-cookbooks-runit-recipes-default.rb,29,Missing Default in Case Statement
+infochimps-labs_ironfan-pantry-cookbooks-iptables-recipes-default.rb,39,Missing Default in Case Statement
+infochimps-labs_ironfan-pantry-cookbooks-nodejs-recipes-install_from_binary.rb,40,No integrity check
+infochimps-labs_ironfan-pantry-cookbooks-nodejs-recipes-install_from_binary.rb,41,No integrity check
+infochimps-labs_ironfan-pantry-cookbooks-nodejs-recipes-install_from_binary.rb,45,No integrity check
+infochimps-labs_ironfan-pantry-cookbooks-python-attributes-default.rb,36,No integrity check
+infochimps-labs_ironfan-pantry-cookbooks-python-attributes-default.rb,36,Use of HTTP without SSL/TLS
+infochimps-labs_ironfan-pantry-cookbooks-zabbix-providers-media_type.rb,23,Hard-coded secret
+infochimps-labs_ironfan-pantry-cookbooks-zabbix-providers-media_type.rb,24,Hard-coded secret
+infochimps-labs_ironfan-pantry-cookbooks-zsh-recipes-default.rb,24,Missing Default in Case Statement
+kitchenplan_chef-applications-recipes-omnigraffle.rb,16,Use of HTTP without SSL/TLS
+kitchenplan_chef-applications-recipes-omnigraffle.rb,41,Use of HTTP without SSL/TLS
+kitchenplan_chef-applications-recipes-omnigraffle.rb,66,Use of HTTP without SSL/TLS
+openstreetmap_chef-cookbooks-accounts-recipes-default.rb,43,Hard-coded secret
+openstreetmap_chef-cookbooks-civicrm-recipes-default.rb,36,Hard-coded secret
+openstreetmap_chef-cookbooks-civicrm-recipes-default.rb,37,Hard-coded secret
+openstreetmap_chef-cookbooks-civicrm-recipes-default.rb,92,No integrity check
+openstreetmap_chef-cookbooks-civicrm-recipes-default.rb,162,Use of HTTP without SSL/TLS
+openstreetmap_chef-cookbooks-civicrm-recipes-default.rb,163,Hard-coded secret
+openstreetmap_chef-cookbooks-civicrm-recipes-default.rb,188,Hard-coded secret
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb,30,Hard-coded secret
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb,46,Hard-coded secret
+pu239ppy_chef-bach-code-bcpc-recipes-mysql.rb,51,Hard-coded secret
+scmgalaxy_chef-training-programs-recipes-raviteja-chef-repo-E4.rb,3,Hard-coded secret
+scmgalaxy_chef-training-programs-recipes-raviteja-chef-repo-E4.rb,3,No integrity check
+scmgalaxy_chef-training-programs-recipes-raviteja-chef-repo-E4.rb,3,Use of HTTP without SSL/TLS
+thomasmeeus_chef-apache2-recipes-mod_php5.rb,20,Missing Default in Case Statement

@@ -1,0 +1,157 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.616050
+# Length: 6332 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-pig-cookbooks-zabbix-attributes-default.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Cookbook Name:: zabbix
+Line 3: # Attributes:: default
+Line 4: 
+Line 5: # Global
+Line 6: zabbix_home_dir                = '/opt/zabbix'
+Line 7: default[:zabbix][:home_dir]    = zabbix_home_dir
+Line 8: 
+Line 9: # Agent
+Line 10: default[:zabbix][:agent][:servers]                = []
+Line 11: default[:zabbix][:agent][:configure_options]      = ["--prefix=#{zabbix_home_dir}", "--with-libcurl"]
+Line 12: default[:zabbix][:agent][:branch]                 = "ZABBIX%20Latest%20Stable"
+Line 13: default[:zabbix][:agent][:version]                = "1.8.5"
+Line 14: default[:zabbix][:agent][:install_method]         = "prebuild"
+Line 15: default[:zabbix][:agent][:log_dir]                = '/var/log/zabbix_agent'
+Line 16: default[:zabbix][:agent][:create_host]            = true
+Line 17: default[:zabbix][:agent][:unmonitor_on_shutdown]  = false
+Line 18: default[:zabbix][:agent][:unsafe_user_parameters] = true
+Line 19: 
+Line 20: default[:zabbix][:user]  = "zabbix"
+Line 21: default[:users ]['zabbix'][:uid]    = 447
+Line 22: default[:groups]['zabbix'][:gid]    = 447
+Line 23: 
+Line 24: # Server
+Line 25: default[:zabbix][:server][:version]           = "1.8.8"
+Line 26: default[:zabbix][:server][:branch]            = "ZABBIX%20Latest%20Stable"
+Line 27: default[:zabbix][:server][:install_method]    = "source"
+Line 28: default[:zabbix][:server][:configure_options] = [ "--prefix=#{zabbix_home_dir}","--with-libcurl","--with-net-snmp","--with-mysql " ]
+Line 29: default[:zabbix][:server][:log_dir]           = '/var/log/zabbix_server'
+Line 30: 
+Line 31: # Database
+Line 32: default[:zabbix][:database][:host]            = "localhost"
+Line 33: default[:zabbix][:database][:port]            = "3306"
+Line 34: default[:zabbix][:database][:root_user]       = "root"
+Line 35: default[:zabbix][:database][:root_password]   = nil
+Line 36: default[:zabbix][:database][:user]            = "zabbix"
+Line 37: default[:zabbix][:database][:password]        = nil
+Line 38: default[:zabbix][:database][:name]            = "zabbix"
+Line 39: default[:zabbix][:database][:install_method]  = 'mysql'
+Line 40: 
+Line 41: # Web frontend
+Line 42: default[:zabbix][:web][:fqdn]           = ""
+Line 43: default[:zabbix][:web][:bind_ip]        = nil
+Line 44: default[:zabbix][:web][:port]           = 9101
+Line 45: default[:zabbix][:web][:log_dir]        = '/var/log/zabbix_web'
+Line 46: default[:zabbix][:web][:install_method] = 'apache'
+Line 47: default[:zabbix][:web][:timezone]       = 'Europe/London' # UTC
+Line 48: 
+Line 49: # API
+Line 50: default[:zabbix][:api][:path]       = 'api_jsonrpc.php'
+Line 51: default[:zabbix][:api][:username]   = 'chef'
+Line 52: default[:zabbix][:api][:password]   = 'fixme'
+Line 53: default[:zabbix][:api][:user_group] = 'chefs'
+Line 54: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

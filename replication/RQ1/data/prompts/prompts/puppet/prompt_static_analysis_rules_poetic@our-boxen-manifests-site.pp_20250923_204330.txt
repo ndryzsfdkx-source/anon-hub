@@ -1,0 +1,196 @@
+# CONSTRUCTED PROMPT
+# File: poetic@our-boxen-manifests-site.pp
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.641771
+# Length: 6079 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: poetic@our-boxen-manifests-site.pp (Puppet)**
+
+
+Line 1: require boxen::environment
+Line 2: require homebrew
+Line 3: require gcc
+Line 4: 
+Line 5: Exec {
+Line 6:   group       => 'staff',
+Line 7:   logoutput   => on_failure,
+Line 8:   user        => $boxen_user,
+Line 9: 
+Line 10:   path => [
+Line 11:     "${boxen::config::home}/rbenv/shims",
+Line 12:     "${boxen::config::home}/rbenv/bin",
+Line 13:     "${boxen::config::home}/rbenv/plugins/ruby-build/bin",
+Line 14:     "${boxen::config::home}/homebrew/bin",
+Line 15:     '/usr/bin',
+Line 16:     '/bin',
+Line 17:     '/usr/sbin',
+Line 18:     '/sbin'
+Line 19:   ],
+Line 20: 
+Line 21:   environment => [
+Line 22:     "HOMEBREW_CACHE=${homebrew::config::cachedir}",
+Line 23:     "HOME=/Users/${::boxen_user}"
+Line 24:   ]
+Line 25: }
+Line 26: 
+Line 27: File {
+Line 28:   group => 'staff',
+Line 29:   owner => $boxen_user
+Line 30: }
+Line 31: 
+Line 32: Package {
+Line 33:   provider => homebrew,
+Line 34:   require  => Class['homebrew']
+Line 35: }
+Line 36: 
+Line 37: Repository {
+Line 38:   provider => git,
+Line 39:   extra    => [
+Line 40:     '--recurse-submodules'
+Line 41:   ],
+Line 42:   require  => File["${boxen::config::bindir}/boxen-git-credential"],
+Line 43:   config   => {
+Line 44:     'credential.helper' => "${boxen::config::bindir}/boxen-git-credential"
+Line 45:   }
+Line 46: }
+Line 47: 
+Line 48: Service {
+Line 49:   provider => ghlaunchd
+Line 50: }
+Line 51: 
+Line 52: Homebrew::Formula <| |> -> Package <| |>
+Line 53: 
+Line 54: node default {
+Line 55:   # core modules, needed for most things
+Line 56:   include dnsmasq
+Line 57:   include git
+Line 58:   include hub
+Line 59:   include nginx
+Line 60: 
+Line 61:   # fail if FDE is not enabled
+Line 62:   if $::root_encrypted == 'no' {
+Line 63:     fail('Please enable full disk encryption and try again')
+Line 64:   }
+Line 65: 
+Line 66:   # node versions
+Line 67:   include nodejs::v0_10
+Line 68: 
+Line 69:   # default ruby versions
+Line 70:   ruby::version { '1.9.3': }
+Line 71:   ruby::version { '2.0.0': }
+Line 72:   ruby::version { '2.1.0': }
+Line 73:   ruby::version { '2.1.1': }
+Line 74:   ruby::version { '2.1.2': }
+Line 75: 
+Line 76:   # common, useful packages
+Line 77:   package {
+Line 78:     [
+Line 79:       'ack',
+Line 80:       'findutils',
+Line 81:       'gnu-tar'
+Line 82:     ]:
+Line 83:   }
+Line 84: 
+Line 85:   file { "${boxen::config::srcdir}/our-boxen":
+Line 86:     ensure => link,
+Line 87:     target => $boxen::config::repodir
+Line 88:   }
+Line 89: 
+Line 90:   # poetic environment
+Line 91:   include poetic::environment
+Line 92: }
+Line 93: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

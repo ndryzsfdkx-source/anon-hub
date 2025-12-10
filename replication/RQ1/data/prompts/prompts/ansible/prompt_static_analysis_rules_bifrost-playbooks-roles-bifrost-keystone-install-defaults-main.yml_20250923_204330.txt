@@ -1,0 +1,172 @@
+# CONSTRUCTED PROMPT
+# File: bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.590295
+# Length: 6425 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: bifrost-playbooks-roles-bifrost-keystone-install-defaults-main.yml (Ansible/YAML)**
+
+
+Line 1: ---
+Line 2: keystone_source_install: true
+Line 3: # *_git_url can be overridden by local clones for offline installs
+Line 4: keystone_git_url: https://git.openstack.org/openstack/keystone
+Line 5: keystone_git_folder: /opt/stack/keystone
+Line 6: 
+Line 7: # set to true to skip installing ironic dependencies
+Line 8: skip_package_install: False
+Line 9: # set to true to skip generation of configs, ironic db and rabbitmq configuration
+Line 10: skip_bootstrap: False
+Line 11: # set to true to skip starting ironic services and dependencies
+Line 12: skip_start: False
+Line 13: 
+Line 14: # Parameters for connecting to mysql for database manipulation.
+Line 15: mysql_username: "root"
+Line 16: mysql_password: ""
+Line 17: 
+Line 18: # Support for CORS configuration
+Line 19: # By default CORS support is disabled.
+Line 20: enable_cors: false
+Line 21: # Origin to accept for CORS requests
+Line 22: cors_allowed_origin: "http://localhost:8000"
+Line 23: cors_allowed_origin2: "www.google.com"
+Line 24: # bifrost utilizes noauth mode by default and as such
+Line 25: # the setting should be set to false. This setting should
+Line 26: # not need to be modified by the user.
+Line 27: enable_cors_credential_support: false
+Line 28: 
+Line 29: # Defaults required by this role that are normally inherited via
+Line 30: # other roles.
+Line 31: file_url_port: 8080
+Line 32: http_boot_folder: /httpboot
+Line 33: 
+Line 34: # Settings related to installing bifrost in a virtual environment
+Line 35: enable_venv: false
+Line 36: bifrost_venv_dir: "{{ lookup('env', 'VENV') | default('/opt/stack/bifrost') }}"
+Line 37: bifrost_venv_env:
+Line 38:   VIRTUAL_ENV: "{{ bifrost_venv_dir }}"
+Line 39:   PATH: "{{ bifrost_venv_dir }}/bin:{{ ansible_env.PATH }}" # include regular path via lookup env
+Line 40:   pydoc: "python -m pydoc"
+Line 41: 
+Line 42: 
+Line 43: keystone:
+Line 44:   debug: true
+Line 45:   bootstrap:
+Line 46:     enabled: true
+Line 47:     username: admin
+Line 48:     password: ChangeThisPa55w0rd
+Line 49:     project_name: admin
+Line 50:     admin_url: "http://127.0.0.1:35357/v3/"
+Line 51:     public_url: "http://127.0.0.1:5000/v3/"
+Line 52:     internal_url: "http://127.0.0.1:5000/v3/"
+Line 53:     region_name: "RegionOne"
+Line 54:   message_queue:
+Line 55:     username: keystone
+Line 56:     password: ChangeThisPa55w0rd
+Line 57:     host: localhost
+Line 58:     port: 5672
+Line 59:   database:
+Line 60:     name: keystone
+Line 61:     username: keystone
+Line 62:     password: ChangeThisPa55w0rd
+Line 63:     host: localhost
+Line 64: 
+Line 65: # NOTE(hwoarang): openSUSE distros may come with recent pip versions so
+Line 66: # upgrade only what's necessary
+Line 67: pip_opts: "{{ ((ansible_os_family | lower == 'suse') or (enable_venv | bool)) | ternary('--upgrade-strategy only-if-needed', '--force-reinstall') }}"
+Line 68: 
+Line 69: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching

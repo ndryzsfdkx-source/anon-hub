@@ -1,0 +1,252 @@
+# CONSTRUCTED PROMPT
+# File: cookbooks_ic-cloud_utils-cookbooks-hadoop_cluster-recipes-default.rb
+# Style: static_analysis_rules
+# Timestamp: 2025-09-23T20:43:30.612918
+# Length: 9362 characters
+# ============================================================
+
+You are a static analyzer for Infrastructure-as-Code (IaC) scripts.
+
+Your task is to analyze the **raw code** of an IaC script and detect any **security smells** according to the formal rules and keyword-based functions below.
+
+You must parse the script internally, identify patterns, and output a list of security smells with corresponding line numbers.
+
+---
+
+### SECURITY SMELL DETECTION RULES
+
+Smell Name: Admin by default  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isUser(x.name) ∨ isRole(x.name)) ∧ isAdmin(x.value) ∧ ¬x.has_variable
+
+Smell Name: Empty password  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isPassword(x.name) ∧ length(x.value) == 0
+
+Smell Name: Hard-coded secret  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ (isPassword(x.name) ∨ isSecret(x.name) ∨ isUser(x.name)) ∧ ¬x.has_variable
+
+Smell Name: Invalid IP address binding  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isInvalidBind(x.value)
+
+Smell Name: Suspicious comment  
+Rule: isComment(x) ∧ hasWrongWords(x.content)
+
+Smell Name: Use of HTTP without TLS  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isURL(x.value) ∧ hasHTTP(x.value) ∧ ¬hasHTTPWhitelist(x.value)
+
+Smell Name: No integrity check  
+Rule: (isAtomicUnit(x) ∧ hasDownload(x.attributes) ∧ ¬hasChecksum(x.attributes))  
+     ∨ ((isAttribute(x) ∨ isVariable(x)) ∧ isCheckSum(x.name) ∧ (x.value == "no" ∨ x.value == "false"))
+
+Smell Name: Use of weak crypto algorithm  
+Rule: (isAttribute(x) ∨ isVariable(x)) ∧ isWeakCrypt(x.value) ∧ ¬hasWeakCryptWhitelist(x.name) ∧ ¬hasWeakCryptWhitelist(x.value)
+
+Smell Name: Missing default case statement  
+Rule: isConditionStatement(x) ∧ x.is_default == False ∧ ¬isDefault(x.else_statement)
+
+---
+
+### STRING PATTERN MATCHING FUNCTIONS
+
+Use the following keyword heuristics to apply the detection rules:
+
+- isUser(): "user", "uname", "username", "login", "userid", "loginid"  
+- isRole(): *(empty — assume no match)*  
+- isAdmin(): "admin", "root"  
+- isPassword(): "pass", "pwd", "password", "passwd", "passno", "pass-no"  
+- isSecret(): "auth_token", "authentication_token", "secret", "ssh_key"  
+- isInvalidBind(): "0.0.0.0"  
+- hasWrongWords(): "bug", "debug", "todo", "hack", "solve", "fixme"  
+- hasHTTP(): "http"  
+- hasHTTPWhitelist(): "localhost", "127.0.0.1"  
+- isDownload(): URLs ending in ".iso", ".tar.gz", ".tgz", ".zip", ".deb", ".rpm"  
+- isCheckSum(): "gpg", "checksum"  
+- isWeakCrypt(): "md5", "sha1", "arcfour"  
+- hasWeakCryptWhitelist(): "checksum"
+
+---
+
+### INSTRUCTIONS
+
+1. Analyze the following **raw IaC code** line-by-line.
+2. For each detected smell, identify:
+   - The exact line number where the smell occurs
+   - The specific security smell category from the rules above
+   - Apply the formal rules and keyword matching functions
+
+If no smells are found, indicate that no issues were detected.
+
+---
+
+### RAW CODE INPUT
+
+**Analyzing file: cookbooks_ic-cloud_utils-cookbooks-hadoop_cluster-recipes-default.rb (Unknown)**
+
+
+Line 1: #
+Line 2: # Cookbook Name::       hadoop_cluster
+Line 3: # Description::         Base configuration for hadoop_cluster
+Line 4: # Recipe::              default
+Line 5: # Author::              Philip (flip) Kromer - Infochimps, Inc
+Line 6: #
+Line 7: # Copyright 2009, Opscode, Inc.
+Line 8: #
+Line 9: # Licensed under the Apache License, Version 2.0 (the "License");
+Line 10: # you may not use this file except in compliance with the License.
+Line 11: # You may obtain a copy of the License at
+Line 12: #
+Line 13: #     http://www.apache.org/licenses/LICENSE-2.0
+Line 14: #
+Line 15: # Unless required by applicable law or agreed to in writing, software
+Line 16: # distributed under the License is distributed on an "AS IS" BASIS,
+Line 17: # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+Line 18: # See the License for the specific language governing permissions and
+Line 19: # limitations under the License.
+Line 20: #
+Line 21: 
+Line 22: include_recipe 'java' ; complain_if_not_sun_java(:hadoop)
+Line 23: include_recipe 'volumes'
+Line 24: class Chef::Recipe; include HadoopCluster ; end
+Line 25: 
+Line 26: include_recipe 'silverware'
+Line 27: include_recipe 'tuning'
+Line 28: include_recipe 'hadoop_cluster::add_cloudera_repo'
+Line 29: 
+Line 30: #
+Line 31: # Hadoop users and group
+Line 32: #
+Line 33: 
+Line 34: daemon_user(:hadoop){ user(:hdfs)   }
+Line 35: daemon_user(:hadoop){ user(:mapred) }
+Line 36: 
+Line 37: group 'hadoop' do
+Line 38:   group_name 'hadoop'
+Line 39:   gid         node[:groups]['hadoop'][:gid]
+Line 40:   action      [:create, :manage]
+Line 41:   append     true
+Line 42:   members     ['hdfs', 'mapred']
+Line 43: end
+Line 44: 
+Line 45: # Create the group hadoop uses to mean 'can act as filesystem root'
+Line 46: group 'supergroup' do
+Line 47:   group_name 'supergroup'
+Line 48:   gid        node[:groups]['supergroup'][:gid]
+Line 49:   action     [:create, :manage]
+Line 50:   append     true
+Line 51: end
+Line 52: 
+Line 53: #
+Line 54: # Primary hadoop packages
+Line 55: #
+Line 56: # (do this *after* creating the users)
+Line 57: 
+Line 58: hadoop_package nil
+Line 59: hadoop_package "native"
+Line 60: hadoop_package "sbin"
+Line 61: 
+Line 62: #
+Line 63: # Hadoop directories
+Line 64: #
+Line 65: #
+Line 66: 
+Line 67: standard_dirs('hadoop') do
+Line 68:   directories   :conf_dir, :pid_dir
+Line 69: end
+Line 70: 
+Line 71: # Namenode metadata striped across all persistent dirs
+Line 72: volume_dirs('hadoop.namenode.data') do
+Line 73:   type          :persistent
+Line 74:   selects       :all
+Line 75:   path          'hadoop/hdfs/name'
+Line 76:   mode          "0700"
+Line 77: end
+Line 78: 
+Line 79: # Secondary Namenode metadata striped across all persistent dirs
+Line 80: volume_dirs('hadoop.secondarynn.data') do
+Line 81:   type          :persistent
+Line 82:   selects       :all
+Line 83:   path          'hadoop/hdfs/secondary'
+Line 84:   mode          "0700"
+Line 85: end
+Line 86: 
+Line 87: # Datanode data striped across all persistent dirs
+Line 88: volume_dirs('hadoop.datanode.data') do
+Line 89:   type          :persistent
+Line 90:   selects       :all
+Line 91:   path          'hadoop/hdfs/data'
+Line 92:   mode          "0700"
+Line 93: end
+Line 94: 
+Line 95: # Mapred job scratch space striped across all scratch dirs
+Line 96: volume_dirs('hadoop.tasktracker.scratch') do
+Line 97:   type          :local
+Line 98:   selects       :all
+Line 99:   path          'hadoop/mapred/local'
+Line 100:   mode          "0755"
+Line 101: end
+Line 102: 
+Line 103: # Hadoop tmp storage on a single scratch dir
+Line 104: volume_dirs('hadoop.tmp') do
+Line 105:   type          :local
+Line 106:   selects       :single
+Line 107:   path          'hadoop/tmp'
+Line 108:   group         'hadoop'
+Line 109:   mode          "0777"
+Line 110: end
+Line 111: 
+Line 112: # Hadoop log storage on a single scratch dir
+Line 113: volume_dirs('hadoop.log') do
+Line 114:   type          :local
+Line 115:   selects       :single
+Line 116:   path          'hadoop/log'
+Line 117:   group         'hadoop'
+Line 118:   mode          "0777"
+Line 119: end
+Line 120: %w[namenode secondarynn datanode].each{|svc| directory("#{node[:hadoop][:log_dir]}/#{svc}"){ action(:create) ; owner 'hdfs'   ; group "hadoop"; mode "0775" } }
+Line 121: %w[jobtracker tasktracker       ].each{|svc| directory("#{node[:hadoop][:log_dir]}/#{svc}"){ action(:create) ; owner 'mapred' ; group "hadoop"; mode "0775" } }
+Line 122: 
+Line 123: # JMX should listen on the public interface
+Line 124: node[:hadoop][:jmx_dash_addr] = public_ip_of(node)
+Line 125: 
+Line 126: # Make /var/log/hadoop point to the logs (which is on the first scratch dir),
+Line 127: # and /var/run/hadoop point to the actual pid dir
+Line 128: force_link("/var/log/hadoop",                    node[:hadoop][:log_dir] )
+Line 129: force_link("/var/log/#{node[:hadoop][:handle]}", node[:hadoop][:log_dir] )
+Line 130: force_link("/var/run/#{node[:hadoop][:handle]}", node[:hadoop][:pid_dir] )
+Line 131: 
+Line 132: node[:hadoop][:exported_jars] = [
+Line 133:   "#{node[:hadoop][:home_dir]}/hadoop-core.jar",
+Line 134:   "#{node[:hadoop][:home_dir]}/hadoop-examples.jar",
+Line 135:   "#{node[:hadoop][:home_dir]}/hadoop-test.jar",
+Line 136:   "#{node[:hadoop][:home_dir]}/hadoop-tools.jar",
+Line 137: ]
+Line 138: 
+Line 139: node[:hadoop][:exported_libs] = Dir["#{node[:hadoop][:home_dir]}/lib/native/**/*.*"].sort.reject{|ff| File.directory?(ff) }
+Line 140: 
+Line 141: Chef::Log.debug( [ 'hadoop native libs', node[:hadoop][:exported_libs] ].inspect )
+Line 142: 
+Line 143: node[:hadoop][:exported_confs]  = [
+Line 144:   "#{node[:hadoop][:conf_dir]}/core-site.xml",
+Line 145:   "#{node[:hadoop][:conf_dir]}/hdfs-site.xml",
+Line 146:   "#{node[:hadoop][:conf_dir]}/mapred-site.xml",
+Line 147: ]
+Line 148: 
+Line 149: 
+
+---
+
+### OUTPUT FORMAT
+
+For each detected smell, output a single line in CSV format:
+NAME_OF_FILE,LINE_NUMBER,SMELL_CATEGORY
+
+If no smells are found in the file, return:
+NAME_OF_FILE,0,none
+
+**Important:** 
+- Output only the CSV findings, no additional explanation
+- Use the exact smell names from the rules above
+- Map "Invalid IP address binding" to "Unrestricted IP Address" 
+- Map "Use of HTTP without TLS" to "Use of HTTP without SSL/TLS"
+- Map "Use of weak crypto algorithm" to "Use of weak cryptography algorithms"
+- Map "Missing default case statement" to "Missing Default in Case Statement"
+- Apply keyword heuristics systematically for pattern matching
