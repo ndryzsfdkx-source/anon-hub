@@ -5,11 +5,11 @@ paper_title: "IntelliSA: An Intelligent Analyzer for IaC Security Smell Detectio
 paper_tag: v1.0-paper
 generated_date: 2025-12-10
 
-# Repository versions (recorded from GitHub remotes)
+# Repository versions (recorded from GitHub remotes when available; otherwise local HEAD)
 repositories:
   hub:
     github: https://github.com/ndryzsfdkx-source/anon-hub
-    commit: 99b9bcbb4244633359c4c6edcea84adc679530ff
+    commit: fb643d4facbb8b2b1ee62850ce02563a16f31a53
 
   cli:
     github: https://github.com/ndryzsfdkx-source/anon-cli
