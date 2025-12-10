@@ -29,11 +29,6 @@
 
 Production-ready CLI tool implementing the IntelliSA method.
 
-- Post-filters detections using neural inference
-- Supports Ansible, Chef, Puppet
-- Outputs SARIF, JSONL, CSV formats
-- Ready for CI/CD integration
-
 **GitHub**: [intellisa-cli](https://github.com/ndryzsfdkx-source/anon-cli)
 
 ### Optional internals
