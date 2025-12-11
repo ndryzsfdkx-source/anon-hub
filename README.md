@@ -8,6 +8,10 @@
 
 **Paper**: "IntelliSA: An Intelligent Analyzer for IaC Security Smell Detection via Rule and Neural Inference"
 
+<p align="center">
+  <img src="logo/IntelliSA_overview.png" alt="IntelliSA Technical Overview" width="800">
+</p>
+
 ## Overview
 
 **Problem**: Static analysis tools generate high false positive rates, causing alert fatigue.
@@ -16,12 +20,21 @@
 
 **Target**: 9 security smell categories across Ansible, Chef, and Puppet.
 
+### Key Results
+
+<p align="center">
+  <img src="logo/rq1_result.png" alt="RQ1 Results" width="800">
+</p>
+
 ## Artifact Scope
 
-- Datasets live in `replication/datasets/` (oracle + training splits).
 - Reproduce Tables 2–6 via `replication/RQ*/run_rq*.sh` (RQ1–RQ3).
 - Run the IntelliSA CLI on the oracle dataset to see end-to-end behavior.
 - Optional internals (for curiosity only): early experiments and training pipeline are linked below.
+
+## DataSets
+
+See [`replication/datasets/README.md`](replication/datasets/README.md) for details on the oracle and training datasets.
 
 ## Repositories
 
