@@ -46,9 +46,3 @@ replication/
 ```
 
 See individual `RQ*/README.md` for details.
-
-## Key Results
-
-- **RQ1**: IntelliSA achieves 83% Macro-F1 (7-42% better than baselines)
-- **RQ2**: Detects 60% of smells by reviewing <2% of code
-- **RQ3**: Claude-4 best teacher (89% F1), CodeT5p-220M best student (79% F1)

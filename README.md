@@ -36,6 +36,8 @@
 
 See [`replication/datasets/README.md`](replication/datasets/README.md) for details on the oracle and training datasets.
 
+See [`replication/prompts/README.md`](replication/prompts/README.md) for all prompt templates used in experiments.
+
 ## Repositories
 
 ### IntelliSA-CLI
