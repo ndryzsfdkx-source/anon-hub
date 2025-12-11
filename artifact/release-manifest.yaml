@@ -9,7 +9,7 @@ generated_date: 2025-12-11
 repositories:
   hub:
     github: https://github.com/ndryzsfdkx-source/anon-hub
-    commit: 18d51cd90c01d820b105aabc3060067379744eec
+    commit: 7ce08f94e0cdf223c3eb0925502dc6d610c9a359
 
   cli:
     github: https://github.com/ndryzsfdkx-source/anon-cli
